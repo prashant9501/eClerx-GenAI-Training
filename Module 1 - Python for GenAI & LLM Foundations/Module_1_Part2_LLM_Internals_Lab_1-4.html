@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 1 · Part 2 — Inside the LLM (Lab 1.4) · Prashant Sahu</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #0a0e27;
+    --bg-mid:  #111733;
+    --bg-card: #161c3a;
+    --bg-card-hover: #1d2447;
+    --accent-sky:     #38bdf8;
+    --accent-violet:  #a78bfa;
+    --accent-emerald: #34d399;
+    --accent-amber:   #fbbf24;
+    --accent-rose:    #fb7185;
+    --text-primary: #e2e8f0;
+    --text-muted:   #94a3b8;
+    --text-dim:     #64748b;
+    --border-soft:  rgba(148, 163, 184, 0.15);
+    --code-bg: #1e293b;
+  }
+
+  .reveal {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+    font-size: 24px;
+    font-weight: 400;
+  }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section { padding: 12px 0; }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ffffff;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    margin: 0 0 0.4em 0;
+  }
+  .reveal h1 { font-size: 2.0em;  line-height: 1.1; font-weight: 700; }
+  .reveal h2 { font-size: 1.25em; line-height: 1.2; }
+  .reveal h3 { font-size: 1.0em;  line-height: 1.3; color: var(--accent-sky); font-weight: 600; }
+  .reveal h4 { font-size: 0.85em; line-height: 1.3; color: var(--accent-violet); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reveal p, .reveal li { line-height: 1.5; color: var(--text-primary); font-size: 0.85em; }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .reveal li { margin-bottom: 0.35em; }
+  .reveal strong { color: #ffffff; font-weight: 600; }
+  .reveal em { color: var(--accent-amber); font-style: italic; }
+  .reveal a { color: var(--accent-sky); text-decoration: none; border-bottom: 1px dotted var(--accent-sky); }
+
+  .reveal code {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    padding: 0.08em 0.32em;
+    border-radius: 4px;
+    font-size: 0.82em;
+  }
+  .reveal pre {
+    width: 100%;
+    box-shadow: none;
+    margin: 0.5em 0;
+  }
+  .reveal pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6em;
+    line-height: 1.5;
+    padding: 0.9em 1.1em;
+    background: var(--code-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-sky);
+    max-height: 380px;
+    overflow: auto;
+  }
+
+  .reveal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4em 0;
+    font-size: 0.78em;
+  }
+  .reveal table th {
+    background: linear-gradient(180deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.08) 100%);
+    color: #ffffff;
+    text-align: left;
+    padding: 0.55em 0.85em;
+    border-bottom: 2px solid var(--accent-sky);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .reveal table td {
+    padding: 0.5em 0.85em;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 180ms ease;
+  }
+  .reveal table tr { transition: background 180ms ease; }
+  .reveal table tr:hover td {
+    background: rgba(56, 189, 248, 0.06);
+  }
+  .reveal table tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.018);
+  }
+  .reveal table tr:nth-child(even):hover td {
+    background: rgba(56, 189, 248, 0.08);
+  }
+
+  /* Title slide */
+  .reveal section.title-slide {
+    text-align: center;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(167, 139, 250, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.title-slide .eyebrow {
+    color: var(--accent-sky);
+    font-size: 0.55em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.8em;
+  }
+  .reveal section.title-slide h1 {
+    font-size: 2.4em;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #38bdf8 0%, #a78bfa 50%, #fb7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5em;
+    animation: titleFade 1.2s ease-out;
+  }
+  @keyframes titleFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal section.title-slide .subtitle {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 0.4em;
+    font-weight: 400;
+  }
+  .reveal section.title-slide .tag {
+    display: inline-block;
+    margin-top: 0.4em;
+    padding: 0.3em 1em;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 999px;
+    font-size: 0.6em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .reveal section.title-slide .presenter-block {
+    margin-top: 1.6em;
+    padding: 0.6em 1.4em;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+  .reveal section.title-slide .presenter-label {
+    color: var(--accent-violet);
+    font-size: 0.5em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.15em;
+  }
+  .reveal section.title-slide .presenter-name {
+    color: #ffffff;
+    font-size: 1.0em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .reveal section.title-slide .meta {
+    margin-top: 1.4em;
+    color: var(--text-dim);
+    font-size: 0.55em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Section divider */
+  .reveal section.divider {
+    text-align: left;
+    background:
+      radial-gradient(circle at 20% 60%, rgba(56, 189, 248, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 90% 30%, rgba(167, 139, 250, 0.13) 0%, transparent 55%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.divider .part-label {
+    display: block;
+    color: var(--accent-sky);
+    font-size: 0.6em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.4em;
+  }
+  .reveal section.divider h1 {
+    font-size: 2.2em;
+    line-height: 1.05;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+  }
+  .reveal section.divider .subtitle {
+    color: var(--text-muted);
+    font-size: 0.7em;
+    max-width: 800px;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  .reveal section.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--accent-sky), var(--accent-violet));
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.8em 1.1em;
+    border-left: 3px solid var(--accent-sky);
+    margin: 0.4em 0;
+    transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+  }
+  .card.violet  { border-left-color: var(--accent-violet); }
+  .card.violet:hover  { box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15); }
+  .card.emerald { border-left-color: var(--accent-emerald); }
+  .card.emerald:hover { box-shadow: 0 8px 24px rgba(52, 211, 153, 0.12); }
+  .card.amber   { border-left-color: var(--accent-amber); }
+  .card.amber:hover   { box-shadow: 0 8px 24px rgba(251, 191, 36, 0.12); }
+  .card.rose    { border-left-color: var(--accent-rose); }
+  .card.rose:hover    { box-shadow: 0 8px 24px rgba(251, 113, 133, 0.12); }
+  .card h3, .card h4 { margin-top: 0; }
+  .card p { margin: 0.3em 0; font-size: 0.8em; }
+
+  .info-card {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    padding: 0.7em 1em;
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .info-card.violet  { background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.2); }
+  .info-card.emerald { background: rgba(52, 211, 153, 0.08);  border-color: rgba(52, 211, 153, 0.2); }
+  .info-card.amber   { background: rgba(251, 191, 36, 0.08);  border-color: rgba(251, 191, 36, 0.25); }
+  .info-card.rose    { background: rgba(251, 113, 133, 0.08); border-color: rgba(251, 113, 133, 0.25); }
+
+  /* Pills */
+  .pill {
+    display: inline-block;
+    padding: 0.12em 0.55em;
+    background: rgba(56, 189, 248, 0.16);
+    color: var(--accent-sky);
+    border-radius: 999px;
+    font-size: 0.65em;
+    font-weight: 500;
+    margin: 0.05em 0.15em;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+  .pill.violet  { background: rgba(167, 139, 250, 0.16); color: var(--accent-violet); border-color: rgba(167, 139, 250, 0.3); }
+  .pill.emerald { background: rgba(52, 211, 153, 0.16);  color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.3); }
+  .pill.amber   { background: rgba(251, 191, 36, 0.16);  color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); }
+  .pill.rose    { background: rgba(251, 113, 133, 0.16); color: var(--accent-rose); border-color: rgba(251, 113, 133, 0.3); }
+
+  /* Grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9em; align-items: stretch; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7em; align-items: stretch; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.6em; align-items: stretch; }
+
+  /* SVG diagrams */
+  svg.diagram {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 10px;
+    width: 100%;
+    height: auto;
+    margin: 0.3em 0;
+    border: 1px solid var(--border-soft);
+  }
+
+  /* Timeline */
+  .timeline { margin: 0.4em 0; position: relative; }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 5em 1fr;
+    gap: 0.8em;
+    padding: 0.45em 0;
+    border-bottom: 1px dashed var(--border-soft);
+    transition: background 200ms ease;
+    align-items: baseline;
+  }
+  .timeline-item:hover { background: rgba(56, 189, 248, 0.04); padding-left: 4px; }
+  .timeline-year {
+    color: var(--accent-sky);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 0.78em;
+  }
+  .timeline-event { font-size: 0.82em; line-height: 1.4; }
+  .timeline-event strong { color: #ffffff; }
+  .timeline-event .desc { color: var(--text-muted); display: block; margin-top: 0.1em; font-size: 0.92em; }
+
+  /* KPI */
+  .kpi {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.6em 0.9em;
+    text-align: center;
+    border-top: 3px solid var(--accent-sky);
+    transition: transform 200ms ease;
+  }
+  .kpi:hover { transform: translateY(-3px); }
+  .kpi.violet  { border-top-color: var(--accent-violet); }
+  .kpi.emerald { border-top-color: var(--accent-emerald); }
+  .kpi.amber   { border-top-color: var(--accent-amber); }
+  .kpi.rose    { border-top-color: var(--accent-rose); }
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    font-size: 1.5em;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-label {
+    color: var(--text-muted);
+    font-size: 0.68em;
+    margin-top: 0.3em;
+    letter-spacing: 0.06em;
+  }
+
+  /* Formula box */
+  .formula-box {
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.08), rgba(56, 189, 248, 0.08));
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    border-radius: 10px;
+    padding: 0.8em 1em;
+    text-align: center;
+    margin: 0.4em 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .formula-box .formula {
+    font-size: 1.2em;
+    color: #ffffff;
+    letter-spacing: 0.04em;
+  }
+  .formula-box .formula em { color: var(--accent-sky); font-style: normal; }
+  .formula-box .formula-label {
+    color: var(--text-muted);
+    font-size: 0.7em;
+    margin-top: 0.4em;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Quote box */
+  .quote-box {
+    border-left: 3px solid var(--accent-amber);
+    padding: 0.5em 1em;
+    background: rgba(251, 191, 36, 0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.85em;
+    margin: 0.5em 0;
+  }
+  .quote-box::before { content: '"'; color: var(--accent-amber); font-size: 1.5em; line-height: 0.5; vertical-align: middle; margin-right: 0.2em; }
+
+  .reveal ul.checklist { list-style: none; padding-left: 0.4em; }
+  .reveal ul.checklist li::before {
+    content: '▸';
+    color: var(--accent-sky);
+    margin-right: 0.5em;
+    font-weight: 700;
+  }
+
+  .reveal .progress { color: var(--accent-sky); height: 4px; }
+  .reveal .slide-number {
+    background: rgba(10, 14, 39, 0.65);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .footer-tag {
+    position: absolute;
+    bottom: 0.3em;
+    right: 0.5em;
+    color: var(--text-dim);
+    font-size: 0.45em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Tokenizer demo styling */
+  .token-demo {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.8em 1em;
+    margin: 0.3em 0;
+    font-size: 0.78em;
+    border: 1px solid var(--border-soft);
+  }
+  .token-demo .label {
+    color: var(--accent-violet);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    margin-bottom: 0.4em;
+  }
+  .token {
+    display: inline-block;
+    padding: 0.15em 0.5em;
+    margin: 0.15em 0.2em 0.15em 0;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+  }
+  .token.v { background: rgba(167, 139, 250, 0.12); color: var(--accent-violet); border-color: rgba(167, 139, 250, 0.25); }
+  .token.e { background: rgba(52, 211, 153, 0.12); color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.25); }
+  .token.a { background: rgba(251, 191, 36, 0.12); color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.25); }
+  .token-count {
+    margin-left: 0.6em;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+  }
+
+  /* Pricing-table accent */
+  .pricing-row td:nth-child(2),
+  .pricing-row td:nth-child(3) {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    text-align: right;
+  }
+
+  @media print {
+    .reveal pre code { font-size: 0.5em; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════ TITLE ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">eClerx · CDAC · Module 1 · Day 1 · Part 2 of 2</div>
+  <h1>Inside the LLM</h1>
+  <div class="subtitle">Architecture · Tokens · Sampling · Pricing</div>
+  <div class="tag">Setup deck for Lab 1.4 — Transformer Architecture &amp; Tokenization</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">2026 · Cohort 1</div>
+</section>
+
+<!-- ═══════════════════════ ROADMAP ═══════════════════════ -->
+<section>
+  <h2>What we'll cover today</h2>
+  <div class="info-card violet" style="margin-bottom:0.6em;">
+    <strong>Recap from Part 1.</strong> You already know <em>what</em> LLMs do, the evolution arc, RAG, prompt engineering, and the production patterns in Labs 1.1–1.3. Now we open the box.
+  </div>
+  <div class="grid-4" style="margin-top:0.4em;">
+    <div class="card"><h4>Part 1</h4><p>The Transformer</p></div>
+    <div class="card violet"><h4>Part 2</h4><p>Three architecture families</p></div>
+    <div class="card emerald"><h4>Part 3</h4><p>Self-attention deep dive</p></div>
+    <div class="card amber"><h4>Part 4</h4><p>Tokenization</p></div>
+  </div>
+  <div class="grid-4" style="margin-top:0.5em;">
+    <div class="card violet"><h4>Part 5</h4><p>Generation &amp; sampling</p></div>
+    <div class="card emerald"><h4>Part 6</h4><p>Context window mechanics</p></div>
+    <div class="card amber"><h4>Part 7</h4><p>Scaling laws &amp; emergence</p></div>
+    <div class="card rose"><h4>Part 8</h4><p>API pricing &amp; cost optimization</p></div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.6em;">
+    <strong>Goal.</strong> Open the LLM black box just enough that every parameter you set in Lab 1.4 has a clear mental model behind it. Then you'll know <em>why</em> a 1M-context model costs $5/M tokens and a fine-tuned encoder costs nothing.
+  </div>
+  <div class="footer-tag">Roadmap</div>
+</section>
+
+<!-- ═══════════════════════ PART 1 — THE TRANSFORMER ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 1</span>
+  <h1>The Transformer</h1>
+  <p class="subtitle">The single architectural idea (2017) that made every modern LLM possible. Replaces sequential recurrence with parallel attention.</p>
+</section>
+
+<section>
+  <h2>The pre-transformer bottleneck</h2>
+  <div class="grid-2">
+    <div>
+      <p>Before transformers, sequence models were <strong>recurrent</strong>: process token 1, update hidden state, process token 2, repeat.</p>
+      <ul class="checklist">
+        <li><span class="pill rose">RNN</span> Vanishing gradients on long sequences.</li>
+        <li><span class="pill rose">LSTM</span> Gates fix vanishing — but still <em>sequential</em>, can't parallelize over tokens.</li>
+        <li><span class="pill amber">Seq2Seq + attention</span> (2014–15) Encoder-decoder for translation; attention added as a patch.</li>
+      </ul>
+    </div>
+    <div class="card amber">
+      <h4>The bottleneck</h4>
+      <p>Every token had to <em>wait</em> for the previous one's hidden state. Training a 1B-parameter RNN at scale was practically impossible — too slow on GPUs.</p>
+      <div class="quote-box" style="margin-top:0.5em;">Then someone asked: do we need recurrence at all?</div>
+    </div>
+  </div>
+  <svg class="diagram" viewBox="0 0 880 100" xmlns="http://www.w3.org/2000/svg" style="margin-top:0.4em;">
+    <text x="20" y="30" fill="#94a3b8" font-family="Inter,sans-serif" font-size="12">RNN — sequential, slow</text>
+    <rect x="20"  y="42" width="60" height="40" rx="4" fill="#161c3a" stroke="#fb7185" stroke-width="1"/>
+    <text x="50"  y="67" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">t₁</text>
+    <line x1="80" y1="62" x2="100" y2="62" stroke="#fb7185" stroke-width="1.5"/>
+    <rect x="100" y="42" width="60" height="40" rx="4" fill="#161c3a" stroke="#fb7185" stroke-width="1"/>
+    <text x="130" y="67" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">t₂</text>
+    <line x1="160" y1="62" x2="180" y2="62" stroke="#fb7185" stroke-width="1.5"/>
+    <rect x="180" y="42" width="60" height="40" rx="4" fill="#161c3a" stroke="#fb7185" stroke-width="1"/>
+    <text x="210" y="67" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">t₃</text>
+    <line x1="240" y1="62" x2="260" y2="62" stroke="#fb7185" stroke-width="1.5"/>
+    <rect x="260" y="42" width="60" height="40" rx="4" fill="#161c3a" stroke="#fb7185" stroke-width="1"/>
+    <text x="290" y="67" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">t₄</text>
+
+    <text x="450" y="30" fill="#94a3b8" font-family="Inter,sans-serif" font-size="12">Transformer — parallel, fast on GPUs</text>
+    <rect x="450" y="42" width="60" height="40" rx="4" fill="#161c3a" stroke="#34d399" stroke-width="1"/>
+    <text x="480" y="67" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">t₁</text>
+    <rect x="520" y="42" width="60" height="40" rx="4" fill="#161c3a" stroke="#34d399" stroke-width="1"/>
+    <text x="550" y="67" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">t₂</text>
+    <rect x="590" y="42" width="60" height="40" rx="4" fill="#161c3a" stroke="#34d399" stroke-width="1"/>
+    <text x="620" y="67" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">t₃</text>
+    <rect x="660" y="42" width="60" height="40" rx="4" fill="#161c3a" stroke="#34d399" stroke-width="1"/>
+    <text x="690" y="67" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">t₄</text>
+    <text x="585" y="95" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">all attend to all — at once</text>
+  </svg>
+  <div class="footer-tag">Part 1 · 1/4</div>
+</section>
+
+<section>
+  <h2>2017 · "Attention Is All You Need"</h2>
+  <p>Vaswani et al. (Google Brain) — the paper that started everything.</p>
+  <div class="grid-2">
+    <div>
+      <h4>Key insight</h4>
+      <p>Replace recurrence with <strong>self-attention</strong>: every token attends to every other token <em>in parallel</em>.</p>
+      <h4 style="margin-top:0.7em;">Why it mattered</h4>
+      <ul class="checklist">
+        <li><strong>Parallelizable</strong> — finally fits GPU compute</li>
+        <li><strong>Long-range</strong> — direct token-to-token paths, no vanishing</li>
+        <li><strong>Scales</strong> — bigger model + more data → predictably better, with no architectural ceiling yet found</li>
+        <li><strong>Universal</strong> — same architecture now powers vision, audio, video, code</li>
+      </ul>
+    </div>
+    <div class="card violet">
+      <h4>The big numbers</h4>
+      <ul class="checklist">
+        <li><strong>2017</strong> — original transformer · 65M params</li>
+        <li><strong>2018</strong> — BERT-large · 340M</li>
+        <li><strong>2020</strong> — GPT-3 · 175B (×1000)</li>
+        <li><strong>2024</strong> — Llama 3.1 405B (open) · GPT-4 estimated &gt; 1T</li>
+      </ul>
+      <div class="info-card emerald" style="margin-top:0.5em;">
+        Same core architecture, scaled 10,000× in 7 years.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 1 · 2/4</div>
+</section>
+
+<section>
+  <h2>The transformer block — anatomy</h2>
+  <div class="grid-2">
+    <div>
+      <svg class="diagram" viewBox="0 0 360 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arT" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <!-- Input -->
+        <rect x="20" y="20" width="320" height="40" rx="6" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="180" y="38" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Input embeddings</text>
+        <text x="180" y="52" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">+ positional encoding</text>
+        <line x1="180" y1="60" x2="180" y2="80" stroke="#38bdf8" stroke-width="2" marker-end="url(#arT)"/>
+        <!-- Attention -->
+        <rect x="20" y="85" width="320" height="60" rx="6" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="180" y="108" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">Multi-Head Self-Attention</text>
+        <text x="180" y="125" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">Q · K → softmax → · V</text>
+        <text x="180" y="140" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">(h heads in parallel)</text>
+        <line x1="180" y1="145" x2="180" y2="165" stroke="#38bdf8" stroke-width="2" marker-end="url(#arT)"/>
+        <!-- Add & Norm 1 -->
+        <rect x="80" y="170" width="200" height="28" rx="4" fill="#0f1430" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="180" y="188" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Add &amp; LayerNorm  (residual)</text>
+        <line x1="180" y1="198" x2="180" y2="218" stroke="#38bdf8" stroke-width="2" marker-end="url(#arT)"/>
+        <!-- FFN -->
+        <rect x="20" y="223" width="320" height="50" rx="6" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+        <text x="180" y="245" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">Feed-Forward Network</text>
+        <text x="180" y="262" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">two linear layers + GELU/SwiGLU</text>
+        <line x1="180" y1="273" x2="180" y2="293" stroke="#38bdf8" stroke-width="2" marker-end="url(#arT)"/>
+        <!-- Add & Norm 2 -->
+        <rect x="80" y="298" width="200" height="28" rx="4" fill="#0f1430" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="180" y="316" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Add &amp; LayerNorm  (residual)</text>
+        <line x1="180" y1="326" x2="180" y2="346" stroke="#38bdf8" stroke-width="2" marker-end="url(#arT)"/>
+        <text x="180" y="365" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">× N layers (12 to 96+)</text>
+      </svg>
+    </div>
+    <div>
+      <h4>The two operations per block</h4>
+      <div class="card violet">
+        <p><strong>1 · Multi-head attention</strong> — tokens look at each other (mixing across positions).</p>
+      </div>
+      <div class="card emerald">
+        <p><strong>2 · Feed-forward network</strong> — each token's representation is transformed independently (mixing across features).</p>
+      </div>
+      <div class="info-card">
+        <strong>Residuals + LayerNorm</strong> wrap both operations — they make deep stacks trainable. Without them, gradients die after a few layers.
+      </div>
+      <div class="info-card emerald">
+        <strong>Repeat the block N times.</strong> GPT-3: 96 blocks. Llama 3.3 70B: 80 blocks. Each block adds capacity to learn more abstract patterns.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 1 · 3/4</div>
+</section>
+
+<section>
+  <h2>Stacking layers — depth = capacity</h2>
+  <div class="grid-2">
+    <div>
+      <p>Stacking transformer blocks creates a <strong>hierarchy of representations</strong>:</p>
+      <ul class="checklist">
+        <li><strong>Early layers</strong> — surface features, syntax, local patterns</li>
+        <li><strong>Middle layers</strong> — phrase- and sentence-level structure</li>
+        <li><strong>Late layers</strong> — semantics, topic, task-specific features</li>
+      </ul>
+      <div class="info-card violet">
+        Same architecture, different depth → different model classes. <em>Width</em> (hidden dim) and <em>depth</em> (num layers) both matter.
+      </div>
+    </div>
+    <div>
+      <table>
+        <tr><th>Model</th><th>Layers</th><th>Hidden</th><th>Heads</th></tr>
+        <tr><td>BERT-base</td><td>12</td><td>768</td><td>12</td></tr>
+        <tr><td>BERT-large</td><td>24</td><td>1024</td><td>16</td></tr>
+        <tr><td>GPT-2-small</td><td>12</td><td>768</td><td>12</td></tr>
+        <tr><td>GPT-3</td><td>96</td><td>12288</td><td>96</td></tr>
+        <tr><td>Llama 3 8B</td><td>32</td><td>4096</td><td>32</td></tr>
+        <tr><td>Llama 3.3 70B</td><td>80</td><td>8192</td><td>64</td></tr>
+      </table>
+      <div class="info-card amber" style="margin-top:0.4em;">
+        Numbers are public for open-weight models. Frontier closed models (GPT-5, Claude) keep these architectural details secret.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 1 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 2 — ARCHITECTURE FAMILIES ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 2</span>
+  <h1>Three architecture<br>families</h1>
+  <p class="subtitle">All transformer-based — but the attention mask and training objective differ. Each is purpose-built for a different task class.</p>
+</section>
+
+<section>
+  <h2>Encoder-only — bidirectional understanding</h2>
+  <div class="grid-2">
+    <div>
+      <h4>Examples</h4>
+      <p><span class="pill">BERT</span> <span class="pill">RoBERTa</span> <span class="pill">DistilBERT</span> <span class="pill">DeBERTa</span></p>
+      <h4 style="margin-top:0.6em;">How it sees text</h4>
+      <p>Every token attends to <strong>every other token in both directions</strong>. The model has full context before predicting anything.</p>
+      <h4 style="margin-top:0.6em;">Best for</h4>
+      <ul class="checklist">
+        <li>Classification (sentiment, intent, spam)</li>
+        <li>Token-level tasks (NER, POS tagging)</li>
+        <li>Embeddings &amp; retrieval (semantic search, RAG)</li>
+        <li>Extractive Q&amp;A (find span in passage)</li>
+      </ul>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="25" fill="#38bdf8" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Bidirectional attention (encoder)</text>
+        <!-- 5 token boxes -->
+        <g font-family="JetBrains Mono, monospace" font-size="11">
+          <rect x="40"  y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#38bdf8"/><text x="67"  y="69" text-anchor="middle" fill="#e2e8f0">[CLS]</text>
+          <rect x="105" y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#38bdf8"/><text x="132" y="69" text-anchor="middle" fill="#e2e8f0">bank</text>
+          <rect x="170" y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#38bdf8"/><text x="197" y="69" text-anchor="middle" fill="#e2e8f0">approved</text>
+          <rect x="235" y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#38bdf8"/><text x="262" y="69" text-anchor="middle" fill="#e2e8f0">loan</text>
+          <rect x="300" y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#38bdf8"/><text x="327" y="69" text-anchor="middle" fill="#e2e8f0">[SEP]</text>
+        </g>
+        <!-- All-to-all arrows (subset for clarity) -->
+        <g stroke="#38bdf8" stroke-width="1" opacity="0.6" fill="none">
+          <path d="M 67 95 Q 100 130 132 95"/>
+          <path d="M 132 95 Q 165 135 197 95"/>
+          <path d="M 197 95 Q 230 130 262 95"/>
+          <path d="M 262 95 Q 295 135 327 95"/>
+          <path d="M 67 95 Q 165 175 262 95"/>
+          <path d="M 132 95 Q 230 175 327 95"/>
+          <path d="M 197 95 Q 230 95 262 95"/>
+        </g>
+        <text x="190" y="200" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Each token sees all others — left AND right</text>
+      </svg>
+      <div class="info-card emerald">
+        <strong>Trained via masked-language-modeling.</strong> Hide 15% of input tokens, predict them — forces bidirectional understanding.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 1/4</div>
+</section>
+
+<section>
+  <h2>Decoder-only — autoregressive generation</h2>
+  <div class="grid-2">
+    <div>
+      <svg class="diagram" viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="25" fill="#a78bfa" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Causal attention (decoder)</text>
+        <g font-family="JetBrains Mono, monospace" font-size="11">
+          <rect x="40"  y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#a78bfa"/><text x="67"  y="69" text-anchor="middle" fill="#e2e8f0">The</text>
+          <rect x="105" y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#a78bfa"/><text x="132" y="69" text-anchor="middle" fill="#e2e8f0">capital</text>
+          <rect x="170" y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#a78bfa"/><text x="197" y="69" text-anchor="middle" fill="#e2e8f0">of</text>
+          <rect x="235" y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#a78bfa"/><text x="262" y="69" text-anchor="middle" fill="#e2e8f0">France</text>
+          <rect x="300" y="50" width="55" height="30" rx="4" fill="#161c3a" stroke="#a78bfa"/><text x="327" y="69" text-anchor="middle" fill="#e2e8f0">is</text>
+        </g>
+        <!-- Only-left arrows -->
+        <g stroke="#a78bfa" stroke-width="1.2" opacity="0.7" fill="none">
+          <path d="M 132 95 Q 100 130 67 95" stroke-dasharray="0"/>
+          <path d="M 197 95 Q 165 130 132 95"/>
+          <path d="M 197 95 Q 130 165 67 95"/>
+          <path d="M 262 95 Q 230 130 197 95"/>
+          <path d="M 262 95 Q 195 165 132 95"/>
+          <path d="M 327 95 Q 295 130 262 95"/>
+          <path d="M 327 95 Q 260 165 197 95"/>
+          <path d="M 327 95 Q 195 195 67 95"/>
+        </g>
+        <text x="190" y="200" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Each token sees only past tokens — left-only mask</text>
+      </svg>
+      <div class="info-card violet">
+        <strong>Trained to predict the next token.</strong> Causal mask forbids "looking ahead". Same model can therefore generate, autoregressively, at inference time.
+      </div>
+    </div>
+    <div>
+      <h4>Examples</h4>
+      <p><span class="pill violet">GPT family</span> <span class="pill violet">Claude</span> <span class="pill violet">Llama</span> <span class="pill violet">Mistral</span> <span class="pill violet">Gemini</span> <span class="pill violet">DeepSeek</span></p>
+      <h4 style="margin-top:0.6em;">How it generates</h4>
+      <p>Autoregressively — predict next token, append, predict next, repeat until <code>EOS</code> or <code>max_tokens</code>.</p>
+      <h4 style="margin-top:0.6em;">Best for</h4>
+      <ul class="checklist">
+        <li>Open-ended text generation</li>
+        <li>Chat / conversation</li>
+        <li>Code generation, completion, refactoring</li>
+        <li>Reasoning &amp; planning</li>
+        <li>Tool use and agents</li>
+      </ul>
+      <div class="info-card amber" style="margin-top:0.5em;">
+        <strong>The dominant paradigm.</strong> All frontier LLMs (GPT-5, Claude, Gemini, Llama) are decoder-only.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 2/4</div>
+</section>
+
+<section>
+  <h2>Encoder-decoder — sequence-to-sequence</h2>
+  <div class="grid-2">
+    <div>
+      <h4>Examples</h4>
+      <p><span class="pill emerald">T5</span> <span class="pill emerald">FLAN-T5</span> <span class="pill emerald">BART</span> <span class="pill emerald">mT5</span></p>
+      <h4 style="margin-top:0.6em;">How it works</h4>
+      <p>Two stacks bridged by <strong>cross-attention</strong>:</p>
+      <ul class="checklist">
+        <li><strong>Encoder</strong> reads the full input bidirectionally</li>
+        <li><strong>Decoder</strong> generates output autoregressively, attending to encoder outputs</li>
+      </ul>
+      <h4 style="margin-top:0.6em;">Best for</h4>
+      <ul class="checklist">
+        <li>Translation</li>
+        <li>Summarization</li>
+        <li>Structured rewriting (text-to-text)</li>
+      </ul>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arE" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#34d399"/>
+          </marker>
+        </defs>
+        <!-- Encoder -->
+        <rect x="30" y="40" width="150" height="160" rx="10" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+        <text x="105" y="60" fill="#34d399" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">Encoder</text>
+        <text x="105" y="78" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">bidirectional</text>
+        <rect x="50" y="95" width="110" height="22" rx="3" fill="#0f1430" stroke="#34d399" stroke-width="1"/>
+        <text x="105" y="111" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">"Bank approved...</text>
+        <rect x="50" y="125" width="110" height="22" rx="3" fill="#0f1430" stroke="#34d399" stroke-width="1"/>
+        <text x="105" y="141" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">...the loan today"</text>
+        <text x="105" y="180" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">→ contextual</text>
+        <text x="105" y="194" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">representations</text>
+
+        <line x1="180" y1="120" x2="220" y2="120" stroke="#34d399" stroke-width="2" marker-end="url(#arE)"/>
+        <text x="200" y="115" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">cross-</text>
+        <text x="200" y="128" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">attention</text>
+
+        <!-- Decoder -->
+        <rect x="220" y="40" width="150" height="160" rx="10" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="295" y="60" fill="#a78bfa" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">Decoder</text>
+        <text x="295" y="78" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">causal · autoregressive</text>
+        <rect x="240" y="95" width="110" height="22" rx="3" fill="#0f1430" stroke="#a78bfa" stroke-width="1"/>
+        <text x="295" y="111" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">"Loan approved"</text>
+        <text x="295" y="180" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">→ summary,</text>
+        <text x="295" y="194" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">translation, ...</text>
+
+        <text x="200" y="225" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Input → encoded context → output</text>
+      </svg>
+      <div class="info-card amber">
+        Modern very-large decoder-only models can do most enc-dec tasks just by being prompted — so encoder-decoders are <em>declining in popularity</em>, but still strong for small / on-prem / fixed-task deployments.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 3/4</div>
+</section>
+
+<section>
+  <h2>Decision matrix — which family for which task?</h2>
+  <table>
+    <tr><th>Task</th><th>Recommended</th><th>Why</th></tr>
+    <tr><td>High-volume classification (e.g. fraud, intent)</td><td><span class="pill">Encoder-only</span> BERT / DistilBERT</td><td>Fast, cheap, deterministic, fine-tunable; no generation overhead</td></tr>
+    <tr><td>Named-entity recognition</td><td><span class="pill">Encoder-only</span></td><td>Token-level classification needs bidirectional context</td></tr>
+    <tr><td>Embeddings / semantic search</td><td><span class="pill">Encoder-only</span></td><td>Sentence-BERT, MTEB-leaders are encoder-only</td></tr>
+    <tr><td>Open-ended generation, chat</td><td><span class="pill violet">Decoder-only</span> GPT / Claude / Llama</td><td>Built for autoregressive generation</td></tr>
+    <tr><td>Code generation, agents, tool use</td><td><span class="pill violet">Decoder-only</span></td><td>Modern frontier models are all decoder-only</td></tr>
+    <tr><td>Multi-step reasoning</td><td><span class="pill violet">Decoder-only</span> (reasoning model)</td><td>gpt-5-mini, o1, Claude w/ extended thinking</td></tr>
+    <tr><td>Summarization &amp; translation (small/on-prem)</td><td><span class="pill emerald">Enc-dec</span> FLAN-T5</td><td>Purpose-built for input → output transformation</td></tr>
+    <tr><td>Summarization &amp; translation (cloud / quality)</td><td><span class="pill violet">Decoder-only</span> via API</td><td>Frontier models outperform small enc-dec by sheer scale</td></tr>
+  </table>
+  <div class="info-card emerald" style="margin-top:0.5em;">
+    <strong>Lab 1.4</strong> §6, §7, §8 walk through one example of each family. §10 ends with a head-to-head comparison; §11 runs the framework on 8 real industry scenarios.
+  </div>
+  <div class="footer-tag">Part 2 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 3 — SELF-ATTENTION ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 3</span>
+  <h1>Self-attention<br>deep dive</h1>
+  <p class="subtitle">The single mechanism that powers every modern LLM. We'll keep math to a minimum and focus on intuition you can describe in an interview.</p>
+</section>
+
+<section>
+  <h2>Query · Key · Value — the intuition</h2>
+  <div class="grid-2">
+    <div>
+      <p>For each token, the model produces three vectors via learned linear projections:</p>
+      <div class="card">
+        <h4>Query (Q)</h4>
+        <p>"What am I looking for?"</p>
+      </div>
+      <div class="card violet">
+        <h4>Key (K)</h4>
+        <p>"What do I represent / advertise?"</p>
+      </div>
+      <div class="card emerald">
+        <h4>Value (V)</h4>
+        <p>"What information do I carry?"</p>
+      </div>
+      <p style="margin-top:0.6em;">Attention = a weighted retrieval: my Q against everyone's K gives weights, then I take a weighted sum of their Vs.</p>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="25" fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">Token "loan" attending to others</text>
+        <!-- Loan in middle -->
+        <rect x="155" y="50" width="70" height="32" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="2"/>
+        <text x="190" y="70" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="12" text-anchor="middle" font-weight="600">"loan"</text>
+        <text x="190" y="95" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">Q</text>
+        <!-- 4 candidate tokens with K and weight -->
+        <g font-family="JetBrains Mono, monospace" font-size="11">
+          <!-- bank -->
+          <rect x="20"  y="160" width="70" height="28" rx="4" fill="#161c3a" stroke="#38bdf8"/>
+          <text x="55"  y="178" text-anchor="middle" fill="#e2e8f0">"bank"</text>
+          <text x="55"  y="200" text-anchor="middle" fill="#94a3b8" font-size="9">K · weight 0.32</text>
+          <!-- approved -->
+          <rect x="105" y="160" width="80" height="28" rx="4" fill="#161c3a" stroke="#38bdf8"/>
+          <text x="145" y="178" text-anchor="middle" fill="#e2e8f0">"approved"</text>
+          <text x="145" y="200" text-anchor="middle" fill="#94a3b8" font-size="9">K · weight 0.41</text>
+          <!-- the -->
+          <rect x="200" y="160" width="55" height="28" rx="4" fill="#161c3a" stroke="#38bdf8"/>
+          <text x="227" y="178" text-anchor="middle" fill="#e2e8f0">"the"</text>
+          <text x="227" y="200" text-anchor="middle" fill="#94a3b8" font-size="9">K · weight 0.04</text>
+          <!-- credit -->
+          <rect x="270" y="160" width="80" height="28" rx="4" fill="#161c3a" stroke="#38bdf8"/>
+          <text x="310" y="178" text-anchor="middle" fill="#e2e8f0">"credit"</text>
+          <text x="310" y="200" text-anchor="middle" fill="#94a3b8" font-size="9">K · weight 0.23</text>
+        </g>
+        <!-- weighted lines from Q to each -->
+        <g stroke="#fbbf24" fill="none">
+          <line x1="190" y1="100" x2="55"  y2="160" stroke-width="1.5" opacity="0.8"/>
+          <line x1="190" y1="100" x2="145" y2="160" stroke-width="2.2" opacity="0.95"/>
+          <line x1="190" y1="100" x2="227" y2="160" stroke-width="0.6" opacity="0.4"/>
+          <line x1="190" y1="100" x2="310" y2="160" stroke-width="1.2" opacity="0.7"/>
+        </g>
+        <text x="190" y="245" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">weights = softmax( Q · Kᵀ / √dₖ )</text>
+        <text x="190" y="270" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">output = Σ (weight × V)</text>
+        <text x="190" y="298" fill="#34d399" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">"loan" most attends to "approved", then "bank" &amp; "credit"</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 1/4</div>
+</section>
+
+<section>
+  <h2>The attention formula</h2>
+  <div class="formula-box">
+    <div class="formula">Attention(<em>Q</em>, <em>K</em>, <em>V</em>) = softmax( <em>Q</em> · <em>K</em>ᵀ / √<em>d</em><sub>k</sub> ) · <em>V</em></div>
+    <div class="formula-label">Vaswani et al., 2017 — the equation that runs every modern LLM</div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Q · Kᵀ</h4>
+      <p>Dot products between every query and every key. Output: an <em>n × n</em> attention-score matrix (n = seq length).</p>
+    </div>
+    <div class="card violet">
+      <h4>÷ √d<sub>k</sub></h4>
+      <p>Scaling — keeps dot products from growing too large at high embedding dimensions and saturating softmax.</p>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card emerald">
+      <h4>softmax(...)</h4>
+      <p>Normalizes each row to a probability distribution (each query's attention weights sum to 1).</p>
+    </div>
+    <div class="card amber">
+      <h4>· V</h4>
+      <p>Mix the values according to the attention weights — produces each token's new representation.</p>
+    </div>
+  </div>
+  <div class="info-card rose">
+    <strong>The cost.</strong> Q·Kᵀ is <em>n × n</em> in sequence length — quadratic. This is why long-context is expensive (Part 6).
+  </div>
+  <div class="footer-tag">Part 3 · 2/4</div>
+</section>
+
+<section>
+  <h2>Multi-head attention — parallel views</h2>
+  <div class="grid-2">
+    <div>
+      <p>Instead of one big attention computation, run <strong>h heads in parallel</strong> with smaller Q/K/V projections, then concatenate and project back.</p>
+      <ul class="checklist">
+        <li><strong>Each head learns a different relation</strong> — syntax, coreference, long-range topical links</li>
+        <li><strong>Compute is the same</strong> — h smaller heads ≈ one big head</li>
+        <li><strong>More expressive</strong> — model can attend to multiple things at once</li>
+      </ul>
+      <div class="info-card violet">
+        <strong>Typical settings.</strong> BERT-base = 12 heads · GPT-3 = 96 heads · Llama 3 8B = 32 heads. Head count usually scales with hidden dimension.
+      </div>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 280" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="22" fill="#a78bfa" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">8 heads · parallel</text>
+        <!-- Input -->
+        <rect x="130" y="35" width="120" height="28" rx="4" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="190" y="53" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Input embeddings</text>
+        <!-- Heads -->
+        <g font-family="JetBrains Mono, monospace" font-size="9">
+          <rect x="20"  y="90" width="40" height="60" rx="4" fill="#0f1430" stroke="#a78bfa"/>
+          <text x="40"  y="110" text-anchor="middle" fill="#a78bfa">h1</text>
+          <text x="40"  y="125" text-anchor="middle" fill="#94a3b8">syntax</text>
+          <rect x="65"  y="90" width="40" height="60" rx="4" fill="#0f1430" stroke="#a78bfa"/>
+          <text x="85"  y="110" text-anchor="middle" fill="#a78bfa">h2</text>
+          <text x="85"  y="125" text-anchor="middle" fill="#94a3b8">coref</text>
+          <rect x="110" y="90" width="40" height="60" rx="4" fill="#0f1430" stroke="#a78bfa"/>
+          <text x="130" y="110" text-anchor="middle" fill="#a78bfa">h3</text>
+          <text x="130" y="125" text-anchor="middle" fill="#94a3b8">topic</text>
+          <rect x="155" y="90" width="40" height="60" rx="4" fill="#0f1430" stroke="#a78bfa"/>
+          <text x="175" y="110" text-anchor="middle" fill="#a78bfa">h4</text>
+          <text x="175" y="125" text-anchor="middle" fill="#94a3b8">prev</text>
+          <rect x="200" y="90" width="40" height="60" rx="4" fill="#0f1430" stroke="#a78bfa"/>
+          <text x="220" y="110" text-anchor="middle" fill="#a78bfa">h5</text>
+          <text x="220" y="125" text-anchor="middle" fill="#94a3b8">next</text>
+          <rect x="245" y="90" width="40" height="60" rx="4" fill="#0f1430" stroke="#a78bfa"/>
+          <text x="265" y="110" text-anchor="middle" fill="#a78bfa">h6</text>
+          <text x="265" y="125" text-anchor="middle" fill="#94a3b8">long</text>
+          <rect x="290" y="90" width="40" height="60" rx="4" fill="#0f1430" stroke="#a78bfa"/>
+          <text x="310" y="110" text-anchor="middle" fill="#a78bfa">h7</text>
+          <text x="310" y="125" text-anchor="middle" fill="#94a3b8">verbs</text>
+          <rect x="335" y="90" width="40" height="60" rx="4" fill="#0f1430" stroke="#a78bfa"/>
+          <text x="355" y="110" text-anchor="middle" fill="#a78bfa">h8</text>
+          <text x="355" y="125" text-anchor="middle" fill="#94a3b8">cls</text>
+        </g>
+        <!-- Concat / Project -->
+        <rect x="80" y="180" width="220" height="32" rx="4" fill="#161c3a" stroke="#34d399"/>
+        <text x="190" y="200" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Concat &amp; linear projection</text>
+        <line x1="190" y1="63"  x2="190" y2="85"  stroke="#94a3b8" stroke-width="1" stroke-dasharray="2,2"/>
+        <line x1="190" y1="150" x2="190" y2="180" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2,2"/>
+        <line x1="190" y1="212" x2="190" y2="240" stroke="#34d399" stroke-width="2"/>
+        <rect x="120" y="240" width="140" height="28" rx="4" fill="#161c3a" stroke="#34d399"/>
+        <text x="190" y="259" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Combined output</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 3/4</div>
+</section>
+
+<section>
+  <h2>What heads &amp; layers learn</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Layers — top to bottom</h3>
+      <ul class="checklist">
+        <li><strong>Early</strong> (layers 1–4) — local syntax, adjacent-word relations</li>
+        <li><strong>Middle</strong> (layers 5–8) — phrase- &amp; clause-level structure</li>
+        <li><strong>Late</strong> (layers 9–12+) — semantics, topic, task-specific</li>
+      </ul>
+      <p style="color:var(--text-muted); margin-top:0.4em;">Empirically observed in BERT probing studies (Tenney et al., 2019; Clark et al., 2019).</p>
+    </div>
+    <div class="card violet">
+      <h3>Heads — within a layer</h3>
+      <ul class="checklist">
+        <li>Some heads attend strongly to <strong>previous token</strong> (a "shift register")</li>
+        <li>Some heads attend to <strong>matching brackets / quotes</strong></li>
+        <li>Some heads attend to <strong>coreferent pronouns</strong></li>
+        <li>Many heads are redundant — pruning them often barely affects accuracy</li>
+      </ul>
+    </div>
+  </div>
+  <div class="info-card emerald">
+    <strong>Lab 1.4 §9</strong> visualizes <em>average attention across heads in the last layer</em> of BERT for a banking sentence. You'll see "loan" attending to "approved" and "bank" — exactly what semantic late-layer attention looks like.
+  </div>
+  <div class="quote-box">
+    Attention heatmaps are a practical interpretability tool — when a model misclassifies, the heatmap often shows it attended to the wrong tokens.
+  </div>
+  <div class="footer-tag">Part 3 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 4 — TOKENIZATION ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 4</span>
+  <h1>Tokenization</h1>
+  <p class="subtitle">LLMs don't see words — they see <em>tokens</em>. The unit of cost, the unit of context, and a frequent source of "why is this prompt so expensive?" surprises.</p>
+</section>
+
+<section>
+  <h2>Why tokens — not characters or words?</h2>
+  <div class="grid-3">
+    <div class="card rose">
+      <h3>Characters</h3>
+      <p><strong>Pros:</strong> tiny vocabulary, no OOV.</p>
+      <p><strong>Cons:</strong> sequences become 4–5× longer · loses word-level structure · poor compute efficiency.</p>
+    </div>
+    <div class="card amber">
+      <h3>Words</h3>
+      <p><strong>Pros:</strong> natural unit, intuitive.</p>
+      <p><strong>Cons:</strong> huge vocab (millions for multilingual) · OOV problem (any new word breaks) · poor for compounds &amp; agglutinative languages.</p>
+    </div>
+    <div class="card emerald">
+      <h3>Subwords ✓</h3>
+      <p><strong>Pros:</strong> ~30K–200K vocab fits everything · common words = 1 token · rare words split intelligently · no OOV.</p>
+      <p><strong>The dominant choice</strong> — used by every modern LLM.</p>
+    </div>
+  </div>
+  <div class="info-card violet">
+    <strong>The trade-off subwords nail.</strong> Frequent words get their own token (fast lookup). Rare words decompose into pieces. Unknown words still tokenize via the byte-level fallback. No vocabulary blow-up.
+  </div>
+  <div class="footer-tag">Part 4 · 1/4</div>
+</section>
+
+<section>
+  <h2>Three subword tokenizer families</h2>
+  <table>
+    <tr><th>Family</th><th>Algorithm</th><th>Used by</th><th>Vocab size</th></tr>
+    <tr><td><strong>BPE</strong> · Byte-Pair Encoding</td><td>Iteratively merge most-frequent pair of symbols. Byte-level variant covers any Unicode.</td><td>GPT-2/3/4 · GPT-4o · Llama · Mistral</td><td>50K – 200K</td></tr>
+    <tr><td><strong>WordPiece</strong></td><td>Like BPE but merges by likelihood gain, not raw frequency. Marks subword pieces with <code>##</code>.</td><td>BERT · DistilBERT · DeBERTa</td><td>~30K</td></tr>
+    <tr><td><strong>SentencePiece</strong> · Unigram</td><td>Probabilistic — keeps a probability per token, prunes vocabulary to maximize likelihood. Treats whitespace as a regular character.</td><td>T5 · FLAN-T5 · Gemini · multilingual mT5</td><td>32K – 256K</td></tr>
+  </table>
+  <div class="grid-2">
+    <div class="card">
+      <h4>BPE in one paragraph</h4>
+      <p>Start with characters → repeatedly merge the most frequent adjacent pair → save the merge rule. After N merges you have a vocabulary of frequent subwords.</p>
+    </div>
+    <div class="card violet">
+      <h4>Why it matters in practice</h4>
+      <p>The same prompt costs <strong>different token counts on different models</strong>. Always count tokens with the <em>model's own</em> tokenizer (e.g., <code>tiktoken</code> for OpenAI) before estimating cost.</p>
+    </div>
+  </div>
+  <div class="footer-tag">Part 4 · 2/4</div>
+</section>
+
+<section>
+  <h2>Tokenizer head-to-head — same sentence</h2>
+  <p style="margin-bottom:0.4em;">Input: <code>"Banking is changing in India."</code></p>
+  <div class="token-demo">
+    <div class="label">GPT-4o · o200k_base BPE</div>
+    <span class="token">Bank</span><span class="token">ing</span><span class="token"> is</span><span class="token"> changing</span><span class="token"> in</span><span class="token"> India</span><span class="token">.</span>
+    <span class="token-count">7 tokens</span>
+  </div>
+  <div class="token-demo">
+    <div class="label">GPT-3 · cl100k_base BPE</div>
+    <span class="token">Bank</span><span class="token">ing</span><span class="token"> is</span><span class="token"> changing</span><span class="token"> in</span><span class="token"> India</span><span class="token">.</span>
+    <span class="token-count">7 tokens</span>
+  </div>
+  <div class="token-demo">
+    <div class="label">BERT · WordPiece</div>
+    <span class="token v">[CLS]</span><span class="token v">banking</span><span class="token v">is</span><span class="token v">changing</span><span class="token v">in</span><span class="token v">india</span><span class="token v">.</span><span class="token v">[SEP]</span>
+    <span class="token-count">8 tokens</span>
+  </div>
+  <div class="token-demo">
+    <div class="label">FLAN-T5 · SentencePiece</div>
+    <span class="token e">▁Banking</span><span class="token e">▁is</span><span class="token e">▁changing</span><span class="token e">▁in</span><span class="token e">▁India</span><span class="token e">.</span>
+    <span class="token-count">6 tokens</span>
+  </div>
+  <div class="token-demo">
+    <div class="label">Same sentence — but Hindi · GPT-4o tokenizer</div>
+    <span class="token a">"न</span><span class="token a">मस्</span><span class="token a">ते</span><span class="token a"> भार</span><span class="token a">त"</span>
+    <span class="token-count">~13 tokens for "नमस्ते भारत" — non-Latin scripts split smaller</span>
+  </div>
+  <div class="info-card amber" style="margin-top:0.4em;">
+    <strong>Practical implication.</strong> The same multilingual prompt is up to <em>4× more expensive</em> in some languages than in English. This is why content-moderation and translation pipelines specifically benchmark tokenizer cost per language.
+  </div>
+  <div class="footer-tag">Part 4 · 3/4</div>
+</section>
+
+<section>
+  <h2>Token budget management — practical</h2>
+  <pre><code class="language-python">import tiktoken
+
+enc = tiktoken.encoding_for_model("gpt-4o-mini")  # o200k_base
+
+def count_tokens(text: str) -> int:
+    return len(enc.encode(text))
+
+system_prompt = "You are a banking assistant..."
+user_query = "Summarize this 50-page policy document..."
+documents = open("policy.txt").read()
+
+budget = 128_000   # context window
+reserved_for_output = 4_000
+
+input_tokens = (
+    count_tokens(system_prompt) +
+    count_tokens(user_query) +
+    count_tokens(documents)
+)
+
+available = budget - reserved_for_output
+if input_tokens > available:
+    # truncate, summarize, or chunk
+    documents = enc.decode(enc.encode(documents)[:available - 2000])</code></pre>
+  <div class="grid-2">
+    <div class="info-card violet">
+      <strong>Lab 1.4 §4 + §5</strong> covers this end-to-end with <code>tiktoken</code> and HuggingFace tokenizers, including safe truncation for BERT-class models with <code>max_length=512</code>.
+    </div>
+    <div class="info-card amber">
+      <strong>Rule of thumb.</strong> Reserve ~10% of context for output. Reasoning models need much more — sometimes 50%+ of <code>max_tokens</code> for hidden thinking.
+    </div>
+  </div>
+  <div class="footer-tag">Part 4 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 5 — GENERATION & SAMPLING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 5</span>
+  <h1>Generation &amp;<br>sampling</h1>
+  <p class="subtitle">How a decoder-only model turns a prompt into output, and what every sampling parameter actually does.</p>
+</section>
+
+<section>
+  <h2>Autoregressive generation — step by step</h2>
+  <svg class="diagram" viewBox="0 0 880 280" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arG" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+      </marker>
+    </defs>
+    <text x="20" y="30" fill="#a78bfa" font-family="Inter,sans-serif" font-size="13" font-weight="600">Step 1 · forward pass</text>
+    <rect x="20"  y="45" width="280" height="32" rx="4" fill="#161c3a" stroke="#38bdf8"/>
+    <text x="160" y="65" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">"The capital of France is"</text>
+    <line x1="305" y1="60" x2="335" y2="60" stroke="#a78bfa" stroke-width="2" marker-end="url(#arG)"/>
+    <rect x="335" y="40" width="200" height="40" rx="4" fill="#161c3a" stroke="#a78bfa"/>
+    <text x="435" y="58" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">probabilities over</text>
+    <text x="435" y="73" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">entire vocabulary (~100K)</text>
+    <line x1="540" y1="60" x2="570" y2="60" stroke="#a78bfa" stroke-width="2" marker-end="url(#arG)"/>
+    <rect x="570" y="40" width="280" height="40" rx="4" fill="#161c3a" stroke="#34d399"/>
+    <text x="710" y="58" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">{" Paris": 0.62, " the": 0.08,</text>
+    <text x="710" y="72" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">" a": 0.05, " home": 0.03, ...}</text>
+
+    <!-- Step 2 -->
+    <text x="20" y="115" fill="#a78bfa" font-family="Inter,sans-serif" font-size="13" font-weight="600">Step 2 · sample &amp; append</text>
+    <rect x="20"  y="130" width="380" height="32" rx="4" fill="#161c3a" stroke="#38bdf8"/>
+    <text x="210" y="150" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">"The capital of France is Paris"</text>
+    <line x1="405" y1="145" x2="435" y2="145" stroke="#a78bfa" stroke-width="2" marker-end="url(#arG)"/>
+    <rect x="435" y="125" width="200" height="40" rx="4" fill="#161c3a" stroke="#a78bfa"/>
+    <text x="535" y="145" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">predict next →</text>
+    <text x="535" y="158" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">{"." 0.71, "," 0.12, ...}</text>
+    <line x1="640" y1="145" x2="670" y2="145" stroke="#a78bfa" stroke-width="2" marker-end="url(#arG)"/>
+    <rect x="670" y="125" width="180" height="40" rx="4" fill="#161c3a" stroke="#34d399"/>
+    <text x="760" y="145" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">append "."</text>
+    <text x="760" y="158" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">→ continue or stop</text>
+
+    <!-- Step N -->
+    <text x="20" y="200" fill="#a78bfa" font-family="Inter,sans-serif" font-size="13" font-weight="600">Step N · stop</text>
+    <rect x="20" y="215" width="500" height="40" rx="4" fill="#161c3a" stroke="#fbbf24"/>
+    <text x="270" y="235" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Stop when:</text>
+    <text x="270" y="250" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">• EOS token sampled  • max_tokens reached  • stop_sequences match</text>
+  </svg>
+  <div class="info-card violet">
+    <strong>Causal masking</strong> — each token only sees tokens to its <em>left</em>. That's why decoder-only models can stream tokens one-at-a-time as they're generated.
+  </div>
+  <div class="footer-tag">Part 5 · 1/4</div>
+</section>
+
+<section>
+  <h2>Sampling — turning probabilities into a token</h2>
+  <div class="grid-4">
+    <div class="card">
+      <h4>Greedy</h4>
+      <p>Always pick <code>argmax</code>.</p>
+      <p style="color:var(--text-muted);">Deterministic. Risk: gets stuck in repetition.</p>
+    </div>
+    <div class="card violet">
+      <h4>Temperature</h4>
+      <p>Divide logits by <em>T</em> before softmax.</p>
+      <p style="color:var(--text-muted);"><em>T &lt; 1</em> = sharper · <em>T &gt; 1</em> = flatter / more creative.</p>
+    </div>
+    <div class="card emerald">
+      <h4>Top-k</h4>
+      <p>Keep only top-<em>k</em> tokens, sample.</p>
+      <p style="color:var(--text-muted);">Hard cap. Rarely tuned in practice.</p>
+    </div>
+    <div class="card amber">
+      <h4>Top-p (nucleus)</h4>
+      <p>Keep smallest set of tokens whose cumulative prob ≥ <em>p</em>.</p>
+      <p style="color:var(--text-muted);">Adaptive — cuts the long tail without hard caps.</p>
+    </div>
+  </div>
+  <svg class="diagram" viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg">
+    <text x="20" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11">Logit distribution → softmax under different temperatures</text>
+    <!-- T=0.2 -->
+    <text x="60"  y="50" fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">T = 0.2 · sharp</text>
+    <rect x="20"  y="60" width="20" height="120" fill="#38bdf8" opacity="0.9"/>
+    <rect x="42"  y="155" width="20" height="25" fill="#38bdf8" opacity="0.5"/>
+    <rect x="64"  y="170" width="20" height="10" fill="#38bdf8" opacity="0.4"/>
+    <rect x="86"  y="175" width="20" height="5"  fill="#38bdf8" opacity="0.3"/>
+    <text x="60"  y="200" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">deterministic</text>
+
+    <!-- T=1.0 -->
+    <text x="270" y="50" fill="#a78bfa" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">T = 1.0 · standard</text>
+    <rect x="230" y="80"  width="20" height="100" fill="#a78bfa" opacity="0.9"/>
+    <rect x="252" y="115" width="20" height="65"  fill="#a78bfa" opacity="0.7"/>
+    <rect x="274" y="135" width="20" height="45"  fill="#a78bfa" opacity="0.6"/>
+    <rect x="296" y="150" width="20" height="30"  fill="#a78bfa" opacity="0.5"/>
+    <text x="270" y="200" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">balanced</text>
+
+    <!-- T=2.0 -->
+    <text x="490" y="50" fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">T = 2.0 · flat</text>
+    <rect x="450" y="120" width="20" height="60" fill="#fbbf24" opacity="0.85"/>
+    <rect x="472" y="125" width="20" height="55" fill="#fbbf24" opacity="0.8"/>
+    <rect x="494" y="130" width="20" height="50" fill="#fbbf24" opacity="0.75"/>
+    <rect x="516" y="135" width="20" height="45" fill="#fbbf24" opacity="0.7"/>
+    <text x="490" y="200" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">creative · risky</text>
+
+    <!-- top-p illustration -->
+    <text x="730" y="50"  fill="#34d399" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">top_p = 0.9 cut</text>
+    <rect x="660" y="80"  width="20" height="100" fill="#34d399" opacity="0.9"/>
+    <rect x="682" y="115" width="20" height="65"  fill="#34d399" opacity="0.85"/>
+    <rect x="704" y="135" width="20" height="45"  fill="#34d399" opacity="0.8"/>
+    <rect x="726" y="150" width="20" height="30"  fill="#34d399" opacity="0.7"/>
+    <rect x="748" y="160" width="20" height="20"  fill="#fb7185" opacity="0.4"/>
+    <rect x="770" y="170" width="20" height="10"  fill="#fb7185" opacity="0.3"/>
+    <line x1="745" y1="60" x2="745" y2="190" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="755" y="70" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="10">cut here</text>
+    <text x="730" y="200" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">adaptive nucleus</text>
+  </svg>
+  <div class="footer-tag">Part 5 · 2/4</div>
+</section>
+
+<section>
+  <h2>Sampling parameter cheat sheet</h2>
+  <table>
+    <tr><th>Parameter</th><th>What it does</th><th>Typical use</th><th>Range</th></tr>
+    <tr><td><code>temperature</code></td><td>Divides logits before softmax</td><td>Factual: <code>0.0–0.2</code> · Brainstorm: <code>0.8–1.2</code></td><td>0.0 – 2.0</td></tr>
+    <tr><td><code>top_p</code></td><td>Nucleus — smallest set summing to <em>p</em></td><td>Production chat: <code>0.9–0.95</code></td><td>0.0 – 1.0</td></tr>
+    <tr><td><code>top_k</code></td><td>Keep only top-<em>k</em>, sample</td><td>Rarely tuned · default ~50</td><td>0 – vocab size</td></tr>
+    <tr><td><code>frequency_penalty</code></td><td>Penalize tokens already seen</td><td>Reduce repetition · <code>0.3–0.5</code></td><td>−2.0 – 2.0</td></tr>
+    <tr><td><code>presence_penalty</code></td><td>Penalize tokens that appeared at all</td><td>Encourage topic diversity · <code>0.3–0.6</code></td><td>−2.0 – 2.0</td></tr>
+    <tr><td><code>max_tokens</code> · <code>max_output_tokens</code></td><td>Hard cap on output length</td><td>Cost &amp; UX control</td><td>1 – context limit</td></tr>
+    <tr><td><code>stop</code> · <code>stop_sequences</code></td><td>Strings that, if generated, end the response</td><td>Force JSON close · custom delimiters</td><td>list of strings</td></tr>
+    <tr><td><code>seed</code></td><td>Make sampling deterministic</td><td>Reproducible eval runs</td><td>integer</td></tr>
+    <tr><td><code>reasoning_effort</code></td><td>Reasoning-model only — hidden-thinking budget</td><td>low / medium / high</td><td>—</td></tr>
+  </table>
+  <div class="info-card amber">
+    <strong>Practical recipe.</strong> For factual / classification: <code>temperature=0</code> + <code>top_p=1</code>. For creative chat: <code>temperature=0.7</code> + <code>top_p=0.9</code>. For reasoning: don't touch sampling — set <code>reasoning_effort</code>.
+  </div>
+  <div class="footer-tag">Part 5 · 3/4</div>
+</section>
+
+<section>
+  <h2>Stopping &amp; control</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Three ways generation ends</h4>
+      <ul class="checklist">
+        <li><strong><code>EOS</code> token sampled</strong> — model decides it's done</li>
+        <li><strong><code>max_tokens</code> hit</strong> — hard cap reached</li>
+        <li><strong><code>stop_sequences</code> matched</strong> — your custom delimiter found</li>
+      </ul>
+    </div>
+    <div class="card violet">
+      <h4>Reasoning-model variant</h4>
+      <ul class="checklist">
+        <li>Hidden thinking ends when the model emits an "answer-start" token</li>
+        <li>Then user-facing answer streams normally</li>
+        <li><code>max_tokens</code> must cover BOTH thinking + answer</li>
+      </ul>
+    </div>
+  </div>
+  <pre><code class="language-python">response = client.responses.create(
+    model="gpt-5-mini",
+    input=user_prompt,
+    reasoning={"effort": "high"},
+    max_output_tokens=4000,        # ← needs headroom for hidden thinking
+    stop=["END_OF_REPORT"],        # ← optional custom stop
+    seed=42,                       # ← reproducibility for eval runs
+)
+# response.usage shows breakdown:
+#  - input_tokens
+#  - output_tokens         (visible)
+#  - reasoning_tokens      (hidden but charged)</code></pre>
+  <div class="info-card emerald">
+    Reasoning tokens are <strong>billed but not returned</strong>. A <code>reasoning_effort=high</code> call can produce 5K–20K hidden tokens — sometimes 10× the visible output. Budget accordingly.
+  </div>
+  <div class="footer-tag">Part 5 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 6 — CONTEXT WINDOW ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 6</span>
+  <h1>Context window<br>mechanics</h1>
+  <p class="subtitle">The working memory of an LLM. How big can it be? How much does it cost? When does it become a bad idea?</p>
+</section>
+
+<section>
+  <h2>Context window — the working memory</h2>
+  <p>Maximum number of tokens (input + output) the model can attend to in a <em>single API call</em>.</p>
+  <table>
+    <tr><th>Model</th><th>Context window</th><th>Practical use</th></tr>
+    <tr><td>BERT-base (2018)</td><td>512 tokens</td><td>One paragraph</td></tr>
+    <tr><td>GPT-3 (2020)</td><td>2K tokens</td><td>Short article</td></tr>
+    <tr><td>GPT-4 (2023)</td><td>8K → 32K → 128K</td><td>Book chapter</td></tr>
+    <tr><td>Claude Sonnet 4.5</td><td>200K · up to 1M for select API tier</td><td>Whole books, large codebases</td></tr>
+    <tr><td>GPT-4.1</td><td>1M tokens</td><td>Multi-document research</td></tr>
+    <tr><td>Gemini 2.5 Pro</td><td>2M tokens</td><td>Same, even larger — niche today</td></tr>
+  </table>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="kpi"><div class="kpi-value">~3,000×</div><div class="kpi-label">context growth<br>2018 → 2025</div></div>
+    <div class="kpi violet"><div class="kpi-value">O(n²)</div><div class="kpi-label">attention cost<br>in seq length</div></div>
+    <div class="kpi emerald"><div class="kpi-value">×4</div><div class="kpi-label">cost when you<br>double context</div></div>
+  </div>
+  <div class="footer-tag">Part 6 · 1/2</div>
+</section>
+
+<section>
+  <h2>Long context isn't free</h2>
+  <div class="grid-2">
+    <div>
+      <h4>The quadratic cost</h4>
+      <p>Self-attention computes an <em>n × n</em> attention matrix. Doubling context = 4× compute &amp; memory. Even with optimizations (FlashAttention, ring attention), the dollar cost scales linearly per token in the API.</p>
+      <h4 style="margin-top:0.6em;">Cost example</h4>
+      <p>A 1M-token Gemini 2.5 Pro call at $1.25/M input ≈ <strong>$1.25 per call</strong>. A 2K Sonnet call ≈ <strong>$0.006</strong>. <em>200× ratio</em> — same model family.</p>
+    </div>
+    <div class="card amber">
+      <h4>When NOT to use long context</h4>
+      <ul class="checklist">
+        <li><strong>RAG is cheaper.</strong> Retrieve only the relevant 5–10 chunks instead of stuffing everything.</li>
+        <li><strong>Lost-in-the-middle.</strong> Models often miss content in the middle of very long contexts.</li>
+        <li><strong>Latency.</strong> Long input = long time-to-first-token, even with prompt caching.</li>
+        <li><strong>Iteration cost.</strong> Each prompt edit re-bills the long input — cache it or shorten it.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="info-card emerald">
+    <strong>Long context techniques (under the hood).</strong> Modern long-context models use FlashAttention (memory-efficient attention), Rotary Position Embeddings (extrapolation beyond training length), and sometimes sliding-window or sparse attention. These don't change your API surface — they change what's economically possible.
+  </div>
+  <div class="quote-box">
+    <strong>Rule:</strong> If RAG can answer the question with 5K tokens, don't use a 1M-token model with the whole corpus stuffed in. Long context is a tool, not a default.
+  </div>
+  <div class="footer-tag">Part 6 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 7 — SCALING LAWS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 7</span>
+  <h1>Scaling laws<br>&amp; emergence</h1>
+  <p class="subtitle">Why bigger models keep getting better — and the surprising abilities that show up only at scale.</p>
+</section>
+
+<section>
+  <h2>Scaling laws — Kaplan &amp; Chinchilla</h2>
+  <div class="grid-2">
+    <div>
+      <h4>Kaplan et al. (2020)</h4>
+      <p>Test loss decreases as a <strong>power law</strong> in three variables: parameters, dataset size, and compute. Scale them and quality improves predictably.</p>
+      <h4 style="margin-top:0.5em;">Chinchilla finding (2022)</h4>
+      <p>Most models in 2020–21 were <em>over-parameterized for the data they were trained on</em>. Optimal ratio: <strong>~20 tokens per parameter</strong>. Smaller-but-trained-longer models often beat bigger ones.</p>
+      <div class="info-card violet">
+        Modern frontier models (Llama 3.3, Claude 4.x) train on <em>far more</em> tokens than Chinchilla-optimal — sacrificing efficiency for downstream quality.
+      </div>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 280" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="22" fill="#a78bfa" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">Test loss vs compute (log-log)</text>
+        <!-- Axes -->
+        <line x1="50"  y1="50"  x2="50"  y2="240" stroke="#94a3b8" stroke-width="1"/>
+        <line x1="50"  y1="240" x2="350" y2="240" stroke="#94a3b8" stroke-width="1"/>
+        <text x="30"  y="50"  fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">loss</text>
+        <text x="350" y="258" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">log compute</text>
+        <!-- Power-law curve -->
+        <path d="M 50 80 Q 130 110 200 150 T 340 230" stroke="#38bdf8" stroke-width="2" fill="none"/>
+        <!-- Annotated points -->
+        <circle cx="80"  cy="100" r="4" fill="#fbbf24"/>
+        <text x="92"  y="100" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">GPT-2 (1.5B)</text>
+        <circle cx="180" cy="155" r="4" fill="#fbbf24"/>
+        <text x="192" y="155" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">GPT-3 (175B)</text>
+        <circle cx="270" cy="200" r="4" fill="#fbbf24"/>
+        <text x="180" y="200" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">Llama 3 (70B+)</text>
+        <text x="190" y="265" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">Each ×10 in compute → predictable drop in loss</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 7 · 1/2</div>
+</section>
+
+<section>
+  <h2>Emergent abilities</h2>
+  <div class="grid-2">
+    <div>
+      <p>Some abilities appear <strong>suddenly</strong> at certain scales — not gradually. Below the threshold, near-random performance; above it, sharp jump.</p>
+      <h4 style="margin-top:0.4em;">Examples</h4>
+      <ul class="checklist">
+        <li><strong>Multi-step arithmetic</strong> — ~10B+ params</li>
+        <li><strong>In-context learning</strong> — ~10B+ params (GPT-3 moment)</li>
+        <li><strong>Instruction following</strong> — needs RLHF + scale</li>
+        <li><strong>Chain-of-thought reasoning</strong> — emerges with scale, then taken further by reasoning training</li>
+      </ul>
+      <div class="info-card amber">
+        <strong>Caveat:</strong> some "emergence" turns out to be a measurement artifact (exact-match metrics making smooth gains look sudden). Whether it's truly discontinuous is debated — but the practical jumps are real.
+      </div>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 260" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="22" fill="#a78bfa" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">"Emergent" capability vs scale</text>
+        <line x1="50"  y1="40"  x2="50"  y2="220" stroke="#94a3b8" stroke-width="1"/>
+        <line x1="50"  y1="220" x2="350" y2="220" stroke="#94a3b8" stroke-width="1"/>
+        <text x="30"  y="40"  fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">acc</text>
+        <text x="345" y="238" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">log params</text>
+        <!-- flat then sudden jump -->
+        <path d="M 50 200 L 200 200 L 230 60 L 350 50" stroke="#34d399" stroke-width="2.5" fill="none"/>
+        <!-- threshold marker -->
+        <line x1="215" y1="40" x2="215" y2="220" stroke="#fb7185" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="218" y="55" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="10">~10B threshold</text>
+        <text x="125" y="195" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">below: random</text>
+        <text x="290" y="105" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10">above: capable</text>
+      </svg>
+      <div class="info-card emerald" style="margin-top:0.4em;">
+        <strong>Practical impact.</strong> "It worked great on Llama 70B, why not on Llama 8B?" — sometimes the answer is: that capability lives above a scale threshold the smaller model is below.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 7 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 8 — API PRICING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 8</span>
+  <h1>API pricing<br>&amp; cost optimization</h1>
+  <p class="subtitle">What you actually pay for, where the savings hide, and how to budget for a 50K-msg/day banking pipeline.</p>
+</section>
+
+<section>
+  <h2>Pricing model — the basics</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you pay for</h4>
+      <ul class="checklist">
+        <li><strong>Input tokens</strong> — system + user + retrieved docs</li>
+        <li><strong>Output tokens</strong> — what the model generates</li>
+        <li><strong>Reasoning tokens</strong> (reasoning models only) — hidden chain-of-thought, billed but not returned</li>
+        <li><strong>Cached input tokens</strong> — re-used system prompts at 10–25% of normal price</li>
+        <li><strong>Image / audio inputs</strong> — counted as token equivalents</li>
+      </ul>
+    </div>
+    <div class="card violet">
+      <h4>Why output tokens cost more</h4>
+      <p>Generation is <em>sequential</em> — one token at a time, each requiring a full forward pass. Input is processed in parallel.</p>
+      <p style="margin-top:0.4em;">Output ≈ <strong>3–5×</strong> the price of input across most providers.</p>
+    </div>
+  </div>
+  <pre><code class="language-python"># Cost estimation (per call)
+input_cost  = (prompt_tokens     / 1_000_000) * price_in_per_M
+output_cost = (completion_tokens / 1_000_000) * price_out_per_M
+
+# Reasoning models add hidden tokens
+if model.startswith("gpt-5") or "thinking" in model:
+    reasoning_cost = (reasoning_tokens / 1_000_000) * price_out_per_M
+    total = input_cost + output_cost + reasoning_cost
+else:
+    total = input_cost + output_cost</code></pre>
+  <div class="footer-tag">Part 8 · 1/3</div>
+</section>
+
+<section>
+  <h2>Provider pricing — early 2026 snapshot</h2>
+  <table>
+    <tr><th>Model</th><th>Input $/M tok</th><th>Output $/M tok</th><th>Notes</th></tr>
+    <tr class="pricing-row"><td>GPT-5 (frontier reasoning)</td><td>~5.00</td><td>~20.00</td><td>Reasoning · hidden tokens billed at output rate</td></tr>
+    <tr class="pricing-row"><td>GPT-5-mini</td><td>~1.10</td><td>~4.40</td><td>Cost-balanced reasoning model</td></tr>
+    <tr class="pricing-row"><td>GPT-4.1</td><td>~2.00</td><td>~8.00</td><td>Non-reasoning · 1M context</td></tr>
+    <tr class="pricing-row"><td>GPT-4.1-mini</td><td>~0.40</td><td>~1.60</td><td>Cheap fast non-reasoning</td></tr>
+    <tr class="pricing-row"><td>Claude Sonnet 4.5</td><td>~3.00</td><td>~15.00</td><td>Mid-tier · 200K context</td></tr>
+    <tr class="pricing-row"><td>Claude Haiku 4.5</td><td>~0.80</td><td>~4.00</td><td>Anthropic's fast tier</td></tr>
+    <tr class="pricing-row"><td>Gemini 2.5 Pro</td><td>~1.25</td><td>~5.00</td><td>2M context · cheaper at &lt;200K</td></tr>
+    <tr class="pricing-row"><td>Gemini 2.5 Flash</td><td>~0.15</td><td>~0.60</td><td>Cost leader for high-volume</td></tr>
+    <tr class="pricing-row"><td>Llama 3.3 70B (Groq)</td><td>~0.59</td><td>~0.79</td><td>Open model on LPU · ~500 t/s output</td></tr>
+    <tr class="pricing-row"><td>Bedrock — Claude Haiku 4.5</td><td>~0.80</td><td>~4.00</td><td>Same as direct + AWS data charges</td></tr>
+    <tr class="pricing-row"><td>text-embedding-3-small</td><td>~0.02</td><td>—</td><td>Embeddings (input-only)</td></tr>
+    <tr class="pricing-row"><td>text-embedding-3-large</td><td>~0.13</td><td>—</td><td>Higher-dim embeddings</td></tr>
+  </table>
+  <div class="info-card amber">
+    <strong>Numbers are approximate &amp; change quarterly.</strong> Always check the live pricing page before budgeting. The shape — <em>10–100× spread between cheapest and frontier</em> — is what matters.
+  </div>
+  <div class="footer-tag">Part 8 · 2/3</div>
+</section>
+
+<section>
+  <h2>Cost optimization patterns</h2>
+  <div class="grid-2">
+    <div class="card emerald">
+      <h4>① Prompt caching</h4>
+      <p>Anthropic, OpenAI: long static system prompts can be cached → cached tokens billed at ~10–25% of normal input price.</p>
+      <p style="color:var(--text-muted);">Wins big for chat with a long persona, RAG with a fixed instruction template, and tool-calling with a long tool definition.</p>
+    </div>
+    <div class="card violet">
+      <h4>② Batch API</h4>
+      <p>OpenAI &amp; Anthropic: submit a batch of requests, get results within 24h at <strong>~50% discount</strong>.</p>
+      <p style="color:var(--text-muted);">Use for: nightly evaluation runs, dataset labeling, offline summarization.</p>
+    </div>
+    <div class="card amber">
+      <h4>③ Cascade routing</h4>
+      <p>Cheap fast model handles the easy 80% — escalate to frontier only when confidence is low or the task is complex.</p>
+      <p style="color:var(--text-muted);">Often cuts cost 5–10× while maintaining quality.</p>
+    </div>
+    <div class="card rose">
+      <h4>④ Right-size the model</h4>
+      <p>Don't use Sonnet where Haiku works. Don't use a reasoning model for classification.</p>
+      <p style="color:var(--text-muted);">Lab 1.3 §8 has the back-of-envelope math for a 50K-msg/day intake bot.</p>
+    </div>
+  </div>
+  <div class="info-card violet" style="margin-top:0.4em;">
+    <strong>Order to apply.</strong> 1) Right-size first — biggest lever. 2) Add cascade routing if quality varies. 3) Add caching when prompts have stable prefixes. 4) Batch API for offline work.
+  </div>
+  <div class="footer-tag">Part 8 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 9 — MAP TO LAB ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 9</span>
+  <h1>Map to Lab 1.4</h1>
+  <p class="subtitle">Which slide of this deck powers which section of the lab — and the three checkpoints to walk away with.</p>
+</section>
+
+<section>
+  <h2>Lab 1.4 — section-by-section</h2>
+  <table>
+    <tr><th>Lab section</th><th>Powered by</th></tr>
+    <tr><td><strong>§4</strong> Tokenization across model families (BPE, WordPiece, SentencePiece)</td><td>Part 4 · slides 1–3</td></tr>
+    <tr><td><strong>§5</strong> Token-budget management with <code>tiktoken</code></td><td>Part 4 · slide 4 + Part 6</td></tr>
+    <tr><td><strong>§6</strong> Encoder-Only (BERT) — classification + NER</td><td>Part 2 · slide 1</td></tr>
+    <tr><td><strong>§7</strong> Decoder-Only (GPT / Llama) — generation</td><td>Part 2 · slide 2 + Part 5</td></tr>
+    <tr><td><strong>§8</strong> Encoder-Decoder (FLAN-T5) — seq-to-seq</td><td>Part 2 · slide 3</td></tr>
+    <tr><td><strong>§9</strong> Self-attention visualization (BERT, last layer)</td><td>Part 3 · all 4 slides</td></tr>
+    <tr><td><strong>§10</strong> Architecture comparison — same task, three approaches</td><td>Part 2 · decision matrix</td></tr>
+    <tr><td><strong>§11</strong> Architecture-selection exercise (8 industry scenarios)</td><td>Part 2 + Part 8 (cost dimension)</td></tr>
+    <tr><td><strong>§12</strong> Scaling laws &amp; model selection matrix</td><td>Part 7 · both slides</td></tr>
+    <tr><td><strong>Interview Prep</strong> 8 Q&amp;A</td><td>Parts 1, 3, 4, 5, 6, 7</td></tr>
+  </table>
+  <div class="info-card emerald">
+    Every lab cell builds on a concept in this deck. If something in the lab feels mysterious, come back to the matching part.
+  </div>
+  <div class="footer-tag">Part 9 · 1/2</div>
+</section>
+
+<section>
+  <h2>Three checkpoints to walk away with</h2>
+  <div class="grid-3" style="margin-top:0.5em;">
+    <div class="card">
+      <h3>① Architecture intuition</h3>
+      <p>For any task you're given, can you say "encoder-only" / "decoder-only" / "encoder-decoder" and defend why?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.4em;"><strong>Goal.</strong> The decision matrix from Part 2 by heart.</p>
+    </div>
+    <div class="card violet">
+      <h3>② Token literacy</h3>
+      <p>For a 5K-character prompt, can you ballpark the token count <em>and</em> the dollar cost on 3 different providers?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.4em;"><strong>Goal.</strong> Always count with the model's own tokenizer; never extrapolate from chars.</p>
+    </div>
+    <div class="card emerald">
+      <h3>③ Cost reasoning</h3>
+      <p>Given 50K msgs/day, defend a model + provider choice in two minutes — covering quality, cost, latency, compliance.</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.4em;"><strong>Goal.</strong> No single right answer — the reasoning is the deliverable.</p>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.6em;">
+    These are the three threads tied off at the end of Day 1. Day 2 (Module 2) shifts to <strong>prompt engineering with LangChain</strong> — the layer above everything we've covered today.
+  </div>
+  <div class="footer-tag">Part 9 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ END ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">End of Module 1 · Day 1</div>
+  <h1>Questions?</h1>
+  <div class="subtitle">Next: open Lab 1.4 — Transformer Architecture &amp; Tokenization Fundamentals.<br>
+    Have <code>transformers</code>, <code>torch</code>, <code>tiktoken</code>, <code>matplotlib</code>, and <code>seaborn</code> installed.</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">Module 1 · Foundations · Part 2 of 2</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    pdfSeparateFragments: false,
+    plugins: [RevealHighlight, RevealZoom, RevealSearch]
+  });
+</script>
+</body>
+</html>
