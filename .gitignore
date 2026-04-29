@@ -84,6 +84,12 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
+# Internal program-management materials (NOT for trainees, NOT in the public repo)
+.quiz/
+~$*.docx
+~$*.xlsx
+~$*.pptx
+
 # Build / tooling artifacts (kept out of the published repo)
 shared/
 build_scripts/
