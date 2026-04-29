@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 1 — Foundations of GenAI (Labs 1.1–1.3) · Prashant Sahu</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #0a0e27;
+    --bg-mid:  #111733;
+    --bg-card: #161c3a;
+    --bg-card-hover: #1d2447;
+    --accent-sky:     #38bdf8;
+    --accent-violet:  #a78bfa;
+    --accent-emerald: #34d399;
+    --accent-amber:   #fbbf24;
+    --accent-rose:    #fb7185;
+    --text-primary: #e2e8f0;
+    --text-muted:   #94a3b8;
+    --text-dim:     #64748b;
+    --border-soft:  rgba(148, 163, 184, 0.15);
+    --code-bg: #1e293b;
+  }
+
+  /* Base reveal overrides */
+  .reveal {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+    font-size: 24px;
+    font-weight: 400;
+  }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section { padding: 12px 0; }
+
+  /* Typography — tighter than default */
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ffffff;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    margin: 0 0 0.4em 0;
+  }
+  .reveal h1 { font-size: 2.0em;  line-height: 1.1; font-weight: 700; }
+  .reveal h2 { font-size: 1.25em; line-height: 1.2; }
+  .reveal h3 { font-size: 1.0em;  line-height: 1.3; color: var(--accent-sky); font-weight: 600; }
+  .reveal h4 { font-size: 0.85em; line-height: 1.3; color: var(--accent-violet); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reveal p, .reveal li { line-height: 1.5; color: var(--text-primary); font-size: 0.85em; }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .reveal li { margin-bottom: 0.35em; }
+  .reveal strong { color: #ffffff; font-weight: 600; }
+  .reveal em { color: var(--accent-amber); font-style: italic; }
+  .reveal a { color: var(--accent-sky); text-decoration: none; border-bottom: 1px dotted var(--accent-sky); }
+
+  /* Inline code */
+  .reveal code {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    padding: 0.08em 0.32em;
+    border-radius: 4px;
+    font-size: 0.82em;
+  }
+  .reveal pre {
+    width: 100%;
+    box-shadow: none;
+    margin: 0.5em 0;
+  }
+  .reveal pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6em;
+    line-height: 1.5;
+    padding: 0.9em 1.1em;
+    background: var(--code-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-sky);
+    max-height: 380px;
+    overflow: auto;
+  }
+
+  /* Tables — interactive row hover */
+  .reveal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4em 0;
+    font-size: 0.78em;
+  }
+  .reveal table th {
+    background: linear-gradient(180deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.08) 100%);
+    color: #ffffff;
+    text-align: left;
+    padding: 0.55em 0.85em;
+    border-bottom: 2px solid var(--accent-sky);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .reveal table td {
+    padding: 0.5em 0.85em;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 180ms ease;
+  }
+  .reveal table tr { transition: background 180ms ease; }
+  .reveal table tr:hover td {
+    background: rgba(56, 189, 248, 0.06);
+  }
+  .reveal table tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.018);
+  }
+  .reveal table tr:nth-child(even):hover td {
+    background: rgba(56, 189, 248, 0.08);
+  }
+
+  /* ───────── Title slide ───────── */
+  .reveal section.title-slide {
+    text-align: center;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(167, 139, 250, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.title-slide .eyebrow {
+    color: var(--accent-sky);
+    font-size: 0.55em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.8em;
+  }
+  .reveal section.title-slide h1 {
+    font-size: 2.4em;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #38bdf8 0%, #a78bfa 50%, #fb7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5em;
+    animation: titleFade 1.2s ease-out;
+  }
+  @keyframes titleFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal section.title-slide .subtitle {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 0.4em;
+    font-weight: 400;
+  }
+  .reveal section.title-slide .tag {
+    display: inline-block;
+    margin-top: 0.4em;
+    padding: 0.3em 1em;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 999px;
+    font-size: 0.6em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .reveal section.title-slide .presenter-block {
+    margin-top: 1.6em;
+    padding: 0.6em 1.4em;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+  .reveal section.title-slide .presenter-label {
+    color: var(--accent-violet);
+    font-size: 0.5em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.15em;
+  }
+  .reveal section.title-slide .presenter-name {
+    color: #ffffff;
+    font-size: 1.0em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .reveal section.title-slide .meta {
+    margin-top: 1.4em;
+    color: var(--text-dim);
+    font-size: 0.55em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* ───────── Section divider ───────── */
+  .reveal section.divider {
+    text-align: left;
+    background:
+      radial-gradient(circle at 20% 60%, rgba(56, 189, 248, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 90% 30%, rgba(167, 139, 250, 0.13) 0%, transparent 55%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.divider .part-label {
+    display: block;
+    color: var(--accent-sky);
+    font-size: 0.6em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.4em;
+  }
+  .reveal section.divider h1 {
+    font-size: 2.2em;
+    line-height: 1.05;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+  }
+  .reveal section.divider .subtitle {
+    color: var(--text-muted);
+    font-size: 0.7em;
+    max-width: 800px;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  .reveal section.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--accent-sky), var(--accent-violet));
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* ───────── Cards ───────── */
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.8em 1.1em;
+    border-left: 3px solid var(--accent-sky);
+    margin: 0.4em 0;
+    transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+  }
+  .card.violet  { border-left-color: var(--accent-violet); }
+  .card.violet:hover  { box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15); }
+  .card.emerald { border-left-color: var(--accent-emerald); }
+  .card.emerald:hover { box-shadow: 0 8px 24px rgba(52, 211, 153, 0.12); }
+  .card.amber   { border-left-color: var(--accent-amber); }
+  .card.amber:hover   { box-shadow: 0 8px 24px rgba(251, 191, 36, 0.12); }
+  .card.rose    { border-left-color: var(--accent-rose); }
+  .card.rose:hover    { box-shadow: 0 8px 24px rgba(251, 113, 133, 0.12); }
+  .card h3, .card h4 { margin-top: 0; }
+  .card p { margin: 0.3em 0; font-size: 0.8em; }
+
+  /* Flat info card (no border) */
+  .info-card {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    padding: 0.7em 1em;
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .info-card.violet  { background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.2); }
+  .info-card.emerald { background: rgba(52, 211, 153, 0.08);  border-color: rgba(52, 211, 153, 0.2); }
+  .info-card.amber   { background: rgba(251, 191, 36, 0.08);  border-color: rgba(251, 191, 36, 0.25); }
+  .info-card.rose    { background: rgba(251, 113, 133, 0.08); border-color: rgba(251, 113, 133, 0.25); }
+
+  /* Pills */
+  .pill {
+    display: inline-block;
+    padding: 0.12em 0.55em;
+    background: rgba(56, 189, 248, 0.16);
+    color: var(--accent-sky);
+    border-radius: 999px;
+    font-size: 0.65em;
+    font-weight: 500;
+    margin: 0.05em 0.15em;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+  .pill.violet  { background: rgba(167, 139, 250, 0.16); color: var(--accent-violet); border-color: rgba(167, 139, 250, 0.3); }
+  .pill.emerald { background: rgba(52, 211, 153, 0.16);  color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.3); }
+  .pill.amber   { background: rgba(251, 191, 36, 0.16);  color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); }
+  .pill.rose    { background: rgba(251, 113, 133, 0.16); color: var(--accent-rose); border-color: rgba(251, 113, 133, 0.3); }
+
+  /* Grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9em; align-items: stretch; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7em; align-items: stretch; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.6em; align-items: stretch; }
+
+  /* SVG diagrams */
+  svg.diagram {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 10px;
+    width: 100%;
+    height: auto;
+    margin: 0.3em 0;
+    border: 1px solid var(--border-soft);
+  }
+
+  /* Timeline */
+  .timeline {
+    margin: 0.4em 0;
+    position: relative;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 5em 1fr;
+    gap: 0.8em;
+    padding: 0.45em 0;
+    border-bottom: 1px dashed var(--border-soft);
+    transition: background 200ms ease;
+    align-items: baseline;
+  }
+  .timeline-item:hover { background: rgba(56, 189, 248, 0.04); padding-left: 4px; }
+  .timeline-year {
+    color: var(--accent-sky);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 0.78em;
+  }
+  .timeline-event { font-size: 0.82em; line-height: 1.4; }
+  .timeline-event strong { color: #ffffff; }
+  .timeline-event .desc { color: var(--text-muted); display: block; margin-top: 0.1em; font-size: 0.92em; }
+
+  /* Stat / KPI block */
+  .kpi {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.6em 0.9em;
+    text-align: center;
+    border-top: 3px solid var(--accent-sky);
+    transition: transform 200ms ease;
+  }
+  .kpi:hover { transform: translateY(-3px); }
+  .kpi.violet { border-top-color: var(--accent-violet); }
+  .kpi.emerald { border-top-color: var(--accent-emerald); }
+  .kpi.amber { border-top-color: var(--accent-amber); }
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    font-size: 1.5em;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-label {
+    color: var(--text-muted);
+    font-size: 0.68em;
+    margin-top: 0.3em;
+    letter-spacing: 0.06em;
+  }
+
+  /* Progress bar */
+  .reveal .progress { color: var(--accent-sky); height: 4px; }
+  .reveal .slide-number {
+    background: rgba(10, 14, 39, 0.65);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  /* Footer tag */
+  .footer-tag {
+    position: absolute;
+    bottom: 0.3em;
+    right: 0.5em;
+    color: var(--text-dim);
+    font-size: 0.45em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Ascii / quote box */
+  .quote-box {
+    border-left: 3px solid var(--accent-amber);
+    padding: 0.5em 1em;
+    background: rgba(251, 191, 36, 0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.85em;
+    margin: 0.5em 0;
+  }
+  .quote-box::before { content: '"'; color: var(--accent-amber); font-size: 1.5em; line-height: 0.5; vertical-align: middle; margin-right: 0.2em; }
+
+  /* List with custom bullets */
+  .reveal ul.checklist {
+    list-style: none;
+    padding-left: 0.4em;
+  }
+  .reveal ul.checklist li::before {
+    content: '▸';
+    color: var(--accent-sky);
+    margin-right: 0.5em;
+    font-weight: 700;
+  }
+
+  /* Two-col list */
+  .reveal ul.two-col, .reveal ol.two-col {
+    columns: 2;
+    column-gap: 1.4em;
+  }
+
+  /* Fragment styling */
+  .reveal .fragment.fade-in-then-out { transition: all 0.3s; }
+
+  /* Print PDF mode */
+  @media print {
+    .reveal pre code { font-size: 0.5em; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════ TITLE ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">eClerx · CDAC · Module 1 · Day 1</div>
+  <h1>Foundations of<br>Generative AI</h1>
+  <div class="subtitle">From the ChatGPT moment to multi-provider production calls</div>
+  <div class="tag">Setup deck for Labs 1.1, 1.2, 1.3</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">2026 · Cohort 1 · Part 1 of 2</div>
+</section>
+
+<!-- ═══════════════════════ ROADMAP ═══════════════════════ -->
+<section>
+  <h2>What we'll cover today</h2>
+  <div class="grid-4" style="margin-top:0.4em;">
+    <div class="card"><h4>Part 1</h4><p>What is Generative AI?</p></div>
+    <div class="card violet"><h4>Part 2</h4><p>Evolution of LLMs</p></div>
+    <div class="card emerald"><h4>Part 3</h4><p>Image generation models</p></div>
+    <div class="card amber"><h4>Part 4</h4><p>Prompt engineering</p></div>
+  </div>
+  <div class="grid-4" style="margin-top:0.5em;">
+    <div class="card violet"><h4>Part 5</h4><p>RAG — retrieval-augmented generation</p></div>
+    <div class="card emerald"><h4>Part 6</h4><p>Fine-tuning — when &amp; how</p></div>
+    <div class="card amber"><h4>Part 7</h4><p>Working with LLMs in production</p></div>
+    <div class="card rose"><h4>Part 8</h4><p>Map to Labs 1.1 · 1.2 · 1.3</p></div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.6em;">
+    <strong>Goal of this deck.</strong> Give you the <em>conceptual</em> picture before you write API calls in the labs. The "how transformers work" / tokenization / context-window deck is <strong>Part 2</strong> (paired with Lab 1.4).
+  </div>
+  <div class="footer-tag">Roadmap</div>
+</section>
+
+<!-- ═══════════════════════ PART 1 — WHAT IS GENAI ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 1</span>
+  <h1>What is<br>Generative AI?</h1>
+  <p class="subtitle">A 5-minute framing — what makes a model "generative", what modalities it spans, and why everyone is suddenly building with it.</p>
+</section>
+
+<section>
+  <h2>Discriminative vs Generative AI</h2>
+  <table>
+    <tr><th></th><th>Discriminative</th><th>Generative</th></tr>
+    <tr><td><strong>Question</strong></td><td>"Which class is this?"</td><td>"What's the most likely next thing?"</td></tr>
+    <tr><td><strong>Output</strong></td><td>Label / score / decision</td><td>New content (text, image, audio, code…)</td></tr>
+    <tr><td><strong>Examples</strong></td><td>Spam filter · Fraud detection · NER · Sentiment</td><td>ChatGPT · Claude · Midjourney · Sora · Copilot</td></tr>
+    <tr><td><strong>Models</strong></td><td>Logistic regression · XGBoost · BERT-classifier</td><td>GPT-5 · Claude · Gemini · Llama · Stable Diffusion</td></tr>
+    <tr><td><strong>Output space</strong></td><td>Small &amp; finite</td><td>Combinatorially huge</td></tr>
+    <tr><td><strong>Eval</strong></td><td>Accuracy · F1 · AUC</td><td>BLEU · ROUGE · LLM-as-Judge · Human pref</td></tr>
+  </table>
+  <div class="info-card emerald">
+    <strong>You'll meet both in production.</strong> A fraud system might use a discriminative classifier to flag a transaction <em>and</em> a generative LLM to draft the customer-friendly explanation.
+  </div>
+  <div class="footer-tag">Part 1 · 1/3</div>
+</section>
+
+<section>
+  <h2>The four GenAI modalities</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>📝 &nbsp; Text</h3>
+      <p>LLMs — GPT-5, Claude, Gemini, Llama. Foundation of chatbots, agents, RAG, code assistants, classification at scale.</p>
+      <p style="color:var(--text-muted);"><strong>Production-ready</strong> — most enterprise GenAI value is here today.</p>
+    </div>
+    <div class="card violet">
+      <h3>🎨 &nbsp; Image</h3>
+      <p>Diffusion models — Stable Diffusion, FLUX, DALL-E, Midjourney, Imagen. Text-to-image, edit, inpainting.</p>
+      <p style="color:var(--text-muted);"><strong>Production-ready</strong> — marketing, design, doc OCR (input).</p>
+    </div>
+    <div class="card emerald">
+      <h3>🔊 &nbsp; Audio &amp; Speech</h3>
+      <p>Whisper (STT), ElevenLabs / Polly (TTS), MusicGen, Suno. Voice agents are now viable.</p>
+      <p style="color:var(--text-muted);"><strong>Production-emerging</strong> — IVR, audio docs, voice UX.</p>
+    </div>
+    <div class="card amber">
+      <h3>🎬 &nbsp; Video</h3>
+      <p>Sora, Veo 3, Runway Gen-3, Pika. Frontier capability, costly per minute.</p>
+      <p style="color:var(--text-muted);"><strong>Frontier</strong> — not yet production-stable for most use cases.</p>
+    </div>
+  </div>
+  <div class="info-card violet">
+    <strong>Module 1 focus = text.</strong> You'll meet image input in Lab 6.1 (Claude Vision); audio &amp; video are out of scope for this 10-day program.
+  </div>
+  <div class="footer-tag">Part 1 · 2/3</div>
+</section>
+
+<section>
+  <h2>Why now? Three converging forces</h2>
+  <div class="grid-3" style="margin-top:0.5em;">
+    <div class="card">
+      <h3>① Architecture</h3>
+      <p>The <strong>transformer</strong> (2017) replaced sequential recurrence with parallel attention — finally fits GPUs at scale.</p>
+      <p style="color:var(--text-muted); font-size:0.75em; margin-top:0.4em;">Without it, training a 100B model is impossible.</p>
+    </div>
+    <div class="card violet">
+      <h3>② Scale</h3>
+      <p><strong>Scaling laws</strong>: more params + more data + more compute → predictably better models.</p>
+      <p style="color:var(--text-muted); font-size:0.75em; margin-top:0.4em;">GPT-3 (175B, 2020) showed the curve had not flattened.</p>
+    </div>
+    <div class="card emerald">
+      <h3>③ Alignment</h3>
+      <p><strong>RLHF + instruction tuning</strong> (2022) turned a "next-word predictor" into a tool that follows human intent.</p>
+      <p style="color:var(--text-muted); font-size:0.75em; margin-top:0.4em;">This is the <em>ChatGPT moment</em>.</p>
+    </div>
+  </div>
+  <svg class="diagram" viewBox="0 0 800 110" xmlns="http://www.w3.org/2000/svg" style="margin-top:0.4em;">
+    <defs>
+      <linearGradient id="grad-a" x1="0" x2="1"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+    </defs>
+    <rect x="10"   y="40" width="170" height="40" rx="8" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="95"   y="65" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">① Transformer architecture</text>
+    <text x="217"  y="64" fill="#94a3b8" font-family="Inter,sans-serif" font-size="20" text-anchor="middle">+</text>
+    <rect x="240"  y="40" width="170" height="40" rx="8" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="325"  y="65" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">② Scaling (params · data)</text>
+    <text x="447"  y="64" fill="#94a3b8" font-family="Inter,sans-serif" font-size="20" text-anchor="middle">+</text>
+    <rect x="470"  y="40" width="170" height="40" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="555"  y="65" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">③ RLHF · alignment</text>
+    <text x="678"  y="64" fill="#94a3b8" font-family="Inter,sans-serif" font-size="20" text-anchor="middle">=</text>
+    <rect x="700"  y="35" width="90"  height="50" rx="8" fill="url(#grad-a)" />
+    <text x="745"  y="65" fill="#0a0e27" font-family="Inter,sans-serif" font-size="13" font-weight="700" text-anchor="middle">ChatGPT</text>
+  </svg>
+  <div class="footer-tag">Part 1 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 2 — EVOLUTION OF LLMS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 2</span>
+  <h1>Evolution of LLMs</h1>
+  <p class="subtitle">A 10-year arc — from "interesting research" to "every team has a use case." Today's frontier sits on top of three distinct breakthroughs.</p>
+</section>
+
+<section>
+  <h2>The big-picture timeline</h2>
+  <div class="timeline">
+    <div class="timeline-item"><span class="timeline-year">2013–16</span><span class="timeline-event"><strong>Word embeddings &amp; RNNs.</strong><span class="desc">Word2Vec, GloVe, then LSTM-based seq2seq for translation. Sequential — slow to train at scale.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">2017</span><span class="timeline-event"><strong>"Attention Is All You Need".</strong><span class="desc">Transformer paper — parallel architecture that finally scales on GPUs.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">2018–19</span><span class="timeline-event"><strong>Pre-trained models become useful.</strong><span class="desc">BERT for understanding · GPT-1/2 for generation. Fine-tuning replaces from-scratch training.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">2020</span><span class="timeline-event"><strong>GPT-3 — the scaling moment.</strong><span class="desc">175B parameters · few-shot in-context learning emerges · API-only, costly.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">Nov 2022</span><span class="timeline-acent timeline-event"><strong style="color:var(--accent-amber);">ChatGPT.</strong><span class="desc">RLHF + instruction tuning + chat UI. 100M users in 2 months.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">2023</span><span class="timeline-event"><strong>GPT-4 · Claude 2 · Gemini · Llama 2.</strong><span class="desc">Frontier becomes a 4-way race; open weights enter the conversation.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">2024</span><span class="timeline-event"><strong>Multimodal + reasoning.</strong><span class="desc">GPT-4o · Claude 3.5 · Gemini 2 · OpenAI o1 — first reasoning model.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">2025–26</span><span class="timeline-event"><strong>Today.</strong><span class="desc">GPT-5, Claude Sonnet 4.5 / Haiku 4.5, Gemini 2.5, Llama 3.3 — reasoning is mainstream.</span></span></div>
+  </div>
+  <div class="footer-tag">Part 2 · 1/5</div>
+</section>
+
+<section>
+  <h2>The "ChatGPT moment" — what actually changed</h2>
+  <p>GPT-3 was a raw <strong>next-word predictor</strong>. Asking it "what is RAG?" might give you the question continued, not answered. <em>Two training stages</em> turned it into ChatGPT.</p>
+  <svg class="diagram" viewBox="0 0 880 230" xmlns="http://www.w3.org/2000/svg" style="margin-top:0.4em;">
+    <defs>
+      <marker id="ar1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+      </marker>
+    </defs>
+    <!-- Stage 1 -->
+    <rect x="20"  y="60" width="200" height="100" rx="12" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="120" y="88"  fill="#38bdf8" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Stage 1 · Pretrain</text>
+    <text x="120" y="112" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Trillions of tokens</text>
+    <text x="120" y="128" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">from the web</text>
+    <text x="120" y="148" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">→ raw next-word predictor</text>
+    <line x1="220" y1="110" x2="260" y2="110" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar1)"/>
+    <!-- Stage 2 -->
+    <rect x="260" y="60" width="200" height="100" rx="12" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="360" y="88"  fill="#a78bfa" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Stage 2 · Instruction tuning</text>
+    <text x="360" y="112" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Human-written</text>
+    <text x="360" y="128" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">(instruction, response) pairs</text>
+    <text x="360" y="148" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">→ "answers when asked"</text>
+    <line x1="460" y1="110" x2="500" y2="110" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar1)"/>
+    <!-- Stage 3 -->
+    <rect x="500" y="60" width="200" height="100" rx="12" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="600" y="88"  fill="#34d399" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Stage 3 · RLHF</text>
+    <text x="600" y="112" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Humans rank outputs →</text>
+    <text x="600" y="128" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">reward model → PPO</text>
+    <text x="600" y="148" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">→ helpful · honest · harmless</text>
+    <line x1="700" y1="110" x2="740" y2="110" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar1)"/>
+    <rect x="740" y="70" width="120" height="80" rx="12" fill="url(#grad-a)" />
+    <text x="800" y="105" fill="#0a0e27" font-family="Inter,sans-serif" font-size="14" text-anchor="middle" font-weight="700">ChatGPT</text>
+    <text x="800" y="125" fill="#0a0e27" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">(Nov 2022)</text>
+    <!-- Bottom labels -->
+    <text x="120" y="195" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">months · $$$$</text>
+    <text x="360" y="195" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">days · $$</text>
+    <text x="600" y="195" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">weeks · $$</text>
+  </svg>
+  <div class="info-card emerald">
+    <strong>Modern alternatives.</strong> <code>DPO</code> (Direct Preference Optimization) and <code>RLAIF</code> (AI feedback) replace PPO in many newer models — same idea, less compute.
+  </div>
+  <div class="footer-tag">Part 2 · 2/5</div>
+</section>
+
+<section>
+  <h2>The reasoning-models era (2024 →)</h2>
+  <p>Newest paradigm: let the model <strong>think for many tokens</strong> <em>before</em> producing the user-facing answer. Hidden chain-of-thought, optimized via RL.</p>
+  <table>
+    <tr><th></th><th>Non-reasoning model</th><th>Reasoning model</th></tr>
+    <tr><td><strong>Examples</strong></td><td>GPT-4.1-mini · Claude Haiku · Gemini Flash · Llama 3.3</td><td>GPT-5-mini · o1 · o3 · Claude w/ extended thinking · DeepSeek-R1</td></tr>
+    <tr><td><strong>Latency</strong></td><td><span class="pill emerald">0.5–3 s</span></td><td><span class="pill amber">5–60 s</span> (thinks first)</td></tr>
+    <tr><td><strong>Cost knob</strong></td><td><code>temperature</code></td><td><code>reasoning_effort</code> (low / medium / high)</td></tr>
+    <tr><td><strong>Best for</strong></td><td>Drafting · summarization · classification · chat</td><td>Math · code debug · multi-step planning · LLM-as-Judge</td></tr>
+    <tr><td><strong>Pricing</strong></td><td>per token in/out</td><td>per token in/out <em>plus</em> hidden reasoning tokens</td></tr>
+  </table>
+  <div class="info-card amber">
+    <strong>Lab 1.1 §6 + 1.3 §5</strong> have you call both kinds side-by-side. Pay attention to the latency gap — it's the trade-off you'll defend in interviews.
+  </div>
+  <div class="footer-tag">Part 2 · 3/5</div>
+</section>
+
+<section>
+  <h2>Today's frontier landscape</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Closed / API-only</h3>
+      <ul class="checklist">
+        <li><span class="pill">OpenAI</span> GPT-5, GPT-4.1, o3</li>
+        <li><span class="pill violet">Anthropic</span> Claude Sonnet 4.5, Haiku 4.5</li>
+        <li><span class="pill emerald">Google</span> Gemini 2.5 Pro / Flash</li>
+      </ul>
+      <p style="color:var(--text-muted); margin-top:0.4em;">Highest quality, polished products, opaque internals.</p>
+    </div>
+    <div class="card amber">
+      <h3>Open weights</h3>
+      <ul class="checklist">
+        <li><span class="pill amber">Meta</span> Llama 3.3 70B / 405B</li>
+        <li><span class="pill amber">Mistral</span> Mistral Large, Mixtral</li>
+        <li><span class="pill amber">DeepSeek</span> V3 · R1 (open reasoning)</li>
+        <li><span class="pill amber">Qwen / Yi</span> Strong Chinese-origin models</li>
+      </ul>
+      <p style="color:var(--text-muted); margin-top:0.4em;">Self-hostable, fine-tunable, sometimes within striking distance of frontier.</p>
+    </div>
+  </div>
+  <div class="info-card violet" style="margin-top:0.4em;">
+    <strong>Where you'll run them.</strong> Direct APIs (OpenAI, Anthropic, Google, Groq) · Cloud-managed (AWS Bedrock, Azure AI Foundry, GCP Vertex) · Self-hosted (Ollama, vLLM, TGI). <strong>Lab 1.1 covers five of these</strong>; production teams typically pick 2–3 to satisfy redundancy + cost + compliance.
+  </div>
+  <div class="footer-tag">Part 2 · 4/5</div>
+</section>
+
+<section>
+  <h2>One number, three frontier models</h2>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="kpi"><div class="kpi-value">~10⁻³</div><div class="kpi-label">USD per 1K input tokens<br>(GPT-5-mini, Sonnet 4.5)</div></div>
+    <div class="kpi violet"><div class="kpi-value">200K</div><div class="kpi-label">tokens of context<br>(Claude Sonnet 4.5)</div></div>
+    <div class="kpi emerald"><div class="kpi-value">2M</div><div class="kpi-label">tokens of context<br>(Gemini 2.5 Pro)</div></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.5em;">
+    <div class="kpi amber"><div class="kpi-value">~500 t/s</div><div class="kpi-label">output speed<br>(Groq + Llama 3.3 70B)</div></div>
+    <div class="kpi"><div class="kpi-value">5–60 s</div><div class="kpi-label">"thinking" latency<br>(reasoning models)</div></div>
+    <div class="kpi violet"><div class="kpi-value">100M+</div><div class="kpi-label">developers using LLM APIs<br>(2025 estimate)</div></div>
+  </div>
+  <div class="info-card">
+    Numbers are approximate &amp; <em>change every quarter</em>. The shape is what matters: cheap-and-fast, big-and-smart, and reasoning-and-slow now coexist on the menu.
+  </div>
+  <div class="footer-tag">Part 2 · 5/5</div>
+</section>
+
+<!-- ═══════════════════════ PART 3 — IMAGE GENERATION ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 3</span>
+  <h1>Image generation models</h1>
+  <p class="subtitle">A short tour. Relevant for context, and for Lab 6.1 (Claude Vision — image <em>input</em>) later in Module 6.</p>
+</section>
+
+<section>
+  <h2>The image-generation timeline</h2>
+  <div class="timeline">
+    <div class="timeline-item"><span class="timeline-year">2014</span><span class="timeline-event"><strong>GANs</strong> (Goodfellow et al.). Generator vs discriminator. Faces, then everything.</span></div>
+    <div class="timeline-item"><span class="timeline-year">2018</span><span class="timeline-event"><strong>StyleGAN · BigGAN.</strong><span class="desc">Photorealistic faces, controllable styles. Difficult to train (mode collapse).</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">2020</span><span class="timeline-event"><strong>DDPM (diffusion).</strong><span class="desc">Diffusion overtakes GANs in quality &amp; training stability.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">Apr 2022</span><span class="timeline-event"><strong>DALL-E 2</strong> (OpenAI). First widely-used T2I product. Public couldn't try until later.</span></div>
+    <div class="timeline-item"><span class="timeline-year">Jul 2022</span><span class="timeline-event"><strong>Midjourney v1.</strong><span class="desc">Discord-native. Defined the aesthetic of "AI image".</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">Aug 2022</span><span class="timeline-event"><strong>Stable Diffusion.</strong><span class="desc">First <em>open-weight</em> production T2I — ignites the open ecosystem.</span></span></div>
+    <div class="timeline-item"><span class="timeline-year">Sep 2023</span><span class="timeline-event"><strong>DALL-E 3</strong> ships inside ChatGPT. Best-in-class prompt adherence.</span></div>
+    <div class="timeline-item"><span class="timeline-year">Aug 2024</span><span class="timeline-event"><strong>FLUX.1</strong> (Black Forest Labs). Current open-weight quality leader.</span></div>
+    <div class="timeline-item"><span class="timeline-year">2024–25</span><span class="timeline-event"><strong>Multimodal LLMs.</strong><span class="desc">GPT-4o · Claude Vision · Gemini accept images as input — a different problem from generation.</span></span></div>
+  </div>
+  <div class="footer-tag">Part 3 · 1/4</div>
+</section>
+
+<section>
+  <h2>How modern T2I works — intuition</h2>
+  <div class="grid-2">
+    <div>
+      <h3>Diffusion in one paragraph</h3>
+      <p>Start from <strong>pure noise</strong>. The model has been trained to <em>iteratively de-noise</em>, conditioned on a text embedding. Each step gets the image slightly closer to "what the prompt describes." After ~25–50 steps you have a plausible image.</p>
+      <div class="info-card emerald">
+        Modern T2I is almost always <strong>latent diffusion</strong> — diffusion runs in a compressed latent space (cheaper, faster), with a VAE bridging to pixel space.
+      </div>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 460 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+          </marker>
+          <linearGradient id="noise" x1="0" x2="1">
+            <stop offset="0" stop-color="#64748b"/><stop offset="1" stop-color="#94a3b8"/>
+          </linearGradient>
+          <linearGradient id="img" x1="0" x2="1">
+            <stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#a78bfa"/>
+          </linearGradient>
+        </defs>
+        <text x="230" y="30" fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Text prompt → embedding</text>
+        <line x1="230" y1="40" x2="230" y2="65" stroke="#a78bfa" stroke-width="2" stroke-dasharray="3,3"/>
+        <rect x="20"  y="100" width="80" height="80" rx="6" fill="url(#noise)"/>
+        <text x="60"  y="195" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">step 0</text>
+        <text x="60"  y="210" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">pure noise</text>
+        <line x1="100" y1="140" x2="135" y2="140" stroke="#a78bfa" stroke-width="2" marker-end="url(#ar3)"/>
+        <rect x="135" y="100" width="80" height="80" rx="6" fill="url(#noise)" opacity="0.7"/>
+        <rect x="135" y="100" width="80" height="80" rx="6" fill="url(#img)" opacity="0.3"/>
+        <text x="175" y="195" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">step 12</text>
+        <line x1="215" y1="140" x2="250" y2="140" stroke="#a78bfa" stroke-width="2" marker-end="url(#ar3)"/>
+        <rect x="250" y="100" width="80" height="80" rx="6" fill="url(#img)" opacity="0.65"/>
+        <rect x="250" y="100" width="80" height="80" rx="6" fill="url(#noise)" opacity="0.25"/>
+        <text x="290" y="195" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">step 25</text>
+        <line x1="330" y1="140" x2="365" y2="140" stroke="#a78bfa" stroke-width="2" marker-end="url(#ar3)"/>
+        <rect x="365" y="100" width="80" height="80" rx="6" fill="url(#img)"/>
+        <text x="405" y="195" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">step 50</text>
+        <text x="405" y="210" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">final</text>
+        <text x="230" y="255" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Iterative denoising, guided by the text embedding</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 2/4</div>
+</section>
+
+<section>
+  <h2>The current image landscape (2025–26)</h2>
+  <table>
+    <tr><th>Model</th><th>Origin</th><th>Strengths</th><th>Access</th></tr>
+    <tr><td><strong>FLUX.1</strong> [pro · dev · schnell]</td><td>Black Forest Labs</td><td>Quality leader · great in-image text · open weights for dev/schnell</td><td>API + open</td></tr>
+    <tr><td><strong>Midjourney v6.x</strong></td><td>Midjourney</td><td>Best aesthetic · tightly art-directed</td><td>API + Discord</td></tr>
+    <tr><td><strong>DALL-E 3</strong></td><td>OpenAI</td><td>Best prompt adherence in the OpenAI stack</td><td>API + ChatGPT</td></tr>
+    <tr><td><strong>Imagen 3 / 4</strong></td><td>Google</td><td>Strong photorealism &amp; in-image text</td><td>Vertex AI · Gemini app</td></tr>
+    <tr><td><strong>Stable Diffusion 3 / 3.5</strong></td><td>Stability AI</td><td>Open weights · foundation for fine-tunes / LoRAs</td><td>API + open</td></tr>
+    <tr><td><strong>Amazon Titan Image</strong></td><td>AWS</td><td>Bedrock-native · regulated-cloud option</td><td>Bedrock</td></tr>
+  </table>
+  <div class="info-card amber">
+    For text-only labs (Modules 1–5), you won't generate images. <strong>Lab 6.1</strong> uses image <em>input</em> — Claude Vision for document OCR &amp; chart analysis.
+  </div>
+  <div class="footer-tag">Part 3 · 3/4</div>
+</section>
+
+<section>
+  <h2>Multimodal LLMs — when text models grew eyes</h2>
+  <p>Modern frontier LLMs accept <strong>images as input</strong>: a single API call takes {image + text}, returns text.</p>
+  <pre><code class="language-python"># Claude Vision (covered in Lab 6.1)
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "image", "source": {"type": "base64",
+                                         "media_type": "image/png",
+                                         "data": image_b64}},
+            {"type": "text", "text": "Extract every line item from this invoice as JSON."}
+        ]
+    }]
+)</code></pre>
+  <div class="grid-2">
+    <div class="card violet">
+      <h4>Practical use cases</h4>
+      <p>Document OCR · invoice extraction · chart analysis · diagram reading · UI testing · content moderation · slide-deck Q&amp;A.</p>
+    </div>
+    <div class="card amber">
+      <h4>Trade-off</h4>
+      <p>Vastly more flexible than dedicated OCR (Tesseract, Textract) — but more expensive per call. Use vision LLMs for variable-layout docs; specialized OCR for high-volume fixed-layout.</p>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 4 — PROMPT ENGINEERING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 4</span>
+  <h1>Prompt engineering</h1>
+  <p class="subtitle">A pragmatic primer. Module 2 (Day 2) goes deep — these slides give you the conceptual frame.</p>
+</section>
+
+<section>
+  <h2>What prompt engineering is — and isn't</h2>
+  <div class="grid-2">
+    <div class="card emerald">
+      <h3>✓ &nbsp; What it IS</h3>
+      <ul class="checklist">
+        <li>Writing instructions LLMs <strong>reliably follow</strong></li>
+        <li>Choosing the right <strong>system / user split</strong></li>
+        <li>Adding <strong>few-shot examples</strong> when the format is unusual</li>
+        <li>Asking for <strong>structured output</strong> (JSON, XML, Pydantic)</li>
+        <li>Iterating: <strong>read failures → adjust → retest</strong></li>
+        <li>A <em>repeatable engineering process</em>, not folklore</li>
+      </ul>
+    </div>
+    <div class="card rose">
+      <h3>✗ &nbsp; What it ISN'T</h3>
+      <ul class="checklist">
+        <li>"Magic words" copied from Reddit</li>
+        <li>A substitute for <strong>retrieval</strong> when the model lacks knowledge</li>
+        <li>A substitute for <strong>fine-tuning</strong> for new behaviors at scale</li>
+        <li>A <em>one-and-done</em> — prompts drift as models update</li>
+        <li>Just for chat — also crucial for tool calls, agents, evaluation</li>
+      </ul>
+    </div>
+  </div>
+  <div class="quote-box">A prompt is just code. Treat it like code: version it, test it, monitor it.</div>
+  <div class="footer-tag">Part 4 · 1/4</div>
+</section>
+
+<section>
+  <h2>Three prompting paradigms</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h3>Zero-shot</h3>
+      <p>Just describe the task. Works on capable models for common tasks.</p>
+      <pre><code style="font-size:0.55em;">Classify the sentiment
+(positive · negative · neutral):
+
+"The food was cold."</code></pre>
+    </div>
+    <div class="card violet">
+      <h3>Few-shot</h3>
+      <p>Show 2–8 examples of the input → output pattern. Helps with niche formats.</p>
+      <pre><code style="font-size:0.55em;">"$45.99 → ₹4,180"
+"$120.00 → ₹11,000"
+"$8.50 → ?"</code></pre>
+    </div>
+    <div class="card emerald">
+      <h3>Chain-of-Thought</h3>
+      <p>"Let's think step by step." Lets the model verbalize reasoning before answering.</p>
+      <pre><code style="font-size:0.55em;">"If 3 trains depart at...
+Think step by step.
+Show your work,
+then give final answer."</code></pre>
+    </div>
+  </div>
+  <div class="info-card amber">
+    <strong>On reasoning models</strong> (gpt-5-mini, o1) CoT happens internally — you don't need "let's think step by step." On <strong>non-reasoning models</strong> it still helps for math &amp; multi-step logic.
+  </div>
+  <div class="footer-tag">Part 4 · 2/4</div>
+</section>
+
+<section>
+  <h2>System vs user — the two-message contract</h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">client.messages.create(
+    model="claude-haiku-4-5",
+    system=(
+      "You are a senior compliance analyst "
+      "at a retail bank. Always respond in "
+      "JSON with fields: risk_level, "
+      "reasoning, recommendation."
+    ),
+    messages=[{
+      "role": "user",
+      "content": "A customer requested "
+                 "₹50L cash withdrawal..."
+    }]
+)</code></pre>
+    </div>
+    <div>
+      <table>
+        <tr><th></th><th>System</th><th>User</th></tr>
+        <tr><td><strong>Role</strong></td><td>Persistent persona, rules, output format</td><td>The actual question / data</td></tr>
+        <tr><td><strong>Changes per call?</strong></td><td>Usually <span class="pill rose">No</span></td><td>Almost always <span class="pill emerald">Yes</span></td></tr>
+        <tr><td><strong>Cache-friendly</strong></td><td><span class="pill emerald">Yes</span></td><td><span class="pill rose">Usually no</span></td></tr>
+        <tr><td><strong>Token budget</strong></td><td>Long &amp; reusable</td><td>Short &amp; varying</td></tr>
+      </table>
+      <div class="info-card violet" style="margin-top:0.4em;">
+        <strong>Caching tip.</strong> Putting reusable instructions in <code>system</code> lets providers cache them — Day 2 Lab 2.5 covers this.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 4 · 3/4</div>
+</section>
+
+<section>
+  <h2>Output structuring — three reliability tiers</h2>
+  <table>
+    <tr><th>Tier</th><th>Method</th><th>Reliability</th><th>Used in</th></tr>
+    <tr><td><strong>1 · Native schema</strong></td><td>Pydantic + provider's structured-output API</td><td><span class="pill emerald">Highest</span> — schema-validated by provider</td><td>OpenAI <code>responses.parse(text_format=Model)</code><br>Anthropic <code>tools</code> · Gemini <code>response_schema</code></td></tr>
+    <tr><td><strong>2 · JSON mode</strong></td><td>Provider guarantees valid JSON; schema in prompt</td><td><span class="pill amber">High</span> — JSON parses, but field names / types may drift</td><td>Most providers · <code>response_format={"type": "json_object"}</code></td></tr>
+    <tr><td><strong>3 · Prompt-only</strong></td><td>"Respond as JSON with keys X, Y, Z."</td><td><span class="pill rose">Lowest</span> — JSON-parse failures common</td><td>Older models · open-weight models without strict mode</td></tr>
+  </table>
+  <div class="info-card emerald">
+    <strong>Lab 1.3 §6 + §7</strong> walks through Tier 1 first, then a Tier 2/3 multi-provider fallback. Once you're using Tier 1 (Pydantic), you stop writing <code>try: json.loads(...) except: ...</code> forever.
+  </div>
+  <div class="footer-tag">Part 4 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 5 — RAG ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 5</span>
+  <h1>RAG — Retrieval-<br>Augmented Generation</h1>
+  <p class="subtitle">When the model doesn't know enough — give it a reference card. The default 80% solution for enterprise GenAI.</p>
+</section>
+
+<section>
+  <h2>The knowledge problem</h2>
+  <p>An LLM only "knows" what was in its training data. So it fails on:</p>
+  <div class="grid-4" style="margin-top:0.4em;">
+    <div class="card">
+      <h4>Recent events</h4>
+      <p>Anything after the training cutoff date.</p>
+    </div>
+    <div class="card violet">
+      <h4>Private data</h4>
+      <p>Your bank's policies, customers, codebase.</p>
+    </div>
+    <div class="card emerald">
+      <h4>Long-tail facts</h4>
+      <p>Obscure entities, niche regulations, internal jargon.</p>
+    </div>
+    <div class="card amber">
+      <h4>Exact extraction</h4>
+      <p>Verbatim quotes, citations, legal clauses.</p>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-top:0.5em;">
+    <div class="card rose">
+      <h3>Option A · Stuff into prompt</h3>
+      <p>Cheap, simple, doesn't scale beyond a few docs.</p>
+    </div>
+    <div class="card violet">
+      <h3>Option B · RAG ★</h3>
+      <p>Retrieve relevant chunks at call time. <em>The default 80% solution.</em></p>
+    </div>
+    <div class="card emerald">
+      <h3>Option C · Fine-tune</h3>
+      <p>Adapt model weights. Powerful, expensive, last resort.</p>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 1/3</div>
+</section>
+
+<section>
+  <h2>RAG — the canonical flow</h2>
+  <svg class="diagram" viewBox="0 0 880 290" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ar4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+      </marker>
+      <linearGradient id="rag-bg" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#161c3a"/><stop offset="1" stop-color="#111733"/>
+      </linearGradient>
+    </defs>
+    <!-- Offline pipeline -->
+    <rect x="20" y="20" width="840" height="80" rx="10" fill="#0f1430" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <text x="40" y="42" fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" font-weight="600">OFFLINE · DONE ONCE</text>
+
+    <rect x="50"  y="55" width="130" height="35" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="1"/>
+    <text x="115" y="78" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Load documents</text>
+
+    <line x1="180" y1="72" x2="210" y2="72" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#ar4)"/>
+
+    <rect x="210" y="55" width="130" height="35" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="1"/>
+    <text x="275" y="78" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Chunk into pieces</text>
+
+    <line x1="340" y1="72" x2="370" y2="72" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#ar4)"/>
+
+    <rect x="370" y="55" width="130" height="35" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="1"/>
+    <text x="435" y="78" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Embed each chunk</text>
+
+    <line x1="500" y1="72" x2="530" y2="72" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#ar4)"/>
+
+    <rect x="530" y="55" width="130" height="35" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="1"/>
+    <text x="595" y="78" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Store in vector DB</text>
+
+    <!-- Online flow -->
+    <rect x="20" y="135" width="840" height="135" rx="10" fill="url(#rag-bg)" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="40" y="157" fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="600">ONLINE · PER QUERY</text>
+
+    <rect x="50"  y="180" width="110" height="60" rx="8" fill="#0f1430" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="105" y="207" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">User query</text>
+    <text x="105" y="223" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">"Is X covered?"</text>
+
+    <line x1="160" y1="210" x2="195" y2="210" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar4)"/>
+
+    <rect x="195" y="180" width="120" height="60" rx="8" fill="#0f1430" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="255" y="200" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Embed query</text>
+    <text x="255" y="218" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">→ vector</text>
+
+    <line x1="315" y1="210" x2="350" y2="210" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar4)"/>
+
+    <rect x="350" y="180" width="130" height="60" rx="8" fill="#0f1430" stroke="#34d399" stroke-width="1.5"/>
+    <text x="415" y="200" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Vector search</text>
+    <text x="415" y="218" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">top-k chunks</text>
+
+    <line x1="480" y1="210" x2="515" y2="210" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar4)"/>
+
+    <rect x="515" y="170" width="160" height="80" rx="8" fill="#0f1430" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="595" y="195" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Build LLM prompt</text>
+    <text x="595" y="216" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">[query +</text>
+    <text x="595" y="232" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">retrieved chunks]</text>
+
+    <line x1="675" y1="210" x2="710" y2="210" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar4)"/>
+
+    <rect x="710" y="180" width="130" height="60" rx="8" fill="url(#grad-a)"/>
+    <text x="775" y="207" fill="#0a0e27" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="700">LLM answers</text>
+    <text x="775" y="223" fill="#0a0e27" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">grounded · cited</text>
+  </svg>
+  <div class="info-card violet">
+    RAG turns your LLM into a <em>closed-book test taker with a reference card</em>. Modules 4 &amp; 5 build this end-to-end.
+  </div>
+  <div class="footer-tag">Part 5 · 2/3</div>
+</section>
+
+<section>
+  <h2>RAG vs prompt vs fine-tune — decision tree</h2>
+  <svg class="diagram" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ar5" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+      </marker>
+    </defs>
+    <!-- Root question -->
+    <rect x="320" y="20" width="260" height="50" rx="8" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="450" y="45" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Does the model already produce</text>
+    <text x="450" y="62" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">acceptable output?</text>
+
+    <!-- YES branch: ship -->
+    <line x1="380" y1="70" x2="170" y2="120" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#ar5)"/>
+    <text x="270" y="93" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">YES →</text>
+    <rect x="60" y="125" width="220" height="50" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="170" y="150" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Ship it.</text>
+    <text x="170" y="166" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Don't over-engineer.</text>
+
+    <!-- NO branch -->
+    <line x1="520" y1="70" x2="730" y2="120" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#ar5)"/>
+    <text x="630" y="93" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">NO →</text>
+
+    <rect x="600" y="125" width="260" height="50" rx="8" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="730" y="148" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Is the gap KNOWLEDGE</text>
+    <text x="730" y="164" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">(facts the model doesn't have)?</text>
+
+    <!-- KNOWLEDGE = YES → RAG -->
+    <line x1="660" y1="175" x2="450" y2="220" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#ar5)"/>
+    <text x="550" y="195" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">YES → RAG</text>
+    <rect x="340" y="225" width="220" height="50" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="450" y="250" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">RAG</text>
+    <text x="450" y="265" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Modules 4 &amp; 5</text>
+
+    <!-- KNOWLEDGE = NO → behavior gap -->
+    <line x1="800" y1="175" x2="800" y2="220" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#ar5)"/>
+    <text x="855" y="200" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">NO →</text>
+    <rect x="640" y="225" width="240" height="50" rx="8" fill="#161c3a" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="760" y="248" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Is the gap BEHAVIOR?</text>
+    <text x="760" y="263" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">(format, style, decisions)</text>
+
+    <!-- behavior simple → prompt -->
+    <rect x="40" y="290" width="260" height="20" rx="4" fill="#161c3a" stroke="#38bdf8" stroke-width="1"/>
+    <text x="170" y="305" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Simple → better prompt + few-shot</text>
+    <line x1="700" y1="275" x2="170" y2="290" stroke="#a78bfa" stroke-width="1" marker-end="url(#ar5)" stroke-dasharray="4,3"/>
+
+    <rect x="320" y="290" width="240" height="20" rx="4" fill="#161c3a" stroke="#a78bfa" stroke-width="1"/>
+    <text x="440" y="305" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Repetitive at scale → LoRA fine-tune</text>
+    <line x1="780" y1="275" x2="440" y2="290" stroke="#a78bfa" stroke-width="1" marker-end="url(#ar5)" stroke-dasharray="4,3"/>
+  </svg>
+  <div class="info-card amber">
+    <strong>Don't skip prompting.</strong> Most teams that go straight to fine-tuning eventually come back and add a prompt + RAG layer anyway.
+  </div>
+  <div class="footer-tag">Part 5 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 6 — FINE-TUNING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 6</span>
+  <h1>Fine-tuning<br>when, why, how</h1>
+  <p class="subtitle">Four flavors, one decision rule. Most enterprise teams don't need this — but you should know when they do.</p>
+</section>
+
+<section>
+  <h2>The four flavors of fine-tuning</h2>
+  <table>
+    <tr><th>Method</th><th>What changes</th><th>Cost</th><th>When to use</th></tr>
+    <tr><td><strong>Full fine-tune (SFT)</strong></td><td>All parameters</td><td><span class="pill rose">Very high</span></td><td>Almost never — only mega-orgs with massive datasets</td></tr>
+    <tr><td><strong>LoRA / QLoRA</strong></td><td>Tiny adapter matrices (~1% of params)</td><td><span class="pill emerald">Low</span> (single GPU)</td><td>Domain adaptation · style transfer · task-specific</td></tr>
+    <tr><td><strong>Instruction tuning</strong></td><td>Adapter or full</td><td><span class="pill amber">Medium</span></td><td>New behavior class (e.g., always answer in legal-memo format)</td></tr>
+    <tr><td><strong>RLHF · DPO</strong></td><td>Adapter or full</td><td><span class="pill rose">High</span> (data + compute)</td><td>Aligning preferences (helpfulness · safety · brand voice)</td></tr>
+  </table>
+  <div class="info-card violet">
+    <strong>Reality check.</strong> For 80% of enterprise problems, <em>strong prompt + RAG &gt; fine-tune</em>. Reach for fine-tuning only when prompt+RAG plateaus, or you need lower latency / cost at extreme scale.
+  </div>
+  <div class="footer-tag">Part 6 · 1/2</div>
+</section>
+
+<section>
+  <h2>When does fine-tuning earn its keep?</h2>
+  <div class="grid-2">
+    <div class="card emerald">
+      <h3>Good reasons to fine-tune</h3>
+      <ul class="checklist">
+        <li><strong>Latency at scale.</strong> Smaller fine-tuned model replaces a frontier API call.</li>
+        <li><strong>Cost at scale.</strong> Same — small model + LoRA can hit 90% of frontier quality at 1% of cost.</li>
+        <li><strong>Highly specific format.</strong> Always emit a 17-section legal-memo structure.</li>
+        <li><strong>Tone &amp; brand voice.</strong> Hard to capture in a prompt at scale.</li>
+        <li><strong>On-prem requirement.</strong> Open weights on your GPUs.</li>
+      </ul>
+    </div>
+    <div class="card rose">
+      <h3>Bad reasons (try prompt+RAG first)</h3>
+      <ul class="checklist">
+        <li><strong>"It hallucinates."</strong> → That's a RAG problem.</li>
+        <li><strong>"It doesn't know our policies."</strong> → RAG.</li>
+        <li><strong>"It's not creative enough."</strong> → Tune temperature / change models.</li>
+        <li><strong>"It got the format wrong."</strong> → Pydantic + structured output.</li>
+        <li><strong>"It's slow."</strong> → Switch to a smaller / faster model first.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="quote-box">
+    Premature fine-tuning is the root of most "GenAI doesn't work" stories at companies that didn't first squeeze prompt + RAG.
+  </div>
+  <div class="footer-tag">Part 6 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 7 — PRODUCTION LLMS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 7</span>
+  <h1>Working with LLMs<br>in production</h1>
+  <p class="subtitle">The patterns that show up directly in Labs 1.1, 1.2, 1.3.</p>
+</section>
+
+<section>
+  <h2>The five-provider landscape</h2>
+  <table>
+    <tr><th>Provider</th><th>Auth</th><th>API style</th><th>Best for</th></tr>
+    <tr><td><strong>OpenAI</strong></td><td><code>OPENAI_API_KEY</code></td><td>Responses API · <code>responses.create()</code></td><td>Frontier reasoning · structured outputs</td></tr>
+    <tr><td><strong>Anthropic</strong></td><td><code>ANTHROPIC_API_KEY</code></td><td>Messages API · <code>messages.create()</code></td><td>Long context · code · agents · regulated industries</td></tr>
+    <tr><td><strong>Google</strong></td><td><code>GEMINI_API_KEY</code></td><td>GenAI SDK · <code>models.generate_content()</code></td><td>2M-token context · multimodal · low cost</td></tr>
+    <tr><td><strong>Groq Cloud</strong></td><td><code>GROQ_API_KEY</code></td><td>OpenAI-compat · <code>chat.completions.create()</code></td><td>Ultra-low-latency open-source models (LPU)</td></tr>
+    <tr><td><strong>AWS Bedrock</strong></td><td>AWS IAM (role / keys)</td><td><code>bedrock-runtime.converse()</code></td><td>Compliance · VPC-private · single AWS bill</td></tr>
+  </table>
+  <div class="info-card emerald">
+    Lab 1.1 calls <strong>all five</strong>. Hidden lesson: every provider is converging on a "messages list + system prompt + model id + max tokens + sampler config" shape. After you've used three, the fourth is trivial.
+  </div>
+  <div class="footer-tag">Part 7 · 1/5</div>
+</section>
+
+<section>
+  <h2>Why use multiple providers?</h2>
+  <div class="grid-4" style="margin-top:0.4em;">
+    <div class="card">
+      <h3>① Reliability</h3>
+      <p>Provider outages happen weekly. <strong>Fallback chains</strong> keep your service alive.</p>
+    </div>
+    <div class="card violet">
+      <h3>② Cost</h3>
+      <p>3–10× price differences for similar quality. Use cheap fast model first, escalate only when needed.</p>
+    </div>
+    <div class="card emerald">
+      <h3>③ Latency</h3>
+      <p>Groq's LPU is 5–10× faster than OpenAI for Llama. Use it for in-loop calls.</p>
+    </div>
+    <div class="card amber">
+      <h3>④ Compliance</h3>
+      <p>Some banks <em>cannot</em> send data to OpenAI Cloud. Bedrock keeps the call inside their AWS VPC.</p>
+    </div>
+  </div>
+  <div class="info-card violet" style="margin-top:0.5em;">
+    <strong>Lab 1.2</strong> builds an OpenAI → Groq fallback. <strong>Lab 1.3</strong> shows multi-provider <em>structured-output</em> fallback. Both labs are practical instances of the four reasons above.
+  </div>
+  <div class="footer-tag">Part 7 · 2/5</div>
+</section>
+
+<section>
+  <h2>Reasoning vs non-reasoning — at the API level</h2>
+  <svg class="diagram" viewBox="0 0 880 230" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ar6" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#34d399"/>
+      </marker>
+      <marker id="ar7" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#fbbf24"/>
+      </marker>
+    </defs>
+    <!-- Non-reasoning -->
+    <text x="40" y="35" fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600">Non-reasoning · gpt-4.1-mini · claude-haiku-4-5</text>
+    <rect x="40"  y="50" width="120" height="50" rx="6" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="100" y="80" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Prompt</text>
+    <line x1="160" y1="75" x2="220" y2="75" stroke="#34d399" stroke-width="2" marker-end="url(#ar6)"/>
+    <text x="190" y="65" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">~1 s</text>
+    <rect x="220" y="50" width="120" height="50" rx="6" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="280" y="80" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Answer</text>
+    <text x="450" y="80" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11">temperature: 0–1 · max_tokens · top_p</text>
+
+    <!-- Reasoning -->
+    <text x="40" y="135" fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" font-weight="600">Reasoning · gpt-5-mini · o1 · Claude w/ extended thinking</text>
+    <rect x="40"  y="150" width="120" height="50" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="100" y="180" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Prompt</text>
+    <line x1="160" y1="175" x2="220" y2="175" stroke="#fbbf24" stroke-width="2" marker-end="url(#ar7)"/>
+    <text x="190" y="167" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">5–60 s</text>
+    <rect x="220" y="150" width="180" height="50" rx="6" fill="#1e293b" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="310" y="173" fill="#fbbf24" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" font-weight="600">hidden thinking</text>
+    <text x="310" y="190" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">(charged but unseen)</text>
+    <line x1="400" y1="175" x2="450" y2="175" stroke="#fbbf24" stroke-width="2" marker-end="url(#ar7)"/>
+    <rect x="450" y="150" width="120" height="50" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="510" y="180" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Answer</text>
+    <text x="600" y="175" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11">reasoning_effort: low / medium / high</text>
+  </svg>
+  <div class="info-card amber">
+    <strong>Trap to avoid:</strong> passing <code>temperature=0.7</code> to <code>gpt-5-mini</code> raises an API error. Lab 1.1 §6 + 1.3 §5 force you to internalize this distinction.
+  </div>
+  <div class="footer-tag">Part 7 · 3/5</div>
+</section>
+
+<section>
+  <h2>Robustness — retries + backoff + fallback</h2>
+  <svg class="diagram" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ar8" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+      </marker>
+    </defs>
+    <!-- Request -->
+    <rect x="350" y="20" width="200" height="44" rx="8" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="450" y="48" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle" font-weight="600">User Request</text>
+
+    <line x1="450" y1="64" x2="450" y2="90" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar8)"/>
+
+    <!-- Primary -->
+    <rect x="290" y="95" width="320" height="80" rx="10" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="450" y="120" fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle">Primary · OpenAI · gpt-4.1-mini</text>
+    <text x="450" y="142" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Retry up to 3× · exponential backoff</text>
+    <text x="450" y="160" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">1s → 2s → 4s · + jitter</text>
+
+    <!-- Right side: error classification -->
+    <rect x="650" y="95" width="220" height="80" rx="10" fill="#161c3a" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="760" y="118" fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Classify error</text>
+    <text x="660" y="138" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="11">retryable</text>
+    <text x="755" y="138" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">→ wait &amp; retry</text>
+    <text x="660" y="156" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="11">non-retryable</text>
+    <text x="772" y="156" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">→ fail fast</text>
+
+    <line x1="610" y1="135" x2="650" y2="135" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+    <line x1="450" y1="175" x2="450" y2="200" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar8)"/>
+    <text x="585" y="195" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11">all retries failed?</text>
+
+    <!-- Fallback -->
+    <rect x="290" y="205" width="320" height="60" rx="10" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="450" y="228" fill="#a78bfa" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle">Fallback · Groq · llama-3.3-70b</text>
+    <text x="450" y="250" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">single attempt — already a backup</text>
+
+    <line x1="450" y1="265" x2="450" y2="285" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar8)"/>
+
+    <!-- Final -->
+    <rect x="320" y="290" width="260" height="20" rx="4" fill="#161c3a" stroke="#fb7185" stroke-width="1.5"/>
+    <text x="450" y="305" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle" font-weight="600">Both failed? → graceful error response</text>
+  </svg>
+  <div class="info-card amber">
+    This <em>is</em> Lab 1.2 in one diagram. Watch for <strong>jitter</strong> — random offset prevents thundering-herd retries when many clients fail simultaneously.
+  </div>
+  <div class="footer-tag">Part 7 · 4/5</div>
+</section>
+
+<section>
+  <h2>Structured outputs — production reliability</h2>
+  <div class="grid-2">
+    <div>
+      <table>
+        <tr><th>Tier</th><th>Reliability</th><th>Mechanism</th></tr>
+        <tr><td><strong>1 · Native schema</strong></td><td><span class="pill emerald">Highest</span></td><td>Provider validates against your Pydantic schema</td></tr>
+        <tr><td><strong>2 · JSON mode</strong></td><td><span class="pill amber">High</span></td><td>Provider guarantees valid JSON; you describe the shape in prompt</td></tr>
+        <tr><td><strong>3 · Prompt-only</strong></td><td><span class="pill rose">Lowest</span></td><td>Trust the model to follow "respond as JSON…"</td></tr>
+      </table>
+    </div>
+    <div>
+      <pre><code class="language-python">from pydantic import BaseModel
+
+class CustomerIntent(BaseModel):
+    category: str
+    urgency: int   # 1-5
+    sentiment: str
+    summary: str
+
+result = openai_client.responses.parse(
+    model="gpt-5-mini",
+    input=[{"role": "user",
+            "content": user_msg}],
+    text_format=CustomerIntent,
+)
+
+result.output_parsed.category   # typed
+result.output_parsed.urgency    # int</code></pre>
+    </div>
+  </div>
+  <div class="info-card emerald">
+    <strong>Why this matters.</strong> Once you adopt Tier 1, you stop writing <code>try: json.loads(...) except: …</code>. Your downstream code consumes <em>typed</em> Pydantic objects, not strings.
+  </div>
+  <div class="footer-tag">Part 7 · 5/5</div>
+</section>
+
+<!-- ═══════════════════════ PART 8 — MAP TO LABS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 8</span>
+  <h1>Map to the labs</h1>
+  <p class="subtitle">Where the concepts above land in Labs 1.1 · 1.2 · 1.3.</p>
+</section>
+
+<section>
+  <h2>Lab 1.1 — Hello-LLM Client</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Call <strong>five providers</strong> (OpenAI, Anthropic, Gemini, Groq, AWS Bedrock) — each with its own SDK shape — then unify behind a <code>(system, user, **kwargs) → dict</code> wrapper. Sweep <code>temperature</code> and <code>reasoning_effort</code>. Compare side-by-side.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>Reasoning vs non-reasoning <strong>API contract</strong> (Part 7)</li>
+        <li>The 5-provider <strong>landscape</strong> (Part 7)</li>
+        <li>Mental model of <strong>system vs user</strong> (Part 4)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card">
+        <h4>👀 &nbsp; Watch for</h4>
+        <ul class="checklist">
+          <li>Why <code>gpt-5-mini</code> errors on <code>temperature=0.7</code></li>
+          <li>Why Groq is 5–10× faster for Llama vs OpenAI</li>
+          <li>Why same prompt = different token counts on different providers</li>
+          <li>The <strong>boto3 vs ChatBedrock</strong> design choice</li>
+        </ul>
+      </div>
+      <div class="info-card amber">
+        Lab 1.1 has the API-pattern <strong>cheat sheet</strong> in §11 — memorize it; it's the most-asked interview content.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 8 · 1/4</div>
+</section>
+
+<section>
+  <h2>Lab 1.2 — Robustness Patterns</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Build a production-grade <code>robust_llm_call(...)</code>: classify errors as retryable vs non-retryable, retry primary 3× with <strong>exponential backoff + jitter</strong>, fall back to Groq, log every attempt, compute reliability metrics.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>The <strong>retry/fallback flowchart</strong> (Part 7)</li>
+        <li>Why <strong>multi-provider</strong> is reason #1 reliability (Part 7)</li>
+        <li>Basic Python error-handling fluency</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card violet">
+        <h4>👀 &nbsp; Watch for</h4>
+        <ul class="checklist">
+          <li>Why retrying a 401 wastes time</li>
+          <li>How <strong>jitter</strong> prevents thundering-herd</li>
+          <li>What to log so on-call has the data they need at 3 AM</li>
+          <li>The reliability dashboard cell — what each metric tells ops</li>
+        </ul>
+      </div>
+      <div class="info-card violet">
+        After this lab, every API call you write will have a fallback story. That's the bar.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 8 · 2/4</div>
+</section>
+
+<section>
+  <h2>Lab 1.3 — Structured Outputs &amp; Multi-Provider</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Run identical banking queries through 4 providers, then pivot to <strong>Pydantic-validated structured outputs</strong> with OpenAI's <code>responses.parse(text_format=...)</code>. Build <code>classify_with_fallback(...)</code> that tries providers in sequence and returns the first valid Pydantic object.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>The <strong>3 reliability tiers</strong> (Part 7)</li>
+        <li>Prompt-engineering basics — <strong>system vs user split</strong> (Part 4)</li>
+        <li>Pydantic basics — <code>BaseModel</code>, <code>Field</code>, type validation</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card emerald">
+        <h4>👀 &nbsp; Watch for</h4>
+        <ul class="checklist">
+          <li>How a Pydantic schema removes <code>json.loads</code> exception handling</li>
+          <li>Whether the same schema travels across providers (it doesn't, perfectly)</li>
+          <li>Why structured output is the foundation of agents and RAG</li>
+          <li>Where the <strong>connection-to-Lab-1.1</strong> note lands at the end</li>
+        </ul>
+      </div>
+      <div class="info-card emerald">
+        Pydantic + the unified-wrapper pattern = a typed, swappable LLM call. Foundation for every chain we'll build from Module 3 onward.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 8 · 3/4</div>
+</section>
+
+<section>
+  <h2>Three checkpoints across the labs</h2>
+  <div class="grid-3" style="margin-top:0.5em;">
+    <div class="card">
+      <h3>① Mental model</h3>
+      <p>Can you draw the request shape for any of the 5 providers without looking?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.4em;"><strong>Goal:</strong> §11 cheat sheet of Lab 1.1 by heart.</p>
+    </div>
+    <div class="card violet">
+      <h3>② Trade-offs</h3>
+      <p>For a 50K msg/day banking intake bot, which model + provider would you pick, and why?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.4em;"><strong>Goal:</strong> defend the trade-off — there's no single right answer.</p>
+    </div>
+    <div class="card emerald">
+      <h3>③ Failure thinking</h3>
+      <p>For each lab cell that calls an API: what error types would crash it in production, and how does the lab handle them?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.4em;"><strong>Goal:</strong> see Lab 1.2's pattern in every other lab.</p>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.6em;">
+    Coming next — <strong>Part 2 deck</strong> covers transformer internals, tokenization, attention, sampling, context window, and API pricing — paired with Lab 1.4 (Transformer Architecture &amp; Tokenization).
+  </div>
+  <div class="footer-tag">Part 8 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ END ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">End of Part 1</div>
+  <h1>Questions?</h1>
+  <div class="subtitle">Next: open Lab 1.1 — the multi-provider call.<br>
+    Have your <code>.env</code> populated with all 4 keys + AWS credentials before we start.</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">Module 1 · Day 1 · Foundations · Part 1 of 2</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    pdfSeparateFragments: false,
+    plugins: [RevealHighlight, RevealZoom, RevealSearch]
+  });
+</script>
+</body>
+</html>
