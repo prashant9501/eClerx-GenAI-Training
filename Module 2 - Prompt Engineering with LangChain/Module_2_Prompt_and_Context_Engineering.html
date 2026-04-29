@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 2 — Prompt &amp; Context Engineering · Prashant Sahu</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #0a0e27;
+    --bg-mid:  #111733;
+    --bg-card: #161c3a;
+    --bg-card-hover: #1d2447;
+    --accent-sky:     #38bdf8;
+    --accent-violet:  #a78bfa;
+    --accent-emerald: #34d399;
+    --accent-amber:   #fbbf24;
+    --accent-rose:    #fb7185;
+    --text-primary: #e2e8f0;
+    --text-muted:   #94a3b8;
+    --text-dim:     #64748b;
+    --border-soft:  rgba(148, 163, 184, 0.15);
+    --code-bg: #1e293b;
+  }
+
+  .reveal {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+    font-size: 24px;
+  }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section { padding: 12px 0; }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ffffff;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    margin: 0 0 0.4em 0;
+  }
+  .reveal h1 { font-size: 2.0em;  line-height: 1.1; font-weight: 700; }
+  .reveal h2 { font-size: 1.25em; line-height: 1.2; }
+  .reveal h3 { font-size: 1.0em;  line-height: 1.3; color: var(--accent-sky); font-weight: 600; }
+  .reveal h4 { font-size: 0.85em; line-height: 1.3; color: var(--accent-violet); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reveal p, .reveal li { line-height: 1.5; color: var(--text-primary); font-size: 0.85em; }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .reveal li { margin-bottom: 0.32em; }
+  .reveal strong { color: #ffffff; font-weight: 600; }
+  .reveal em { color: var(--accent-amber); font-style: italic; }
+  .reveal a { color: var(--accent-sky); text-decoration: none; border-bottom: 1px dotted var(--accent-sky); }
+
+  .reveal code {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    padding: 0.08em 0.32em;
+    border-radius: 4px;
+    font-size: 0.82em;
+  }
+  .reveal pre {
+    width: 100%;
+    box-shadow: none;
+    margin: 0.4em 0;
+  }
+  .reveal pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6em;
+    line-height: 1.5;
+    padding: 0.85em 1em;
+    background: var(--code-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-sky);
+    max-height: 380px;
+    overflow: auto;
+  }
+
+  .reveal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4em 0;
+    font-size: 0.78em;
+  }
+  .reveal table th {
+    background: linear-gradient(180deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.08) 100%);
+    color: #ffffff;
+    text-align: left;
+    padding: 0.5em 0.8em;
+    border-bottom: 2px solid var(--accent-sky);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .reveal table td {
+    padding: 0.45em 0.8em;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 180ms ease;
+  }
+  .reveal table tr:hover td { background: rgba(56, 189, 248, 0.06); }
+  .reveal table tr:nth-child(even) td { background: rgba(255, 255, 255, 0.018); }
+  .reveal table tr:nth-child(even):hover td { background: rgba(56, 189, 248, 0.08); }
+
+  /* Title slide */
+  .reveal section.title-slide {
+    text-align: center;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(167, 139, 250, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.title-slide .eyebrow {
+    color: var(--accent-sky);
+    font-size: 0.55em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.8em;
+  }
+  .reveal section.title-slide h1 {
+    font-size: 2.4em;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #38bdf8 0%, #a78bfa 50%, #fb7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5em;
+    animation: titleFade 1.2s ease-out;
+  }
+  @keyframes titleFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal section.title-slide .subtitle {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 0.4em;
+  }
+  .reveal section.title-slide .tag {
+    display: inline-block;
+    margin-top: 0.4em;
+    padding: 0.3em 1em;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 999px;
+    font-size: 0.6em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .reveal section.title-slide .presenter-block {
+    margin-top: 1.6em;
+    padding: 0.6em 1.4em;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+  .reveal section.title-slide .presenter-label {
+    color: var(--accent-violet);
+    font-size: 0.5em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.15em;
+  }
+  .reveal section.title-slide .presenter-name {
+    color: #ffffff;
+    font-size: 1.0em;
+    font-weight: 600;
+  }
+  .reveal section.title-slide .meta {
+    margin-top: 1.4em;
+    color: var(--text-dim);
+    font-size: 0.55em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Section divider */
+  .reveal section.divider {
+    text-align: left;
+    background:
+      radial-gradient(circle at 20% 60%, rgba(56, 189, 248, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 90% 30%, rgba(167, 139, 250, 0.13) 0%, transparent 55%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.divider .part-label {
+    display: block;
+    color: var(--accent-sky);
+    font-size: 0.6em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.4em;
+  }
+  .reveal section.divider h1 {
+    font-size: 2.2em;
+    line-height: 1.05;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+  }
+  .reveal section.divider .subtitle {
+    color: var(--text-muted);
+    font-size: 0.7em;
+    max-width: 800px;
+    line-height: 1.5;
+  }
+  .reveal section.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--accent-sky), var(--accent-violet));
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.75em 1.05em;
+    border-left: 3px solid var(--accent-sky);
+    margin: 0.35em 0;
+    transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+  }
+  .card.violet  { border-left-color: var(--accent-violet); }
+  .card.violet:hover  { box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15); }
+  .card.emerald { border-left-color: var(--accent-emerald); }
+  .card.emerald:hover { box-shadow: 0 8px 24px rgba(52, 211, 153, 0.12); }
+  .card.amber   { border-left-color: var(--accent-amber); }
+  .card.amber:hover   { box-shadow: 0 8px 24px rgba(251, 191, 36, 0.12); }
+  .card.rose    { border-left-color: var(--accent-rose); }
+  .card.rose:hover    { box-shadow: 0 8px 24px rgba(251, 113, 133, 0.12); }
+  .card h3, .card h4 { margin-top: 0; }
+  .card p { margin: 0.3em 0; font-size: 0.78em; }
+
+  .info-card {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    padding: 0.65em 0.95em;
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .info-card.violet  { background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.2); }
+  .info-card.emerald { background: rgba(52, 211, 153, 0.08);  border-color: rgba(52, 211, 153, 0.2); }
+  .info-card.amber   { background: rgba(251, 191, 36, 0.08);  border-color: rgba(251, 191, 36, 0.25); }
+  .info-card.rose    { background: rgba(251, 113, 133, 0.08); border-color: rgba(251, 113, 133, 0.25); }
+
+  .pill {
+    display: inline-block;
+    padding: 0.12em 0.55em;
+    background: rgba(56, 189, 248, 0.16);
+    color: var(--accent-sky);
+    border-radius: 999px;
+    font-size: 0.65em;
+    font-weight: 500;
+    margin: 0.05em 0.15em;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+  .pill.violet  { background: rgba(167, 139, 250, 0.16); color: var(--accent-violet); border-color: rgba(167, 139, 250, 0.3); }
+  .pill.emerald { background: rgba(52, 211, 153, 0.16);  color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.3); }
+  .pill.amber   { background: rgba(251, 191, 36, 0.16);  color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); }
+  .pill.rose    { background: rgba(251, 113, 133, 0.16); color: var(--accent-rose); border-color: rgba(251, 113, 133, 0.3); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85em; align-items: stretch; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.65em; align-items: stretch; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.55em; align-items: stretch; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5em; align-items: stretch; }
+
+  svg.diagram {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 8px;
+    width: 100%;
+    height: auto;
+    margin: 0.3em 0;
+    border: 1px solid var(--border-soft);
+  }
+
+  .timeline { margin: 0.4em 0; position: relative; }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 5em 1fr;
+    gap: 0.8em;
+    padding: 0.4em 0;
+    border-bottom: 1px dashed var(--border-soft);
+    transition: background 200ms ease;
+    align-items: baseline;
+  }
+  .timeline-item:hover { background: rgba(56, 189, 248, 0.04); padding-left: 4px; }
+  .timeline-year {
+    color: var(--accent-sky);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 0.78em;
+  }
+  .timeline-event { font-size: 0.82em; line-height: 1.4; }
+  .timeline-event strong { color: #ffffff; }
+  .timeline-event .desc { color: var(--text-muted); display: block; margin-top: 0.1em; font-size: 0.92em; }
+
+  .kpi {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.55em 0.85em;
+    text-align: center;
+    border-top: 3px solid var(--accent-sky);
+    transition: transform 200ms ease;
+  }
+  .kpi:hover { transform: translateY(-3px); }
+  .kpi.violet  { border-top-color: var(--accent-violet); }
+  .kpi.emerald { border-top-color: var(--accent-emerald); }
+  .kpi.amber   { border-top-color: var(--accent-amber); }
+  .kpi.rose    { border-top-color: var(--accent-rose); }
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-label {
+    color: var(--text-muted);
+    font-size: 0.66em;
+    margin-top: 0.3em;
+    letter-spacing: 0.06em;
+  }
+
+  .quote-box {
+    border-left: 3px solid var(--accent-amber);
+    padding: 0.45em 0.95em;
+    background: rgba(251, 191, 36, 0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .quote-box::before { content: '"'; color: var(--accent-amber); font-size: 1.5em; line-height: 0.5; vertical-align: middle; margin-right: 0.2em; }
+
+  .reveal ul.checklist { list-style: none; padding-left: 0.4em; }
+  .reveal ul.checklist li::before {
+    content: '▸';
+    color: var(--accent-sky);
+    margin-right: 0.5em;
+    font-weight: 700;
+  }
+
+  .reveal .progress { color: var(--accent-sky); height: 4px; }
+  .reveal .slide-number {
+    background: rgba(10, 14, 39, 0.65);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .footer-tag {
+    position: absolute;
+    bottom: 0.3em;
+    right: 0.5em;
+    color: var(--text-dim);
+    font-size: 0.45em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Bad-vs-good comparison boxes */
+  .bad-good {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7em;
+    margin: 0.4em 0;
+  }
+  .bad-good .bad, .bad-good .good {
+    border-radius: 10px;
+    padding: 0.7em 1em;
+    font-size: 0.78em;
+    transition: all 220ms ease;
+  }
+  .bad-good .bad {
+    background: rgba(251, 113, 133, 0.08);
+    border: 1px solid rgba(251, 113, 133, 0.3);
+  }
+  .bad-good .bad:hover { background: rgba(251, 113, 133, 0.13); }
+  .bad-good .good {
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+  .bad-good .good:hover { background: rgba(52, 211, 153, 0.13); }
+  .bad-good h4 { margin-bottom: 0.3em; }
+  .bad-good .bad h4  { color: var(--accent-rose); }
+  .bad-good .good h4 { color: var(--accent-emerald); }
+
+  /* Lever / dimension card */
+  .lever {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.7em 0.9em;
+    border-bottom: 3px solid var(--accent-sky);
+    transition: transform 220ms ease;
+  }
+  .lever:hover { transform: translateY(-3px); }
+  .lever .lever-num {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-sky);
+    font-size: 0.7em;
+  }
+  .lever h4 { margin: 0.2em 0 0.3em 0; color: #ffffff; text-transform: none; letter-spacing: 0; font-size: 0.95em; }
+  .lever p { font-size: 0.72em; color: var(--text-muted); margin: 0; }
+  .lever.violet  { border-bottom-color: var(--accent-violet); }
+  .lever.emerald { border-bottom-color: var(--accent-emerald); }
+  .lever.amber   { border-bottom-color: var(--accent-amber); }
+  .lever.rose    { border-bottom-color: var(--accent-rose); }
+
+  @media print {
+    .reveal pre code { font-size: 0.5em; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════ TITLE ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">eClerx · CDAC · Module 2 · Day 2</div>
+  <h1>Prompt &amp;<br>Context Engineering</h1>
+  <div class="subtitle">Patterns, parsers, caching, and what to put in the context window</div>
+  <div class="tag">Setup deck for Labs 2.1 → 2.5</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">2026 · Cohort 1</div>
+</section>
+
+<!-- ═══════════════════════ ROADMAP ═══════════════════════ -->
+<section>
+  <h2>What we'll cover today</h2>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card"><h4>Part 1</h4><p>From prompts to engineered prompts</p></div>
+    <div class="card violet"><h4>Part 2</h4><p>LangChain prompt primitives</p></div>
+    <div class="card emerald"><h4>Part 3</h4><p>Foundational patterns (Lab 2.2)</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card amber"><h4>Part 4</h4><p>Reasoning patterns — CoT · ToT · CoVe (Lab 2.3)</p></div>
+    <div class="card rose"><h4>Part 5</h4><p>Output structuring &amp; parsers (Lab 2.4)</p></div>
+    <div class="card"><h4>Part 6</h4><p>Prompt caching across providers (Lab 2.5)</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card violet"><h4>Part 7</h4><p>Context engineering — the bigger picture</p></div>
+    <div class="card emerald"><h4>Part 8</h4><p>Context management techniques</p></div>
+    <div class="card amber"><h4>Part 9</h4><p>Map to all 5 labs</p></div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    <strong>Goal.</strong> By the end of today you should be able to look at any LLM-powered feature and immediately ask: <em>(1) what's in the context?</em> · <em>(2) is it cached?</em> · <em>(3) what's the output schema?</em> · <em>(4) which prompting pattern fits?</em>
+  </div>
+  <div class="footer-tag">Roadmap</div>
+</section>
+
+<!-- ═══════════════════════ PART 1 — FROM PROMPTS TO ENGINEERED PROMPTS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 1</span>
+  <h1>From prompts to<br>engineered prompts</h1>
+  <p class="subtitle">A prompt is just code. Once you treat it like code — versioned, tested, structured — you stop fighting the model and start steering it.</p>
+</section>
+
+<section>
+  <h2>The shift: ad-hoc string → engineered artifact</h2>
+  <div class="bad-good">
+    <div class="bad">
+      <h4>Ad-hoc f-string · Day 1</h4>
+      <pre><code style="font-size:0.72em;">prompt = f"Summarize this: {text}"
+response = client.chat.completions.create(
+    model="gpt-4.1-mini",
+    messages=[{"role": "user",
+               "content": prompt}]
+)</code></pre>
+      <p style="margin-top:0.4em; color:var(--accent-rose);">Vague task · no persona · no constraints · no schema · output is unpredictable.</p>
+    </div>
+    <div class="good">
+      <h4>Engineered prompt · Day 2</h4>
+      <pre><code style="font-size:0.72em;">prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a senior compliance "
+               "analyst. Respond in JSON "
+               "with risk_level, reasoning, "
+               "and recommendation."),
+    ("user", "Summarize this in 3 lines: {text}")
+])
+chain = prompt | llm | PydanticOutputParser(pydantic_object=Risk)</code></pre>
+      <p style="margin-top:0.4em; color:var(--accent-emerald);">Persona · output contract · structured · testable · cacheable.</p>
+    </div>
+  </div>
+  <div class="info-card violet">
+    <strong>The whole module</strong> is about the right side of this slide. Every lab moves you one step further from the left.
+  </div>
+  <div class="footer-tag">Part 1 · 1/3</div>
+</section>
+
+<section>
+  <h2>The 5 levers of every prompt</h2>
+  <div class="grid-5" style="margin-top:0.4em;">
+    <div class="lever">
+      <div class="lever-num">01</div>
+      <h4>Persona</h4>
+      <p>Who is the model speaking as? "You are a senior compliance analyst…"</p>
+    </div>
+    <div class="lever violet">
+      <div class="lever-num">02</div>
+      <h4>Task</h4>
+      <p>What verb, on what input? "Summarize / Classify / Extract / Translate…"</p>
+    </div>
+    <div class="lever emerald">
+      <div class="lever-num">03</div>
+      <h4>Examples</h4>
+      <p>Few-shot exemplars when format or style is non-obvious.</p>
+    </div>
+    <div class="lever amber">
+      <div class="lever-num">04</div>
+      <h4>Output format</h4>
+      <p>JSON · XML · plain · Pydantic schema · enum.</p>
+    </div>
+    <div class="lever rose">
+      <div class="lever-num">05</div>
+      <h4>Constraints</h4>
+      <p>Length, tone, what to skip, refusal rules, language.</p>
+    </div>
+  </div>
+  <div class="info-card emerald" style="margin-top:0.5em;">
+    Almost every "this prompt isn't working" complaint reduces to one of these five being missing or contradictory. When debugging, walk through them in order.
+  </div>
+  <div class="footer-tag">Part 1 · 2/3</div>
+</section>
+
+<section>
+  <h2>Bad vs good — Lab 2.1 preview</h2>
+  <div class="bad-good">
+    <div class="bad">
+      <h4>👎 Bad</h4>
+      <pre><code style="font-size:0.72em;">"Summarize this loan inquiry."
+
+[long customer email]</code></pre>
+      <p style="margin-top:0.4em;"><strong>What's wrong:</strong> no persona, no length cap, no field structure, no tone instruction. The output will be a 5-paragraph essay.</p>
+    </div>
+    <div class="good">
+      <h4>👍 Good</h4>
+      <pre><code style="font-size:0.72em;">SYSTEM:
+You are a senior loan officer.
+
+USER:
+Summarize the customer's loan inquiry below
+in EXACTLY this JSON shape:
+  {{"intent": ..., "amount_requested": ...,
+    "tenure_years": ..., "urgency": "low|med|high",
+    "next_action": ...}}
+
+Customer email:
+[long customer email]</code></pre>
+      <p style="margin-top:0.4em;"><strong>Why it works:</strong> persona + scope + schema + value enums.</p>
+    </div>
+  </div>
+  <div class="quote-box">
+    <strong>Lab 2.1</strong> walks through 2 banking scenarios contrasting bad vs good prompts. The point is muscle memory — the structure should feel automatic by the time you finish the lab.
+  </div>
+  <div class="footer-tag">Part 1 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 2 — LANGCHAIN PRIMITIVES ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 2</span>
+  <h1>LangChain prompt<br>primitives</h1>
+  <p class="subtitle">The classes you'll write every day. Stop concatenating f-strings — start composing templates.</p>
+</section>
+
+<section>
+  <h2>Two template classes — pick the right one</h2>
+  <table>
+    <tr><th></th><th><code>PromptTemplate</code></th><th><code>ChatPromptTemplate</code> ★</th></tr>
+    <tr><td><strong>Output</strong></td><td>Single string</td><td>List of role-tagged messages</td></tr>
+    <tr><td><strong>Used with</strong></td><td>Legacy completion APIs</td><td>Modern chat models (OpenAI Responses, Anthropic Messages, Bedrock Converse)</td></tr>
+    <tr><td><strong>System prompt</strong></td><td>Embedded in string</td><td>Separate <code>("system", "...")</code> tuple</td></tr>
+    <tr><td><strong>Multi-turn</strong></td><td>Awkward</td><td>Native — <code>MessagesPlaceholder</code></td></tr>
+    <tr><td><strong>When to use</strong></td><td>Almost never in 2026</td><td><strong>Default for everything chat-shaped</strong></td></tr>
+  </table>
+  <pre><code class="language-python">from langchain_core.prompts import ChatPromptTemplate
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a {role}. Be concise."),
+    ("user",   "{input}"),
+])
+
+# Variables fill from the chain input dict
+chain = prompt | llm
+chain.invoke({"role": "compliance analyst", "input": "Review claim #1234..."})</code></pre>
+  <div class="info-card amber">
+    <strong>Lab 2.1</strong> establishes the <code>ChatPromptTemplate</code> habit from cell 1 — every subsequent module assumes you reach for it by reflex.
+  </div>
+  <div class="footer-tag">Part 2 · 1/3</div>
+</section>
+
+<section>
+  <h2><code>MessagesPlaceholder</code> — multi-turn conversations</h2>
+  <div class="grid-2">
+    <div>
+      <p>For chat with history, you need a <em>variable-length</em> slot for prior messages. <code>MessagesPlaceholder</code> is that slot.</p>
+      <pre><code class="language-python">from langchain_core.prompts import (
+    ChatPromptTemplate,
+    MessagesPlaceholder,
+)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a banking assistant."),
+    MessagesPlaceholder("history"),     # ← any number
+    ("user", "{input}"),
+])
+
+# history is a list of HumanMessage / AIMessage
+chain.invoke({
+    "history": prior_messages,
+    "input":   new_user_msg,
+})</code></pre>
+    </div>
+    <div>
+      <h4>What goes in <code>history</code>?</h4>
+      <ul class="checklist">
+        <li>Previous turns of this conversation</li>
+        <li>Tool outputs (in agent flows)</li>
+        <li>Retrieved context (in RAG)</li>
+      </ul>
+      <div class="info-card violet">
+        Pair this with <code>RunnableWithMessageHistory</code> to auto-track per-session history. Module 3 covers the modern memory pattern in depth.
+      </div>
+      <div class="info-card amber" style="margin-top:0.4em;">
+        <strong>Don't</strong> use the deprecated <code>ConversationBufferMemory</code> / <code>ConversationSummaryMemory</code> — they predate LCEL and don't compose with modern chains.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 2/3</div>
+</section>
+
+<section>
+  <h2><code>FewShotChatMessagePromptTemplate</code> — examples at scale</h2>
+  <div class="grid-2">
+    <div>
+      <h4>The problem</h4>
+      <p>Inline string interpolation of 5 examples works. 50 examples? Selectable by similarity? <em>That</em> needs a class.</p>
+      <h4 style="margin-top:0.5em;">The solution</h4>
+      <p><code>FewShotChatMessagePromptTemplate</code> takes:</p>
+      <ul class="checklist">
+        <li>An <code>examples</code> list (or a <em>selector</em> that picks dynamically)</li>
+        <li>An <code>example_prompt</code> — the (user, assistant) sub-template each example uses</li>
+      </ul>
+      <p>Output: a flat sequence of message pairs the model treats as in-context training data.</p>
+    </div>
+    <div>
+      <pre><code class="language-python">from langchain_core.prompts import (
+    ChatPromptTemplate,
+    FewShotChatMessagePromptTemplate,
+)
+
+examples = [
+    {"input": "transferred ₹50K to TATA",
+     "output": "category=Equity"},
+    {"input": "ATM withdrawal ₹2K",
+     "output": "category=Cash"},
+    # ... 100 more
+]
+
+example_prompt = ChatPromptTemplate.from_messages([
+    ("user", "{input}"),
+    ("assistant", "{output}"),
+])
+
+few_shot = FewShotChatMessagePromptTemplate(
+    examples=examples,
+    example_prompt=example_prompt,
+)
+
+final_prompt = ChatPromptTemplate.from_messages([
+    ("system", "Categorize bank transactions."),
+    few_shot,
+    ("user", "{input}"),
+])</code></pre>
+    </div>
+  </div>
+  <div class="info-card emerald">
+    <strong>Lab 2.2 §4</strong> builds this with <code>SemanticSimilarityExampleSelector</code> — picks the most-similar 3 of 100 examples per query, so token budget stays tight even with a huge corpus.
+  </div>
+  <div class="footer-tag">Part 2 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 3 — FOUNDATIONAL PATTERNS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 3</span>
+  <h1>Foundational<br>prompt patterns</h1>
+  <p class="subtitle">The four patterns from Lab 2.2. Master these before reaching for chain-of-thought.</p>
+</section>
+
+<section>
+  <h2>Pattern 1 · Persona</h2>
+  <div class="grid-2">
+    <div>
+      <p>Tell the model <strong>who it is</strong> and <strong>who it's writing for</strong>. Goes in the system prompt.</p>
+      <h4>Why it works</h4>
+      <ul class="checklist">
+        <li>Activates a domain-specific writing style learned during training</li>
+        <li>Shifts vocabulary, sentence length, refusal threshold</li>
+        <li>Costs almost nothing in tokens</li>
+      </ul>
+      <h4 style="margin-top:0.5em;">Tuning knobs</h4>
+      <ul class="checklist">
+        <li><strong>Role</strong> — "senior compliance analyst", "warm bank teller"</li>
+        <li><strong>Audience</strong> — "explain to a customer with no banking background"</li>
+        <li><strong>Tone</strong> — "calm, factual, no emojis"</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="language-python">SYSTEM:
+You are a senior fraud-detection analyst at
+a retail bank in India. You write for the
+on-call investigations team — concise,
+RBI-compliant language, no hedging.
+
+USER:
+Investigate transaction #TXN-1234 below
+and recommend HOLD or RELEASE.
+
+[transaction details]</code></pre>
+      <div class="info-card violet">
+        <strong>Lab 2.2 §1</strong> contrasts neutral persona vs senior-analyst persona on the same prompt — output quality measurably shifts.
+      </div>
+      <div class="quote-box">
+        Persona is not "playing a character" — it's <em>activating</em> the right slice of the model's training distribution.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 1/4</div>
+</section>
+
+<section>
+  <h2>Pattern 2 · N-Shot prompting</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h3>Zero-shot</h3>
+      <p>Just describe the task. <strong>Default for capable modern models</strong> on common tasks.</p>
+      <pre><code style="font-size:0.6em;">Classify sentiment:
+"Service was awful."
+&rarr;</code></pre>
+    </div>
+    <div class="card violet">
+      <h3>One-shot</h3>
+      <p>Single example to anchor format / style.</p>
+      <pre><code style="font-size:0.6em;">"It was great" &rarr; positive
+"Service was awful." &rarr;</code></pre>
+    </div>
+    <div class="card emerald">
+      <h3>Few-shot</h3>
+      <p>2–8 examples. Teaches subtle conventions, niche labels, custom formats.</p>
+      <pre><code style="font-size:0.6em;">"It was great" &rarr; +
+"Could be better" &rarr; ~
+"Awful service" &rarr; -
+"Service was awful." &rarr;</code></pre>
+    </div>
+  </div>
+  <svg class="diagram" viewBox="0 0 880 200" xmlns="http://www.w3.org/2000/svg" style="margin-top:0.4em;">
+    <text x="20" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11">Quality vs # of examples (typical curve)</text>
+    <line x1="50"  y1="40"  x2="50"  y2="170" stroke="#94a3b8" stroke-width="1"/>
+    <line x1="50"  y1="170" x2="850" y2="170" stroke="#94a3b8" stroke-width="1"/>
+    <text x="30"  y="45"  fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">qual</text>
+    <text x="845" y="187" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end"># examples</text>
+    <!-- Curve -->
+    <path d="M 50 140 Q 110 90 200 70 T 500 50 T 850 50" stroke="#38bdf8" stroke-width="2.5" fill="none"/>
+    <!-- Annotations -->
+    <circle cx="60"  cy="138" r="4" fill="#fbbf24"/>
+    <text x="70"  y="135" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">0-shot</text>
+    <circle cx="125" cy="100" r="4" fill="#fbbf24"/>
+    <text x="135" y="100" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">1-shot</text>
+    <circle cx="280" cy="68" r="4" fill="#fbbf24"/>
+    <text x="290" y="65" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">3-5 shot</text>
+    <circle cx="600" cy="50" r="4" fill="#fbbf24"/>
+    <text x="610" y="50" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">8 shot · plateau</text>
+    <line x1="50" y1="48" x2="850" y2="48" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+    <text x="350" y="40" fill="#fb7185" font-family="Inter,sans-serif" font-size="10">"diminishing returns" zone</text>
+  </svg>
+  <div class="info-card amber">
+    <strong>Practical rule.</strong> 3–5 carefully-chosen examples ≈ as good as 50 random ones. Quality &gt; quantity. Lab 2.2 §2 walks through example selection.
+  </div>
+  <div class="footer-tag">Part 3 · 2/4</div>
+</section>
+
+<section>
+  <h2>Pattern 3 · Directional Stimulus</h2>
+  <div class="grid-2">
+    <div>
+      <p>Inject <strong>keywords or hints</strong> that nudge the model toward the right concept space — without giving away the answer.</p>
+      <h4>Why it works</h4>
+      <p>Keywords activate related concepts via attention. The model "lights up" the relevant region of its knowledge.</p>
+      <h4 style="margin-top:0.5em;">When to use</h4>
+      <ul class="checklist">
+        <li>Domain-specific summarization (where vocabulary matters)</li>
+        <li>Tasks where the answer is "in the model's head" but it picks the wrong association</li>
+        <li>Nudging refusal-prone models without jailbreaking</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="language-python"># Without stimulus
+"Summarize this customer feedback."
+
+# With directional stimulus
+"Summarize this customer feedback.
+Focus on these themes: pricing, service
+quality, app stability, branch hours."</code></pre>
+      <div class="info-card emerald">
+        <strong>Lab 2.2 §3</strong> demonstrates this on customer-feedback triage — adding 4 hint keywords cuts hallucinated themes by &gt;50%.
+      </div>
+      <div class="quote-box">
+        Compare to <em>retrieval</em> — stimulus is "free" (no retrieval cost) but only works if the answer is already in the model's parameters.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 3/4</div>
+</section>
+
+<section>
+  <h2>Pattern 4 · Template &amp; Meta-Language</h2>
+  <div class="grid-2">
+    <div>
+      <p>Define a <strong>structured input/output convention</strong> using delimiters, XML tags, or a custom schema. Then ask the model to fill it in.</p>
+      <h4>Why it works</h4>
+      <ul class="checklist">
+        <li>Removes ambiguity about what fields exist</li>
+        <li>Anchors the model's output in your schema</li>
+        <li>Makes downstream parsing reliable</li>
+      </ul>
+      <h4 style="margin-top:0.5em;">Common conventions</h4>
+      <ul class="checklist">
+        <li><strong>JSON</strong> — most universal</li>
+        <li><strong>XML tags</strong> — Anthropic prefers (training distribution)</li>
+        <li><strong>Markdown headers</strong> — for human-readable but parseable</li>
+        <li><strong>Delimited blocks</strong> — <code>###</code>, <code>"""</code></li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="language-python">SYSTEM:
+You are a banking risk analyst. Output your
+analysis in EXACTLY this template:
+
+&lt;risk_assessment&gt;
+  &lt;level&gt;low | medium | high&lt;/level&gt;
+  &lt;reasoning&gt;1-2 sentences&lt;/reasoning&gt;
+  &lt;recommendation&gt;HOLD | RELEASE&lt;/recommendation&gt;
+  &lt;confidence&gt;0.0 - 1.0&lt;/confidence&gt;
+&lt;/risk_assessment&gt;
+
+USER: [transaction details]</code></pre>
+      <div class="info-card amber">
+        Templates are the <em>pre-Pydantic</em> way of doing structured output. They still work great with any model. Pydantic + <code>with_structured_output</code> is the modern equivalent — covered in Part 5.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 4 — REASONING PATTERNS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 4</span>
+  <h1>Reasoning patterns<br>CoT · ToT · CoVe</h1>
+  <p class="subtitle">When zero-shot isn't enough, reach here. The patterns from Lab 2.3 — chain, tree, and verification.</p>
+</section>
+
+<section>
+  <h2>Chain-of-Thought (CoT)</h2>
+  <div class="grid-2">
+    <div>
+      <p><strong>Get the model to "show its work" before answering.</strong> Reasoning improves on math, multi-step decisions, edge-case detection.</p>
+      <h4>Two flavors</h4>
+      <ul class="checklist">
+        <li><strong>Zero-shot CoT</strong> — append <em>"Let's think step by step."</em></li>
+        <li><strong>Few-shot CoT</strong> — include 2–3 examples that show the reasoning trace, not just the final answer</li>
+      </ul>
+      <h4 style="margin-top:0.5em;">Why it works</h4>
+      <p>Each generated step conditions the next — the model effectively gets more "compute" to spread across the answer. Internal token states encode the partial reasoning.</p>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arC" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <rect x="20" y="20" width="340" height="32" rx="6" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="190" y="40" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Question</text>
+        <line x1="190" y1="52" x2="190" y2="72" stroke="#38bdf8" stroke-width="2" marker-end="url(#arC)"/>
+        <rect x="20" y="75" width="340" height="32" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="190" y="95" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Step 1: identify key facts</text>
+        <line x1="190" y1="107" x2="190" y2="127" stroke="#38bdf8" stroke-width="2" marker-end="url(#arC)"/>
+        <rect x="20" y="130" width="340" height="32" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="190" y="150" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Step 2: apply relevant rule / formula</text>
+        <line x1="190" y1="162" x2="190" y2="182" stroke="#38bdf8" stroke-width="2" marker-end="url(#arC)"/>
+        <rect x="20" y="185" width="340" height="32" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="190" y="205" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Final answer (with justification)</text>
+      </svg>
+      <div class="info-card violet">
+        <strong>Lab 2.3 §3</strong> uses CoT for fraud-alert analysis &amp; small-business loan eligibility — both cases where the wrong "vibes-only" answer is dangerous.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 4 · 1/4</div>
+</section>
+
+<section>
+  <h2>Tree of Thoughts (ToT)</h2>
+  <div class="grid-2">
+    <div>
+      <p>Generalize CoT to <strong>multiple parallel branches</strong>. The model explores several reasoning paths, evaluates them, picks the best.</p>
+      <h4>Pattern</h4>
+      <ol>
+        <li><strong>Generate</strong> N candidate next-steps from the current state</li>
+        <li><strong>Evaluate</strong> each (self-critique or scoring)</li>
+        <li><strong>Prune / expand</strong> the most promising</li>
+        <li>Repeat to depth <em>D</em>, return best path</li>
+      </ol>
+      <h4 style="margin-top:0.5em;">When it earns its keep</h4>
+      <ul class="checklist">
+        <li>Genuine multi-option problems (strategy, planning, design)</li>
+        <li>Tasks where evaluation is <em>cheaper</em> than generation</li>
+        <li>You can budget the extra latency &amp; cost</li>
+      </ul>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arT2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+          </marker>
+        </defs>
+        <rect x="155" y="15" width="80" height="30" rx="6" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="195" y="35" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Root</text>
+        <!-- Layer 2: 3 branches -->
+        <line x1="195" y1="45" x2="80"  y2="75" stroke="#a78bfa" stroke-width="1.2"/>
+        <line x1="195" y1="45" x2="195" y2="75" stroke="#a78bfa" stroke-width="1.2"/>
+        <line x1="195" y1="45" x2="310" y2="75" stroke="#a78bfa" stroke-width="1.2"/>
+        <rect x="40"  y="75" width="80" height="30" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="80"  y="95" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Path A</text>
+        <text x="80"  y="120" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">score: 0.4</text>
+        <rect x="155" y="75" width="80" height="30" rx="6" fill="#161c3a" stroke="#34d399" stroke-width="2"/>
+        <text x="195" y="95" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Path B ★</text>
+        <text x="195" y="120" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">score: 0.8</text>
+        <rect x="270" y="75" width="80" height="30" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="310" y="95" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Path C</text>
+        <text x="310" y="120" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">score: 0.6</text>
+        <!-- Layer 3: expand B -->
+        <line x1="195" y1="105" x2="155" y2="145" stroke="#a78bfa" stroke-width="1.2"/>
+        <line x1="195" y1="105" x2="235" y2="145" stroke="#a78bfa" stroke-width="1.2"/>
+        <rect x="115" y="145" width="80" height="30" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="155" y="165" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">B1</text>
+        <rect x="195" y="145" width="80" height="30" rx="6" fill="#161c3a" stroke="#34d399" stroke-width="2"/>
+        <text x="235" y="165" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">B2 ★</text>
+        <line x1="235" y1="175" x2="235" y2="200" stroke="#a78bfa" stroke-width="1.2" marker-end="url(#arT2)"/>
+        <rect x="195" y="205" width="80" height="30" rx="6" fill="#161c3a" stroke="#34d399" stroke-width="2"/>
+        <text x="235" y="225" fill="#34d399" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Best path</text>
+        <text x="190" y="265" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">explore · evaluate · prune · expand</text>
+      </svg>
+    </div>
+  </div>
+  <div class="info-card amber">
+    <strong>Lab 2.3 §4</strong> applies ToT to client investment strategy &amp; debt-restructuring planning. Watch the cost — ToT can use 5–10× the tokens of plain CoT.
+  </div>
+  <div class="footer-tag">Part 4 · 2/4</div>
+</section>
+
+<section>
+  <h2>Chain of Verification (CoVe)</h2>
+  <div class="grid-2">
+    <div>
+      <p>A four-step loop that reduces hallucinations by making the model <strong>fact-check itself</strong>.</p>
+      <ol>
+        <li><strong>Draft</strong> — generate an initial answer to the question</li>
+        <li><strong>Plan verifications</strong> — list specific factual sub-questions about the draft</li>
+        <li><strong>Answer verifications</strong> — independently answer each (without seeing the draft)</li>
+        <li><strong>Revise</strong> — generate a final answer reconciling draft + verification results</li>
+      </ol>
+      <h4 style="margin-top:0.5em;">Why it works</h4>
+      <p>Decoupled verification — the verification step doesn't see the draft, so the model can't anchor its checks to the original (possibly wrong) answer.</p>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 270" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arV" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#34d399"/>
+          </marker>
+        </defs>
+        <rect x="80"  y="15" width="220" height="32" rx="8" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="190" y="35" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">1 · Draft answer</text>
+        <line x1="190" y1="47" x2="190" y2="67" stroke="#34d399" stroke-width="2" marker-end="url(#arV)"/>
+        <rect x="80"  y="70" width="220" height="32" rx="8" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="190" y="90" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">2 · Plan verification questions</text>
+        <line x1="190" y1="102" x2="190" y2="122" stroke="#34d399" stroke-width="2" marker-end="url(#arV)"/>
+        <rect x="80"  y="125" width="220" height="32" rx="8" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="190" y="145" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">3 · Answer them</text>
+        <text x="190" y="157" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">(without seeing the draft)</text>
+        <line x1="190" y1="167" x2="190" y2="187" stroke="#34d399" stroke-width="2" marker-end="url(#arV)"/>
+        <rect x="80"  y="190" width="220" height="40" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="2"/>
+        <text x="190" y="208" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">4 · Revised final answer</text>
+        <text x="190" y="222" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">draft + verifications</text>
+        <text x="190" y="255" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Dhuliawala et al., Meta AI 2023</text>
+      </svg>
+    </div>
+  </div>
+  <div class="info-card violet">
+    <strong>Lab 2.3 Part 2</strong> applies CoVe to regulatory-guideline summarization &amp; factual stock analysis — exactly the contexts where a wrong fact has business consequences.
+  </div>
+  <div class="footer-tag">Part 4 · 3/4</div>
+</section>
+
+<section>
+  <h2>When NOT to use these</h2>
+  <table>
+    <tr><th>Situation</th><th>Use</th><th>Skip CoT/ToT/CoVe because…</th></tr>
+    <tr><td>Reasoning model (gpt-5-mini, o1, Claude w/ extended thinking)</td><td>Just set <code>reasoning_effort="medium"</code></td><td>The model already chain-of-thoughts internally; explicit CoT is redundant overhead</td></tr>
+    <tr><td>Strict latency budget (&lt; 1s)</td><td>Plain prompt + single-pass</td><td>CoT 2–5× longer; ToT 10×; CoVe 4×</td></tr>
+    <tr><td>Trivial classification (sentiment, intent)</td><td>Zero-shot</td><td>Reasoning patterns add cost without quality gain</td></tr>
+    <tr><td>Pure retrieval / lookup task</td><td>RAG</td><td>Reasoning won't invent missing facts</td></tr>
+    <tr><td>Highly subjective / no ground truth</td><td>Prompt + persona</td><td>Verification has nothing to check against</td></tr>
+  </table>
+  <div class="quote-box">
+    <strong>Rule:</strong> reach for reasoning patterns only when the wrong answer has consequences AND the right answer requires multi-step thought.
+  </div>
+  <div class="footer-tag">Part 4 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 5 — OUTPUT STRUCTURING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 5</span>
+  <h1>Output structuring<br>&amp; parsers</h1>
+  <p class="subtitle">Once the model produces text, you need it as a <em>typed object</em>. The 9 LangChain parsers from Lab 2.4 + the modern <code>with_structured_output</code> path.</p>
+</section>
+
+<section>
+  <h2>The output-parser landscape</h2>
+  <table>
+    <tr><th>Parser</th><th>Output type</th><th>Best for</th></tr>
+    <tr><td><code>StrOutputParser</code></td><td><code>str</code></td><td>Plain text · LCEL final stage</td></tr>
+    <tr><td><code>CommaSeparatedListOutputParser</code></td><td><code>list[str]</code></td><td>Quick lists — tags, keywords</td></tr>
+    <tr><td><code>DatetimeOutputParser</code></td><td><code>datetime</code></td><td>Single date/time extraction</td></tr>
+    <tr><td><code>StructuredOutputParser</code></td><td><code>dict</code></td><td>Quick named-field extraction (no class)</td></tr>
+    <tr><td><code>JsonOutputParser</code></td><td><code>dict</code> (or Pydantic)</td><td>Flexible JSON — streamable</td></tr>
+    <tr><td><code>PydanticOutputParser</code> ★</td><td>Typed Pydantic model</td><td>Production schema validation</td></tr>
+    <tr><td><code>EnumOutputParser</code></td><td>Python <code>Enum</code></td><td>Classification into fixed categories</td></tr>
+    <tr><td><code>OutputFixingParser</code></td><td>Wraps any parser</td><td>Auto-retry malformed output</td></tr>
+    <tr><td><code>.with_structured_output()</code> ★★</td><td>Pydantic / TypedDict / dict</td><td><strong>Modern default</strong> — provider-native</td></tr>
+  </table>
+  <div class="info-card amber">
+    <strong>Lab 2.4</strong> walks through every one. By §15 you should be reaching for Pydantic + <code>with_structured_output</code> by reflex.
+  </div>
+  <div class="footer-tag">Part 5 · 1/4</div>
+</section>
+
+<section>
+  <h2><code>PydanticOutputParser</code> — the workhorse</h2>
+  <pre><code class="language-python">from pydantic import BaseModel, Field
+from typing import Literal
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+
+class LoanApplication(BaseModel):
+    applicant_name: str = Field(description="Full legal name")
+    amount_requested: float = Field(description="In INR lakhs", ge=0)
+    tenure_years: int = Field(ge=1, le=30)
+    risk_tier: Literal["low", "medium", "high"]
+    flags: list[str] = Field(default_factory=list, description="any concerns")
+
+parser = PydanticOutputParser(pydantic_object=LoanApplication)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Extract a LoanApplication from the customer email.\n"
+               "{format_instructions}"),
+    ("user", "{email}"),
+]).partial(format_instructions=parser.get_format_instructions())
+
+chain = prompt | llm | parser
+result: LoanApplication = chain.invoke({"email": email_text})
+result.amount_requested  # &rarr; float, validated</code></pre>
+  <div class="info-card emerald">
+    <strong>What this gets you:</strong> typed access (IDE autocomplete) · runtime validation (range checks, enums) · automatic JSON-schema generation for the prompt · re-use of the schema in your DB layer / API.
+  </div>
+  <div class="footer-tag">Part 5 · 2/4</div>
+</section>
+
+<section>
+  <h2><code>.with_structured_output()</code> — the modern path</h2>
+  <div class="grid-2">
+    <div>
+      <p>Most providers now have <strong>native</strong> structured-output support — they validate the schema on their side and refuse to return invalid JSON. LangChain's <code>.with_structured_output()</code> wraps that.</p>
+      <h4>Differences vs <code>PydanticOutputParser</code></h4>
+      <ul class="checklist">
+        <li><strong>Provider-validated</strong> — fewer parse failures</li>
+        <li><strong>No prompt-instruction overhead</strong> — schema goes via API, not in tokens</li>
+        <li><strong>One line of code</strong> instead of three (parser + prompt + chain)</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code class="language-python">from pydantic import BaseModel, Field
+from langchain_openai import ChatOpenAI
+
+class TriageResult(BaseModel):
+    category: Literal["billing", "technical", "fraud"]
+    urgency: int = Field(ge=1, le=5)
+    summary: str
+
+llm = ChatOpenAI(model="gpt-5-mini")
+structured_llm = llm.with_structured_output(TriageResult)
+
+result = structured_llm.invoke(
+    "Customer says their card was charged twice "
+    "for a single Amazon order on 12 Jan."
+)
+# &rarr; TriageResult instance, validated server-side</code></pre>
+      <div class="info-card violet" style="margin-top:0.4em;">
+        <strong>Default to this</strong> for any new chain in 2026. Fall back to <code>PydanticOutputParser</code> only when running on a model without native support.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 3/4</div>
+</section>
+
+<section>
+  <h2>XML tagging · Decision tree</h2>
+  <div class="grid-2">
+    <div>
+      <h3>XML tagging via system prompt</h3>
+      <p>Anthropic's training distribution is <strong>XML-heavy</strong>. For Claude, XML tags often outperform JSON for "extract structured fields from unstructured text".</p>
+      <pre><code class="language-python">SYSTEM:
+Extract policy details from the email.
+Wrap each field in tags:
+
+&lt;policy_number&gt;...&lt;/policy_number&gt;
+&lt;coverage_amount&gt;...&lt;/coverage_amount&gt;
+&lt;effective_date&gt;...&lt;/effective_date&gt;
+&lt;exclusions&gt;...&lt;/exclusions&gt;</code></pre>
+      <p>Then parse with regex / <code>lxml</code> — no parser library needed.</p>
+    </div>
+    <div>
+      <h3>Which parser?</h3>
+      <pre><code style="font-size:0.65em;">Need typed object with validation?
+├── YES &rarr; with_structured_output (Pydantic) ★
+└── NO  &rarr; what shape?
+           ├── single string &rarr; StrOutputParser
+           ├── list of strings &rarr; CommaSeparated
+           ├── single date &rarr; Datetime
+           ├── enum/category &rarr; EnumOutputParser
+           ├── flexible JSON &rarr; JsonOutputParser
+           ├── XML (Claude) &rarr; XML tagging via system
+           └── prone to invalid output?
+                &rarr; wrap in OutputFixingParser</code></pre>
+      <div class="info-card amber" style="margin-top:0.4em;">
+        <strong>Lab 2.4 §11 + §15</strong> walk through XML tagging and the full decision tree.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 6 — PROMPT CACHING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 6</span>
+  <h1>Prompt caching<br>across providers</h1>
+  <p class="subtitle">If your prompt has a long stable prefix, you're leaving 50–90% of cost and 4× of latency on the table without caching.</p>
+</section>
+
+<section>
+  <h2>Why cache? — cost &amp; latency math</h2>
+  <div class="grid-2">
+    <div>
+      <h4>Without caching</h4>
+      <p>System prompt (5K tokens) + user query (200 tokens) every call.</p>
+      <p>1M calls/day → 5.2B tokens/day → on Sonnet 4.5: <strong>~$15,600/day</strong>.</p>
+    </div>
+    <div class="card emerald">
+      <h4>With caching</h4>
+      <p>System prompt cached → billed at ~10% of normal rate after first hit.</p>
+      <p>Same 1M calls/day → effective <strong>~$2,000/day</strong>.</p>
+      <p style="color:var(--accent-emerald);"><strong>Savings: 87%.</strong></p>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-top:0.5em;">
+    <div class="kpi"><div class="kpi-value">10×</div><div class="kpi-label">cheaper · cached input<br>(Anthropic, OpenAI)</div></div>
+    <div class="kpi violet"><div class="kpi-value">4–5×</div><div class="kpi-label">faster · TTFT<br>on cache hit</div></div>
+    <div class="kpi emerald"><div class="kpi-value">5 min</div><div class="kpi-label">default cache TTL<br>(extendable)</div></div>
+  </div>
+  <div class="info-card amber">
+    <strong>Cache is free money.</strong> If your prompt has any reusable prefix (system prompt, RAG instructions, tool definitions, few-shot examples) and you call &gt; 100 times/hour — turn caching on.
+  </div>
+  <div class="footer-tag">Part 6 · 1/5</div>
+</section>
+
+<section>
+  <h2>Anthropic — explicit <code>cache_control</code></h2>
+  <pre><code class="language-python">response = anthropic_client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    system=[
+        {
+            "type": "text",
+            "text": "&lt;long bank-policy reference document, ~10K tokens&gt;",
+            "cache_control": {"type": "ephemeral"},   # &larr; cache this!
+        }
+    ],
+    messages=[{"role": "user", "content": "Is X covered under policy Y?"}],
+)
+# response.usage:
+#   cache_creation_input_tokens   (first call)
+#   cache_read_input_tokens       (subsequent calls — billed at ~10%)
+</code></pre>
+  <div class="grid-2">
+    <div class="card">
+      <h4>How it works</h4>
+      <ul class="checklist">
+        <li>You mark <em>cache breakpoints</em> with <code>cache_control</code></li>
+        <li>Anything <strong>before</strong> the breakpoint is cached</li>
+        <li>Up to 4 breakpoints per request → multi-tier cache</li>
+        <li>Default TTL = 5 minutes (1-hour TTL via beta header)</li>
+      </ul>
+    </div>
+    <div class="card violet">
+      <h4>Pricing</h4>
+      <ul class="checklist">
+        <li><strong>Cache creation</strong> — 1.25× normal input cost (one-time)</li>
+        <li><strong>Cache read</strong> — 0.1× normal input cost (every subsequent hit)</li>
+        <li>Output is unchanged</li>
+        <li>Break-even after ~2 hits</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-tag">Part 6 · 2/5</div>
+</section>
+
+<section>
+  <h2>Anthropic — multi-layer cache breakpoints</h2>
+  <pre><code class="language-python">system=[
+    {  # Layer 1 — bank policies (3K tokens, near-permanent)
+        "type": "text",
+        "text": large_policy_doc,
+        "cache_control": {"type": "ephemeral"},
+    },
+    {  # Layer 2 — today's interest rates (500 tokens, refreshes daily)
+        "type": "text",
+        "text": today_rates_table,
+        "cache_control": {"type": "ephemeral"},
+    },
+    {  # Layer 3 — current session preamble (rarely re-used)
+        "type": "text",
+        "text": session_metadata,
+    },
+]</code></pre>
+  <div class="info-card emerald">
+    <strong>The art of cache design.</strong> Stack <em>most-stable on top</em>, <em>most-volatile at bottom</em>. When the bottom layer changes, top layers stay cached. <strong>Lab 2.5 §6.1</strong> demonstrates this with multi-tier banking content.
+  </div>
+  <div class="quote-box">
+    <strong>Anti-pattern:</strong> putting the user's variable input <em>above</em> a stable reference doc — the cache invalidates on every call. Order matters.
+  </div>
+  <div class="footer-tag">Part 6 · 3/5</div>
+</section>
+
+<section>
+  <h2>OpenAI &amp; Gemini — different shapes, same idea</h2>
+  <div class="grid-2">
+    <div class="card violet">
+      <h3>OpenAI — automatic</h3>
+      <p>No code change required. The platform automatically caches any prompt prefix &gt; 1024 tokens and reuses it across calls within ~5–10 minutes.</p>
+      <ul class="checklist">
+        <li>Cached input billed at ~50% of normal rate (varies by model)</li>
+        <li>You see <code>cached_tokens</code> in <code>response.usage.prompt_tokens_details</code></li>
+        <li>Stability requires <strong>identical prefix</strong> (down to whitespace)</li>
+      </ul>
+    </div>
+    <div class="card emerald">
+      <h3>Gemini — explicit cache API</h3>
+      <p>You create a named cache resource, then reference it in queries.</p>
+      <pre><code style="font-size:0.62em;">cache = client.caches.create(
+    model="gemini-2.5-flash",
+    config={"contents": large_doc,
+            "ttl": "3600s"})
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=question,
+    config={"cached_content": cache.name},
+)</code></pre>
+      <ul class="checklist">
+        <li>Full CRUD — list / get / update / delete</li>
+        <li>Min content size: ~32K tokens (Pro) or 1K (Flash)</li>
+        <li>Storage cost separate from inference</li>
+      </ul>
+    </div>
+  </div>
+  <div class="info-card amber">
+    <strong>Lab 2.5 §5–§7</strong> walks through all three providers end-to-end. <strong>§8</strong> compares them on the same prompt — note the different breakeven points and TTLs.
+  </div>
+  <div class="footer-tag">Part 6 · 4/5</div>
+</section>
+
+<section>
+  <h2>Cache-aware prompt design</h2>
+  <div class="bad-good">
+    <div class="bad">
+      <h4>👎 Cache-hostile</h4>
+      <pre><code style="font-size:0.7em;">system = (
+    f"Today is {datetime.now()}. "    # &larr; changes every second
+    f"User: {user_id}. "              # &larr; per-user
+    f"You are a banking assistant..." # &larr; stable but BURIED
+)</code></pre>
+      <p style="margin-top:0.3em;"><strong>Problem:</strong> the variable parts are at the TOP, so nothing before them can be cached → 0% cache hit.</p>
+    </div>
+    <div class="good">
+      <h4>👍 Cache-friendly</h4>
+      <pre><code style="font-size:0.7em;">system = [
+    {"text": LARGE_POLICY_DOC,         # 5K stable
+     "cache_control": {"type": "ephemeral"}},
+    {"text": LARGE_FAQ,                 # 3K stable
+     "cache_control": {"type": "ephemeral"}},
+    {"text": f"User: {user_id}. "       # variable
+             f"Date: {today}. "}
+]</code></pre>
+      <p style="margin-top:0.3em;"><strong>Why it works:</strong> stable content first → cache always hits → variable suffix doesn't break the cache above it.</p>
+    </div>
+  </div>
+  <div class="info-card violet" style="margin-top:0.4em;">
+    <strong>Mental model:</strong> cache hits stop at the first byte that differs. Put long-stable stuff first, short-variable stuff last. <strong>Lab 2.5 §9</strong> drills this with measurable hit-rate experiments.
+  </div>
+  <div class="footer-tag">Part 6 · 5/5</div>
+</section>
+
+<!-- ═══════════════════════ PART 7 — CONTEXT ENGINEERING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 7</span>
+  <h1>Context engineering<br>the bigger picture</h1>
+  <p class="subtitle">Prompt engineering tunes <em>how</em> the model is asked. Context engineering decides <em>what</em> the model sees. The newer, broader discipline.</p>
+</section>
+
+<section>
+  <h2>Prompt engineering vs context engineering</h2>
+  <table>
+    <tr><th></th><th>Prompt engineering</th><th>Context engineering</th></tr>
+    <tr><td><strong>Question</strong></td><td>"How do I phrase this?"</td><td>"What information should be in the window?"</td></tr>
+    <tr><td><strong>Scope</strong></td><td>The instruction</td><td>The full token budget — instructions + data + memory + tool outputs</td></tr>
+    <tr><td><strong>Levers</strong></td><td>Persona · examples · format · CoT</td><td>Retrieval · summarization · memory · ordering · compression</td></tr>
+    <tr><td><strong>Failure modes</strong></td><td>"Vague output"</td><td>"Lost-in-the-middle" · "missed key fact" · "ran out of tokens"</td></tr>
+    <tr><td><strong>Owns the loss when…</strong></td><td>Prompt was unclear</td><td>Wrong context was retrieved / kept / dropped</td></tr>
+    <tr><td><strong>Required for</strong></td><td>Every LLM feature</td><td>Any feature with state, memory, RAG, agents, or large input</td></tr>
+  </table>
+  <div class="quote-box">
+    Andrej Karpathy &amp; Tobi Lütke (2024–25): "the new core skill is context engineering — the art and science of filling the context window with just the right information for the next step."
+  </div>
+  <div class="footer-tag">Part 7 · 1/3</div>
+</section>
+
+<section>
+  <h2>The 5 information layers in a context window</h2>
+  <svg class="diagram" viewBox="0 0 880 280" xmlns="http://www.w3.org/2000/svg">
+    <text x="440" y="20" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">A typical chat-with-RAG context, top to bottom</text>
+    <!-- Layer stack -->
+    <rect x="100" y="35"  width="680" height="38" rx="6" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="120" y="58" fill="#38bdf8" font-family="Inter,sans-serif" font-size="12" font-weight="600">① System / persona</text>
+    <text x="780" y="58" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">~500 tokens · stable · cacheable</text>
+
+    <rect x="100" y="78"  width="680" height="38" rx="6" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="120" y="101" fill="#a78bfa" font-family="Inter,sans-serif" font-size="12" font-weight="600">② Few-shot examples / output schema</text>
+    <text x="780" y="101" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">~1–5K · stable · cacheable</text>
+
+    <rect x="100" y="121"  width="680" height="38" rx="6" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="120" y="144" fill="#34d399" font-family="Inter,sans-serif" font-size="12" font-weight="600">③ Retrieved context (RAG chunks, tool outputs)</text>
+    <text x="780" y="144" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">~5–20K · per-query · NOT cacheable</text>
+
+    <rect x="100" y="164"  width="680" height="38" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="120" y="187" fill="#fbbf24" font-family="Inter,sans-serif" font-size="12" font-weight="600">④ Conversation history (chat memory)</text>
+    <text x="780" y="187" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">~1–10K · per-session · grows over time</text>
+
+    <rect x="100" y="207"  width="680" height="38" rx="6" fill="#161c3a" stroke="#fb7185" stroke-width="1.5"/>
+    <text x="120" y="230" fill="#fb7185" font-family="Inter,sans-serif" font-size="12" font-weight="600">⑤ Current user message + recent tool calls</text>
+    <text x="780" y="230" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">~50–500 tokens · per-call</text>
+
+    <text x="440" y="270" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Stable layers go first → cacheable. Volatile ones at the bottom.</text>
+  </svg>
+  <div class="info-card emerald">
+    Each layer has different sourcing, different lifespan, different cost. Treating them as one giant string is the #1 cause of wasted cost and lost-in-the-middle errors.
+  </div>
+  <div class="footer-tag">Part 7 · 2/3</div>
+</section>
+
+<section>
+  <h2>The context budget — allocation framework</h2>
+  <div class="grid-2">
+    <div>
+      <h4>Step 1 · Set the budget</h4>
+      <p>Pick a target — e.g. 32K input tokens (out of 200K window). Reserves the rest for output and headroom.</p>
+      <h4 style="margin-top:0.5em;">Step 2 · Allocate by layer</h4>
+      <ul class="checklist">
+        <li><strong>System / few-shot:</strong> 5K (cached, ~$0)</li>
+        <li><strong>RAG chunks:</strong> 15K (5–10 chunks, top-k)</li>
+        <li><strong>Memory:</strong> 8K (summary + last 5 turns)</li>
+        <li><strong>Current turn:</strong> 4K (input + tool outputs)</li>
+      </ul>
+      <h4 style="margin-top:0.5em;">Step 3 · Measure &amp; tune</h4>
+      <p>Log per-call: tokens by layer, hit rate, latency. Re-balance when one layer crowds out another.</p>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 280" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">32K input budget · sample allocation</text>
+        <!-- Pie segments -->
+        <g transform="translate(190 150)">
+          <!-- 5K system: 56 deg -->
+          <path d="M 0 0 L 0 -110 A 110 110 0 0 1 91.4 -61.4 Z" fill="#38bdf8" opacity="0.85"/>
+          <!-- 15K RAG: 169 deg -->
+          <path d="M 0 0 L 91.4 -61.4 A 110 110 0 0 1 -109.6 9.4 Z" fill="#34d399" opacity="0.85"/>
+          <!-- 8K memory: 90 deg -->
+          <path d="M 0 0 L -109.6 9.4 A 110 110 0 0 1 -50 97.9 Z" fill="#fbbf24" opacity="0.85"/>
+          <!-- 4K current: 45 deg -->
+          <path d="M 0 0 L -50 97.9 A 110 110 0 0 1 0 -110 Z" fill="#fb7185" opacity="0.85"/>
+        </g>
+        <text x="245" y="105" fill="#0a0e27" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">5K · sys</text>
+        <text x="280" y="170" fill="#0a0e27" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">15K · RAG</text>
+        <text x="100" y="220" fill="#0a0e27" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">8K · mem</text>
+        <text x="120" y="80"  fill="#0a0e27" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">4K · turn</text>
+      </svg>
+    </div>
+  </div>
+  <div class="info-card amber">
+    Ratios change per use case — code agents skew RAG-heavy, customer-support skews memory-heavy. <strong>Always measure first</strong>, never assume.
+  </div>
+  <div class="footer-tag">Part 7 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 8 — CONTEXT MANAGEMENT TECHNIQUES ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 8</span>
+  <h1>Context management<br>techniques</h1>
+  <p class="subtitle">When the context window starts to overflow — and it always does — these are the patterns that keep your application alive.</p>
+</section>
+
+<section>
+  <h2>Truncation — the simplest move</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h3>Head truncation</h3>
+      <p>Drop oldest tokens first. Keeps recent context.</p>
+      <p style="color:var(--text-muted);"><strong>Use for:</strong> chat where recent turns matter most.</p>
+      <p style="color:var(--accent-rose); font-size:0.7em;">Risk: loses original system prompt &amp; goals.</p>
+    </div>
+    <div class="card violet">
+      <h3>Tail truncation</h3>
+      <p>Drop newest tokens. Keeps original setup.</p>
+      <p style="color:var(--text-muted);"><strong>Use for:</strong> rare — only when system prompt is the most important.</p>
+      <p style="color:var(--accent-rose); font-size:0.7em;">Risk: ignores user's actual question.</p>
+    </div>
+    <div class="card emerald">
+      <h3>Head + tail (default) ★</h3>
+      <p>Keep system prompt &amp; most recent N turns; drop the middle.</p>
+      <p style="color:var(--text-muted);"><strong>Use for:</strong> production chat.</p>
+      <p style="color:var(--accent-emerald); font-size:0.7em;">Best balance — but middle context is gone forever.</p>
+    </div>
+  </div>
+  <svg class="diagram" viewBox="0 0 880 130" xmlns="http://www.w3.org/2000/svg">
+    <text x="20" y="25" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11">Original conversation (15 turns)</text>
+    <g>
+      <rect x="20" y="35" width="850" height="22" fill="#161c3a" stroke="#94a3b8" stroke-width="0.5"/>
+      <text x="445" y="50" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">[sys] [t1] [t2] [t3] [t4] [t5] [t6] [t7] [t8] [t9] [t10] [t11] [t12] [t13] [t14] [t15]</text>
+    </g>
+    <text x="20" y="80" fill="#34d399" font-family="Inter,sans-serif" font-size="11">After head+tail truncation (keep sys + last 4)</text>
+    <g>
+      <rect x="20" y="90" width="120" height="22" fill="#161c3a" stroke="#38bdf8" stroke-width="1"/>
+      <text x="80" y="105" fill="#38bdf8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">[sys]</text>
+      <rect x="142" y="90" width="430" height="22" fill="#0f1430" stroke="#fb7185" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <text x="357" y="105" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">— middle dropped —</text>
+      <rect x="574" y="90" width="296" height="22" fill="#161c3a" stroke="#34d399" stroke-width="1"/>
+      <text x="722" y="105" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">[t12] [t13] [t14] [t15]</text>
+    </g>
+  </svg>
+  <div class="footer-tag">Part 8 · 1/5</div>
+</section>
+
+<section>
+  <h2>Summarization — running &amp; hierarchical</h2>
+  <div class="grid-2">
+    <div>
+      <h3>Running summary</h3>
+      <p>After every <em>k</em> turns, summarize the older portion into a compact paragraph. Replace it in the context window.</p>
+      <pre><code style="font-size:0.65em;">if len(history) &gt; 10:
+    old, recent = history[:-5], history[-5:]
+    summary = llm.invoke(
+        f"Summarize this chat in 200 words: {old}"
+    )
+    history = [summary] + recent</code></pre>
+      <div class="info-card violet">
+        Trade-off: cheaper context, but summary loses fidelity each pass. Compounds over a long session.
+      </div>
+    </div>
+    <div>
+      <h3>Hierarchical summarization</h3>
+      <p>Multiple levels — last-5-turns summary, last-50-turns summary, last-500-turns summary. Older = more compressed.</p>
+      <svg class="diagram" viewBox="0 0 380 200" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20"  y="20" width="340" height="22" fill="#161c3a" stroke="#fb7185"/>
+        <text x="190" y="35" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">all turns 1-500 → 1-paragraph summary (Level 3)</text>
+        <rect x="80"  y="55" width="280" height="22" fill="#161c3a" stroke="#fbbf24"/>
+        <text x="220" y="70" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">turns 451-500 → 1-page summary (L2)</text>
+        <rect x="140" y="90" width="220" height="22" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="250" y="105" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">turns 491-500 → bullet summary (L1)</text>
+        <rect x="200" y="125" width="160" height="22" fill="#161c3a" stroke="#34d399"/>
+        <text x="280" y="140" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">turns 496-500 → verbatim</text>
+        <text x="190" y="180" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">recent = full fidelity · old = compressed gist</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 8 · 2/5</div>
+</section>
+
+<section>
+  <h2>Sliding-window memory</h2>
+  <div class="grid-2">
+    <div>
+      <p>Keep the <strong>last N tokens</strong> verbatim. Anything older falls off the edge.</p>
+      <h4>When it works</h4>
+      <ul class="checklist">
+        <li>Tasks where only recent context matters (short-form chat, code completion)</li>
+        <li>Stateless services on top of stateful clients</li>
+        <li>Cost-sensitive deployments — bounded context = bounded cost</li>
+      </ul>
+      <h4 style="margin-top:0.5em;">When it fails</h4>
+      <ul class="checklist">
+        <li>User refers to something said 30 turns ago — gone</li>
+        <li>Multi-day support cases — needs persistent memory below the window</li>
+      </ul>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 250" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6">
+            <path d="M0 6 L6 0" stroke="#fb7185" stroke-width="0.5" opacity="0.4"/>
+          </pattern>
+        </defs>
+        <text x="190" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">N=5 sliding window over time</text>
+        <!-- Time slices -->
+        <g font-family="JetBrains Mono, monospace" font-size="10">
+          <text x="20" y="55" fill="#94a3b8">t=5:</text>
+          <rect x="60"  y="42" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="100" y="42" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="140" y="42" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="180" y="42" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="220" y="42" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <text x="80"  y="58" fill="#0a0e27" text-anchor="middle">m1</text>
+          <text x="120" y="58" fill="#0a0e27" text-anchor="middle">m2</text>
+          <text x="160" y="58" fill="#0a0e27" text-anchor="middle">m3</text>
+          <text x="200" y="58" fill="#0a0e27" text-anchor="middle">m4</text>
+          <text x="240" y="58" fill="#0a0e27" text-anchor="middle">m5</text>
+
+          <text x="20" y="105" fill="#94a3b8">t=6:</text>
+          <rect x="60"  y="92" width="40" height="22" fill="url(#hatch)" stroke="#fb7185"/>
+          <rect x="100" y="92" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="140" y="92" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="180" y="92" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="220" y="92" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="260" y="92" width="40" height="22" fill="#fbbf24" opacity="0.85"/>
+          <text x="80"  y="108" fill="#fb7185" text-anchor="middle">m1</text>
+          <text x="120" y="108" fill="#0a0e27" text-anchor="middle">m2</text>
+          <text x="160" y="108" fill="#0a0e27" text-anchor="middle">m3</text>
+          <text x="200" y="108" fill="#0a0e27" text-anchor="middle">m4</text>
+          <text x="240" y="108" fill="#0a0e27" text-anchor="middle">m5</text>
+          <text x="280" y="108" fill="#0a0e27" text-anchor="middle">m6</text>
+
+          <text x="20" y="155" fill="#94a3b8">t=8:</text>
+          <rect x="60"  y="142" width="40" height="22" fill="url(#hatch)" stroke="#fb7185"/>
+          <rect x="100" y="142" width="40" height="22" fill="url(#hatch)" stroke="#fb7185"/>
+          <rect x="140" y="142" width="40" height="22" fill="url(#hatch)" stroke="#fb7185"/>
+          <rect x="180" y="142" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="220" y="142" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="260" y="142" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="300" y="142" width="40" height="22" fill="#34d399" opacity="0.7"/>
+          <rect x="340" y="142" width="40" height="22" fill="#fbbf24" opacity="0.85"/>
+          <text x="200" y="158" fill="#0a0e27" text-anchor="middle">m4</text>
+          <text x="240" y="158" fill="#0a0e27" text-anchor="middle">m5</text>
+          <text x="280" y="158" fill="#0a0e27" text-anchor="middle">m6</text>
+          <text x="320" y="158" fill="#0a0e27" text-anchor="middle">m7</text>
+          <text x="360" y="158" fill="#0a0e27" text-anchor="middle">m8</text>
+        </g>
+        <text x="190" y="200" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">hatched = dropped, not recoverable from context</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 8 · 3/5</div>
+</section>
+
+<section>
+  <h2>Memory architectures — short-term + long-term</h2>
+  <svg class="diagram" viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arM" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+      </marker>
+    </defs>
+    <!-- Working / short-term -->
+    <rect x="20" y="40" width="260" height="170" rx="10" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="150" y="65" fill="#38bdf8" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle">Working memory</text>
+    <text x="150" y="83" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">in-context · ~last 10 turns</text>
+    <text x="40"  y="115" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ Recent user messages</text>
+    <text x="40"  y="135" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ Tool call results</text>
+    <text x="40"  y="155" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ Sliding window</text>
+    <text x="150" y="195" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">FAST · expensive · volatile</text>
+
+    <!-- Short-term summary -->
+    <rect x="310" y="40" width="240" height="170" rx="10" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="430" y="65" fill="#a78bfa" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle">Session memory</text>
+    <text x="430" y="83" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">running summary · session DB</text>
+    <text x="330" y="115" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ Conversation summary</text>
+    <text x="330" y="135" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ User prefs this session</text>
+    <text x="330" y="155" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ Active goals / state</text>
+    <text x="430" y="195" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">FAST-ish · per-session DB</text>
+
+    <!-- Long-term -->
+    <rect x="580" y="40" width="280" height="170" rx="10" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="720" y="65" fill="#34d399" font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle">Long-term memory</text>
+    <text x="720" y="83" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">vector store · graph DB · RAG</text>
+    <text x="600" y="115" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ User's full chat history</text>
+    <text x="600" y="135" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ Customer profile facts</text>
+    <text x="600" y="155" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11">▸ Org-wide knowledge base</text>
+    <text x="720" y="195" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">SLOW · cheap · persistent</text>
+
+    <line x1="280" y1="125" x2="310" y2="125" stroke="#a78bfa" stroke-width="2" marker-end="url(#arM)"/>
+    <line x1="550" y1="125" x2="580" y2="125" stroke="#a78bfa" stroke-width="2" marker-end="url(#arM)"/>
+
+    <text x="440" y="240" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Each tier feeds the next via summarization (left → right) or retrieval (right → left).</text>
+  </svg>
+  <div class="info-card emerald">
+    Module 3 (LangChain memory) and Modules 4–5 (RAG) build out the right two tiers. Module 7 (LangGraph) coordinates them via state.
+  </div>
+  <div class="footer-tag">Part 8 · 4/5</div>
+</section>
+
+<section>
+  <h2>Lost-in-the-middle &amp; ordering</h2>
+  <div class="grid-2">
+    <div>
+      <p>Models recall information at the <strong>start</strong> and <strong>end</strong> of long contexts much better than in the middle. Documented across GPT-4, Claude, Llama, Gemini.</p>
+      <h4>Mitigations</h4>
+      <ul class="checklist">
+        <li><strong>Reorder by relevance</strong> — most-relevant chunks first AND last</li>
+        <li><strong>Re-rank before insertion</strong> — cross-encoder bumps top hits up</li>
+        <li><strong>Compress mid-context</strong> — summarize less-relevant chunks</li>
+        <li><strong>Recency anchor</strong> — restate the question right before the answer position</li>
+        <li><strong>Smaller windows</strong> — fewer chunks → less middle to lose</li>
+      </ul>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 380 280" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Recall accuracy vs answer position</text>
+        <line x1="50"  y1="40"  x2="50"  y2="220" stroke="#94a3b8" stroke-width="1"/>
+        <line x1="50"  y1="220" x2="350" y2="220" stroke="#94a3b8" stroke-width="1"/>
+        <text x="40"  y="50"  fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="end">acc</text>
+        <text x="50"  y="240" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">start</text>
+        <text x="200" y="240" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">middle</text>
+        <text x="350" y="240" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">end</text>
+        <!-- U-curve -->
+        <path d="M 50 60 Q 90 80 130 130 Q 200 200 270 130 Q 310 80 350 60" stroke="#fb7185" stroke-width="2.5" fill="none"/>
+        <text x="50"  y="80" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="10">high</text>
+        <text x="200" y="190" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">trough · "lost"</text>
+        <text x="320" y="80" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="10">high</text>
+        <text x="190" y="265" fill="#94a3b8" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">Liu et al. 2023 — "Lost in the Middle"</text>
+      </svg>
+    </div>
+  </div>
+  <div class="info-card amber">
+    Practical: when doing RAG with k=10 chunks, put your top-3 most-relevant at the <em>start</em>, the next 3 at the <em>end</em>, and the rest in the middle. Module 5 covers this in depth.
+  </div>
+  <div class="footer-tag">Part 8 · 5/5</div>
+</section>
+
+<!-- ═══════════════════════ PART 9 — MAP TO LABS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 9</span>
+  <h1>Map to the labs</h1>
+  <p class="subtitle">Where each concept above lands in Labs 2.1 → 2.5.</p>
+</section>
+
+<section>
+  <h2>Lab 2.1 — Crafting Precise Prompts</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Side-by-side comparisons of <strong>bad vs good</strong> prompts on two banking scenarios (loan inquiry summary, failed-transaction communication). Build the <code>ChatPromptTemplate</code> habit from cell 1.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>The <strong>5 levers</strong> (Part 1)</li>
+        <li><code>ChatPromptTemplate</code> basics (Part 2)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card">
+        <h4>👀 Watch for</h4>
+        <ul class="checklist">
+          <li>How adding a persona changes tone instantly</li>
+          <li>How a 1-line schema constraint changes output reliability</li>
+          <li>The "challenge" cell — your turn to write a good prompt from scratch</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 9 · 1/5</div>
+</section>
+
+<section>
+  <h2>Lab 2.2 — Foundational Prompt Patterns</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Apply each of the 4 foundational patterns on banking content: <strong>Persona · N-Shot · Directional Stimulus · Template &amp; Meta-Language</strong>. Then scale few-shot with <code>FewShotChatMessagePromptTemplate</code> + <code>SemanticSimilarityExampleSelector</code>.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>All 4 foundational patterns (Part 3)</li>
+        <li>LangChain few-shot primitives (Part 2)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card violet">
+        <h4>👀 Watch for</h4>
+        <ul class="checklist">
+          <li>How each pattern compounds — combining persona + few-shot beats either alone</li>
+          <li>The directional-stimulus measurable improvement in faithfulness</li>
+          <li>Why 3 well-chosen examples ≈ 50 random ones</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 9 · 2/5</div>
+</section>
+
+<section>
+  <h2>Lab 2.3 — Advanced Prompting (CoT · ToT · CoVe)</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Three reasoning patterns on banking content: <strong>Chain of Thought</strong> (fraud alerts, loan eligibility), <strong>Tree of Thoughts</strong> (investment strategy, debt restructuring), <strong>Chain of Verification</strong> (regulatory summaries, factual stock analysis).</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>The 3 reasoning patterns (Part 4)</li>
+        <li>When NOT to use them — reasoning models, latency budgets (Part 4)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card emerald">
+        <h4>👀 Watch for</h4>
+        <ul class="checklist">
+          <li>Latency cost of ToT vs plain CoT (10× tokens)</li>
+          <li>How CoVe catches hallucinations CoT misses</li>
+          <li>The Q&amp;A section at the end — interview-grade questions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 9 · 3/5</div>
+</section>
+
+<section>
+  <h2>Lab 2.4 — Output Parsers Deep-Dive</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Walk through every LangChain output parser (8 of them), then the modern <code>.with_structured_output()</code>, plus XML-tagging via system prompt and a multi-step output-chaining pattern.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>The parser landscape table (Part 5)</li>
+        <li>Pydantic basics — <code>BaseModel</code>, <code>Field</code>, <code>Literal</code>, validators</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card amber">
+        <h4>👀 Watch for</h4>
+        <ul class="checklist">
+          <li>The decision tree at §15 — memorize it</li>
+          <li>How <code>with_structured_output</code> beats <code>PydanticOutputParser</code> on Pareto front</li>
+          <li>Comparison: open-source (Llama via Groq) vs frontier on parser reliability</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 9 · 4/5</div>
+</section>
+
+<section>
+  <h2>Lab 2.5 — Prompt Caching Across Providers</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Build large reference docs, then test caching on <strong>OpenAI (automatic)</strong>, <strong>Anthropic (explicit cache_control)</strong> with multi-layer breakpoints, and <strong>Gemini (explicit cache resource)</strong>. Then a side-by-side comparison and good-vs-bad cache-design experiments.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>The 3 provider caching APIs (Part 6)</li>
+        <li>Cache-aware design: stable-first, variable-last (Part 6)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card rose">
+        <h4>👀 Watch for</h4>
+        <ul class="checklist">
+          <li>Cache-creation cost spike on first call vs steady-state savings</li>
+          <li>How TTLs affect break-even calculations</li>
+          <li>The Q&amp;A section's "cache breakpoint" question — common interview probe</li>
+        </ul>
+      </div>
+      <div class="info-card rose">
+        Apply the Lab 2.5 lessons to <em>every</em> production system from Module 3 onward — most of them have a stable system prompt + RAG context that begs to be cached.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 9 · 5/5</div>
+</section>
+
+<section>
+  <h2>Three checkpoints for Day 2</h2>
+  <div class="grid-3" style="margin-top:0.5em;">
+    <div class="card">
+      <h3>① Pattern fluency</h3>
+      <p>For any task, can you name the right pattern (persona · few-shot · CoT · ToT · CoVe) in 5 seconds?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> the table in Part 4 (when NOT to use these) by reflex.</p>
+    </div>
+    <div class="card violet">
+      <h3>② Schema-first</h3>
+      <p>Default mode: every LLM call returns a Pydantic object. Free-text only when there's a real reason.</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> reach for <code>with_structured_output</code> by reflex.</p>
+    </div>
+    <div class="card emerald">
+      <h3>③ Context budget</h3>
+      <p>For any LLM feature, can you draw the 5 information layers and assign a token budget to each?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> Part 7's allocation framework as a habit.</p>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.6em;">
+    Day 3 (Module 3) builds modern memory + LCEL + tool-calling agents on top of everything we covered today. Bring strong prompt + parser + caching habits — they'll save you from re-learning.
+  </div>
+  <div class="footer-tag">Day 2 · checkpoints</div>
+</section>
+
+<!-- ═══════════════════════ END ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">End of Module 2</div>
+  <h1>Questions?</h1>
+  <div class="subtitle">Next: open Lab 2.1 — Crafting Precise Prompts.<br>
+    Have your <code>.env</code> populated with the 4 LLM keys; <code>langchain&gt;=1.0</code> and <code>pydantic</code> installed.</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">Module 2 · Day 2 · Prompt &amp; Context Engineering</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    pdfSeparateFragments: false,
+    plugins: [RevealHighlight, RevealZoom, RevealSearch]
+  });
+</script>
+</body>
+</html>
