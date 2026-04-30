@@ -1,6 +1,6 @@
 # eClerx — AI / GenAI Engineer Training
 
-A 10-day, 40-lab corporate training program preparing CDAC graduates at **eClerx** for deployment as AI / GenAI Engineers at financial-services clients. The program covers prompt engineering, LangChain, LangGraph, RAG, agentic systems, AWS Bedrock, observability, and production deployment.
+A 10-day, 39-lab corporate training program preparing CDAC graduates at **eClerx** for deployment as AI / GenAI Engineers at financial-services clients. The program covers prompt engineering, LangChain, LangGraph, RAG, agentic systems, AWS Bedrock, observability, and production deployment.
 
 Each module ships as a folder at the repo root containing:
 
@@ -27,16 +27,19 @@ eClerx-GenAI-Training/
 │   ├── Lab_2.4_Output_Parsers_DeepDive.ipynb
 │   ├── Lab_2.5_Prompt_Caching.ipynb
 │   └── Module_2_Prompt_and_Context_Engineering.html
-├── Module 3 - LangChain Deep Dive/                    (coming soon — Day 3, 3 labs)
+├── Module 3 - LangChain Deep Dive/                       ← Day 3 (2 labs) ✅
+│   ├── Lab_3.1_LangChain_Fundamentals.ipynb
+│   └── Lab_3.2_Tool_Calling_Agents.ipynb
+├── Module 4 - RAG Foundations/                           (coming soon — Day 4, 4 labs)
 ├── …
-└── Module 10 - Production Deployment & Capstone/      (coming soon — Day 10, 3 labs)
+└── Module 10 - Production Deployment & Capstone/         (coming soon — Day 10, 3 labs)
 ```
 
 | # | Module | Day | Labs | Status |
 |---|---|---|---|---|
 | 1 | Python for GenAI & LLM Foundations | 1 | 4 | ✅ Available |
 | 2 | Prompt Engineering with LangChain | 2 | 5 | ✅ Available |
-| 3 | LangChain Deep Dive | 3 | 3 | Coming soon |
+| 3 | LangChain Deep Dive | 3 | 2 | ✅ Available |
 | 4 | RAG Foundations | 4 | 4 | Coming soon |
 | 5 | Advanced RAG & Evaluation | 5 | 4 | Coming soon |
 | 6 | Claude API & AWS Bedrock | 6 | 4 | Coming soon |
@@ -71,6 +74,17 @@ eClerx-GenAI-Training/
 | 2.5 | Prompt caching across providers — Anthropic `cache_control`, OpenAI automatic, Gemini explicit cache API | Dense (with interview prep) |
 
 **Deck:** `Module_2_Prompt_and_Context_Engineering.html` covers all 5 labs plus the broader concepts of **context engineering** (vs prompt engineering) and **context management techniques** (truncation, running summary, hierarchical summary, sliding window, memory tiers, lost-in-the-middle).
+
+---
+
+## Module 3 — LangChain Deep Dive
+
+| Lab | Topic | Type |
+|---|---|---|
+| 3.1 | LangChain Fundamentals — chains, **modern memory** (`RunnableWithMessageHistory`), LCEL composition, `.astream_events()` for streaming UIs | Dense (with interview prep) |
+| 3.2 | Tool-calling agents with **LangChain v1 `create_agent`** — built-in tools (Tavily), custom `@tool` and `StructuredTool` patterns, real-world weather API, error handling | Dense (with interview prep) |
+
+Lab 3.1 replaces the deprecated `ConversationBufferMemory` family with the LangChain v1 `RunnableWithMessageHistory` + `InMemoryChatMessageHistory` pattern, and introduces `.astream_events()` for streaming UIs (used later in Module 10's FastAPI deployment). Lab 3.2 replaces the legacy `AgentExecutor` orchestration with the v1 `create_agent` Runnable, and previews the LangGraph `StateGraph` re-implementation that comes in Module 7.
 
 ---
 
