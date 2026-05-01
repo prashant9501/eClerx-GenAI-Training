@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 3 — LangChain Deep Dive · Prashant Sahu</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #0a0e27;
+    --bg-mid:  #111733;
+    --bg-card: #161c3a;
+    --bg-card-hover: #1d2447;
+    --accent-sky:     #38bdf8;
+    --accent-violet:  #a78bfa;
+    --accent-emerald: #34d399;
+    --accent-amber:   #fbbf24;
+    --accent-rose:    #fb7185;
+    --text-primary: #e2e8f0;
+    --text-muted:   #94a3b8;
+    --text-dim:     #64748b;
+    --border-soft:  rgba(148, 163, 184, 0.15);
+    --code-bg: #1e293b;
+  }
+
+  .reveal {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+    font-size: 24px;
+  }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section { padding: 12px 0; }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ffffff;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    margin: 0 0 0.4em 0;
+  }
+  .reveal h1 { font-size: 2.0em;  line-height: 1.1; font-weight: 700; }
+  .reveal h2 { font-size: 1.25em; line-height: 1.2; }
+  .reveal h3 { font-size: 1.0em;  line-height: 1.3; color: var(--accent-sky); font-weight: 600; }
+  .reveal h4 { font-size: 0.85em; line-height: 1.3; color: var(--accent-violet); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reveal p, .reveal li { line-height: 1.5; color: var(--text-primary); font-size: 0.85em; }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .reveal li { margin-bottom: 0.32em; }
+  .reveal strong { color: #ffffff; font-weight: 600; }
+  .reveal em { color: var(--accent-amber); font-style: italic; }
+  .reveal a { color: var(--accent-sky); text-decoration: none; border-bottom: 1px dotted var(--accent-sky); }
+
+  .reveal code {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    padding: 0.08em 0.32em;
+    border-radius: 4px;
+    font-size: 0.82em;
+  }
+  .reveal pre {
+    width: 100%;
+    box-shadow: none;
+    margin: 0.4em 0;
+  }
+  .reveal pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6em;
+    line-height: 1.5;
+    padding: 0.85em 1em;
+    background: var(--code-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-sky);
+    max-height: 380px;
+    overflow: auto;
+  }
+
+  .reveal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4em 0;
+    font-size: 0.78em;
+  }
+  .reveal table th {
+    background: linear-gradient(180deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.08) 100%);
+    color: #ffffff;
+    text-align: left;
+    padding: 0.5em 0.8em;
+    border-bottom: 2px solid var(--accent-sky);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .reveal table td {
+    padding: 0.45em 0.8em;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 180ms ease;
+  }
+  .reveal table tr:hover td { background: rgba(56, 189, 248, 0.06); }
+  .reveal table tr:nth-child(even) td { background: rgba(255, 255, 255, 0.018); }
+  .reveal table tr:nth-child(even):hover td { background: rgba(56, 189, 248, 0.08); }
+
+  /* Title slide */
+  .reveal section.title-slide {
+    text-align: center;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(167, 139, 250, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.title-slide .eyebrow {
+    color: var(--accent-sky);
+    font-size: 0.55em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.8em;
+  }
+  .reveal section.title-slide h1 {
+    font-size: 2.4em;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #38bdf8 0%, #a78bfa 50%, #fb7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5em;
+    animation: titleFade 1.2s ease-out;
+  }
+  @keyframes titleFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal section.title-slide .subtitle {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 0.4em;
+  }
+  .reveal section.title-slide .tag {
+    display: inline-block;
+    margin-top: 0.4em;
+    padding: 0.3em 1em;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 999px;
+    font-size: 0.6em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .reveal section.title-slide .presenter-block {
+    margin-top: 1.6em;
+    padding: 0.6em 1.4em;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+  .reveal section.title-slide .presenter-label {
+    color: var(--accent-violet);
+    font-size: 0.5em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.15em;
+  }
+  .reveal section.title-slide .presenter-name {
+    color: #ffffff;
+    font-size: 1.0em;
+    font-weight: 600;
+  }
+  .reveal section.title-slide .meta {
+    margin-top: 1.4em;
+    color: var(--text-dim);
+    font-size: 0.55em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Section divider */
+  .reveal section.divider {
+    text-align: left;
+    background:
+      radial-gradient(circle at 20% 60%, rgba(56, 189, 248, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 90% 30%, rgba(167, 139, 250, 0.13) 0%, transparent 55%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.divider .part-label {
+    display: block;
+    color: var(--accent-sky);
+    font-size: 0.6em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.4em;
+  }
+  .reveal section.divider h1 {
+    font-size: 2.2em;
+    line-height: 1.05;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+  }
+  .reveal section.divider .subtitle {
+    color: var(--text-muted);
+    font-size: 0.7em;
+    max-width: 800px;
+    line-height: 1.5;
+  }
+  .reveal section.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--accent-sky), var(--accent-violet));
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.75em 1.05em;
+    border-left: 3px solid var(--accent-sky);
+    margin: 0.35em 0;
+    transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+  }
+  .card.violet  { border-left-color: var(--accent-violet); }
+  .card.violet:hover  { box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15); }
+  .card.emerald { border-left-color: var(--accent-emerald); }
+  .card.emerald:hover { box-shadow: 0 8px 24px rgba(52, 211, 153, 0.12); }
+  .card.amber   { border-left-color: var(--accent-amber); }
+  .card.amber:hover   { box-shadow: 0 8px 24px rgba(251, 191, 36, 0.12); }
+  .card.rose    { border-left-color: var(--accent-rose); }
+  .card.rose:hover    { box-shadow: 0 8px 24px rgba(251, 113, 133, 0.12); }
+  .card h3, .card h4 { margin-top: 0; }
+  .card p { margin: 0.3em 0; font-size: 0.78em; }
+
+  .info-card {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    padding: 0.65em 0.95em;
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .info-card.violet  { background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.2); }
+  .info-card.emerald { background: rgba(52, 211, 153, 0.08);  border-color: rgba(52, 211, 153, 0.2); }
+  .info-card.amber   { background: rgba(251, 191, 36, 0.08);  border-color: rgba(251, 191, 36, 0.25); }
+  .info-card.rose    { background: rgba(251, 113, 133, 0.08); border-color: rgba(251, 113, 133, 0.25); }
+
+  .pill {
+    display: inline-block;
+    padding: 0.12em 0.55em;
+    background: rgba(56, 189, 248, 0.16);
+    color: var(--accent-sky);
+    border-radius: 999px;
+    font-size: 0.65em;
+    font-weight: 500;
+    margin: 0.05em 0.15em;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+  .pill.violet  { background: rgba(167, 139, 250, 0.16); color: var(--accent-violet); border-color: rgba(167, 139, 250, 0.3); }
+  .pill.emerald { background: rgba(52, 211, 153, 0.16);  color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.3); }
+  .pill.amber   { background: rgba(251, 191, 36, 0.16);  color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); }
+  .pill.rose    { background: rgba(251, 113, 133, 0.16); color: var(--accent-rose); border-color: rgba(251, 113, 133, 0.3); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85em; align-items: stretch; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.65em; align-items: stretch; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.55em; align-items: stretch; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5em; align-items: stretch; }
+
+  svg.diagram {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 8px;
+    width: 100%;
+    height: auto;
+    margin: 0.3em 0;
+    border: 1px solid var(--border-soft);
+  }
+
+  .kpi {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.55em 0.85em;
+    text-align: center;
+    border-top: 3px solid var(--accent-sky);
+    transition: transform 200ms ease;
+  }
+  .kpi:hover { transform: translateY(-3px); }
+  .kpi.violet  { border-top-color: var(--accent-violet); }
+  .kpi.emerald { border-top-color: var(--accent-emerald); }
+  .kpi.amber   { border-top-color: var(--accent-amber); }
+  .kpi.rose    { border-top-color: var(--accent-rose); }
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-label {
+    color: var(--text-muted);
+    font-size: 0.66em;
+    margin-top: 0.3em;
+    letter-spacing: 0.06em;
+  }
+
+  .quote-box {
+    border-left: 3px solid var(--accent-amber);
+    padding: 0.45em 0.95em;
+    background: rgba(251, 191, 36, 0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .quote-box::before { content: '"'; color: var(--accent-amber); font-size: 1.5em; line-height: 0.5; vertical-align: middle; margin-right: 0.2em; }
+
+  .reveal ul.checklist { list-style: none; padding-left: 0.4em; }
+  .reveal ul.checklist li::before {
+    content: '▸';
+    color: var(--accent-sky);
+    margin-right: 0.5em;
+    font-weight: 700;
+  }
+
+  .reveal .progress { color: var(--accent-sky); height: 4px; }
+  .reveal .slide-number {
+    background: rgba(10, 14, 39, 0.65);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .footer-tag {
+    position: absolute;
+    bottom: 0.3em;
+    right: 0.5em;
+    color: var(--text-dim);
+    font-size: 0.45em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Bad-vs-good comparison boxes */
+  .bad-good {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7em;
+    margin: 0.4em 0;
+  }
+  .bad-good .bad, .bad-good .good {
+    border-radius: 10px;
+    padding: 0.7em 1em;
+    font-size: 0.78em;
+    transition: all 220ms ease;
+  }
+  .bad-good .bad {
+    background: rgba(251, 113, 133, 0.08);
+    border: 1px solid rgba(251, 113, 133, 0.3);
+  }
+  .bad-good .bad:hover { background: rgba(251, 113, 133, 0.13); }
+  .bad-good .good {
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+  .bad-good .good:hover { background: rgba(52, 211, 153, 0.13); }
+  .bad-good h4 { margin-bottom: 0.3em; }
+  .bad-good .bad h4  { color: var(--accent-rose); }
+  .bad-good .good h4 { color: var(--accent-emerald); }
+
+  /* Lever / dimension card */
+  .lever {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.7em 0.9em;
+    border-bottom: 3px solid var(--accent-sky);
+    transition: transform 220ms ease;
+  }
+  .lever:hover { transform: translateY(-3px); }
+  .lever .lever-num {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-sky);
+    font-size: 0.7em;
+  }
+  .lever h4 { margin: 0.2em 0 0.3em 0; color: #ffffff; text-transform: none; letter-spacing: 0; font-size: 0.95em; }
+  .lever p { font-size: 0.72em; color: var(--text-muted); margin: 0; }
+  .lever.violet  { border-bottom-color: var(--accent-violet); }
+  .lever.emerald { border-bottom-color: var(--accent-emerald); }
+  .lever.amber   { border-bottom-color: var(--accent-amber); }
+  .lever.rose    { border-bottom-color: var(--accent-rose); }
+
+  @media print {
+    .reveal pre code { font-size: 0.5em; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════ TITLE ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">eClerx · CDAC · Module 3 · Day 3</div>
+  <h1>LangChain<br>Deep Dive</h1>
+  <div class="subtitle">From a chain to a tool-calling agent — LCEL, modern memory, and the LangChain v1 agent path</div>
+  <div class="tag">Setup deck for Labs 3.1 → 3.2</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">2026 · Cohort 1</div>
+</section>
+
+<!-- ═══════════════════════ ROADMAP ═══════════════════════ -->
+<section>
+  <h2>What we'll cover today</h2>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card"><h4>Part 1</h4><p>From chain to agent — where Day 3 sits</p></div>
+    <div class="card violet"><h4>Part 2</h4><p>LCEL composition patterns (Lab 3.1)</p></div>
+    <div class="card emerald"><h4>Part 3</h4><p>Modern memory — <code>RunnableWithMessageHistory</code></p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card amber"><h4>Part 4</h4><p>Streaming — <code>.stream</code> vs <code>.astream_events</code></p></div>
+    <div class="card rose"><h4>Part 5</h4><p>Tools &amp; agents — the v1 path (Lab 3.2)</p></div>
+    <div class="card"><h4>Part 6</h4><p>Production concerns — errors, debugging</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card violet"><h4>Part 7</h4><p>Map to the labs</p></div>
+    <div class="card emerald"><h4>+</h4><p>Forward references — LangGraph (M7), FastAPI (M10)</p></div>
+    <div class="card amber"><h4>Goal</h4><p>By 6pm: build, compose, agentise &amp; debug a LangChain pipeline</p></div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    <strong>One sentence summary.</strong> A LangChain pipeline is a <em>graph of Runnables</em>; the pipe operator is <em>function composition</em>; an agent is <em>a chain that decides what to do next</em>. Internalise these three and the rest is API surface.
+  </div>
+  <div class="footer-tag">Roadmap</div>
+</section>
+
+<!-- ═══════════════════════ PART 1 — FROM CHAIN TO AGENT ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 1</span>
+  <h1>From a chain<br>to an agent</h1>
+  <p class="subtitle">Day 1 you called an LLM. Day 2 you engineered the prompt. Today you compose, remember, route, and let the model pick its own next step.</p>
+</section>
+
+<section>
+  <h2>The Day-2 → Day-3 jump</h2>
+  <div class="bad-good">
+    <div class="bad">
+      <h4>Day 2 · single call</h4>
+      <pre><code style="font-size:0.72em;">prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are an analyst..."),
+    ("user", "{question}"),
+])
+msg = prompt.invoke({"question": q})
+response = llm.invoke(msg)
+text = response.content</code></pre>
+      <p style="margin-top:0.4em;">Three calls to glue together · no chaining · no streaming · no memory · no tools.</p>
+    </div>
+    <div class="good">
+      <h4>Day 3 · LCEL chain</h4>
+      <pre><code style="font-size:0.72em;">chain = prompt | llm | StrOutputParser()
+
+# one call · streamable · batchable
+text = chain.invoke({"question": q})
+
+# add memory
+with_history = RunnableWithMessageHistory(
+    chain, get_session_history,
+    input_messages_key="question",
+    history_messages_key="history",
+)</code></pre>
+      <p style="margin-top:0.4em;">One composable object · streams · batches · accepts memory wrappers · production-ready.</p>
+    </div>
+  </div>
+  <div class="info-card violet">
+    The whole module is about moving from the left side of this slide to the right. <code>|</code> is the gateway drug.
+  </div>
+  <div class="footer-tag">Part 1 · 1/3</div>
+</section>
+
+<section>
+  <h2>The Runnable interface — the unit of composition</h2>
+  <div class="grid-2">
+    <div>
+      <p>Every LangChain component (prompt, LLM, parser, retriever, lambda) is a <code>Runnable</code>. They all share the same interface — that's why the pipe operator works.</p>
+      <h4>The 5 methods you'll use</h4>
+      <table style="font-size:0.78em;">
+        <tr><th>Method</th><th>Returns</th><th>When</th></tr>
+        <tr><td><code>.invoke(x)</code></td><td>single result</td><td>one call</td></tr>
+        <tr><td><code>.stream(x)</code></td><td>iterator of chunks</td><td>token-stream UI</td></tr>
+        <tr><td><code>.batch([x1, x2])</code></td><td>list of results</td><td>parallel calls</td></tr>
+        <tr><td><code>.ainvoke(x)</code></td><td>awaitable</td><td>async server</td></tr>
+        <tr><td><code>.astream_events(x)</code></td><td>fine-grained events</td><td>tracing / SSE</td></tr>
+      </table>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arRn" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <text x="200" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Same shape — every component</text>
+        <rect x="30" y="40" width="340" height="42" rx="8" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="200" y="60" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">ChatPromptTemplate · Runnable</text>
+        <text x="200" y="76" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">.invoke({...}) → ChatPromptValue</text>
+        <line x1="200" y1="84" x2="200" y2="104" stroke="#38bdf8" stroke-width="2" marker-end="url(#arRn)"/>
+        <rect x="30" y="108" width="340" height="42" rx="8" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="200" y="128" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">ChatAnthropic · Runnable</text>
+        <text x="200" y="144" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">.invoke(prompt_value) → AIMessage</text>
+        <line x1="200" y1="152" x2="200" y2="172" stroke="#38bdf8" stroke-width="2" marker-end="url(#arRn)"/>
+        <rect x="30" y="176" width="340" height="42" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+        <text x="200" y="196" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">StrOutputParser · Runnable</text>
+        <text x="200" y="212" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">.invoke(message) → str</text>
+        <text x="200" y="245" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">prompt | llm | parser  ≡  function composition</text>
+      </svg>
+    </div>
+  </div>
+  <div class="info-card emerald">
+    <strong>Mental model.</strong> If you can write <code>f(g(h(x)))</code>, you can write <code>h | g | f</code>. The pipe just spells composition left-to-right.
+  </div>
+  <div class="footer-tag">Part 1 · 2/3</div>
+</section>
+
+<section>
+  <h2>What changes structurally on Day 3</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4>① From f-strings to chains</h4>
+      <p>You stop writing <code>response = llm.invoke(prompt)</code> by hand. You write <code>chain = prompt | llm | parser</code> and call <code>chain.invoke(...)</code>.</p>
+    </div>
+    <div class="card violet">
+      <h4>② From "no memory" to per-session memory</h4>
+      <p>You wrap the chain in <code>RunnableWithMessageHistory</code>. Each user gets their own conversation thread, identified by <code>session_id</code>.</p>
+    </div>
+    <div class="card emerald">
+      <h4>③ From "answer text" to "stream events"</h4>
+      <p><code>.stream()</code> for token UIs. <code>.astream_events()</code> for fine-grained traces — the basis of M9 observability and M10 SSE endpoints.</p>
+    </div>
+    <div class="card amber">
+      <h4>④ From "one path" to "many paths"</h4>
+      <p><code>RunnableParallel</code>, <code>RunnableLambda</code>, <code>RunnableBranch</code>, <code>.with_fallbacks()</code> — branch, fan-out, recover.</p>
+    </div>
+    <div class="card rose">
+      <h4>⑤ From "fixed steps" to "agent decides"</h4>
+      <p>The model picks which tool to call. <code>create_agent</code> (LangChain v1) replaces the legacy <code>AgentExecutor</code> orchestration.</p>
+    </div>
+    <div class="card">
+      <h4>⑥ From "happy path" to "production loop"</h4>
+      <p>Tool failures, wrong-tool selection, infinite loops, timeouts. Module 3 ends with the debugging mindset.</p>
+    </div>
+  </div>
+  <div class="footer-tag">Part 1 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 2 — LCEL COMPOSITION ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 2</span>
+  <h1>LCEL composition<br>patterns</h1>
+  <p class="subtitle">The five primitives you'll reach for daily — pipe, parallel, passthrough, lambda, branch.</p>
+</section>
+
+<section>
+  <h2>The pipe — <code>prompt | llm | parser</code></h2>
+  <div class="grid-2">
+    <div>
+      <p>The simplest LCEL chain. The right-hand side's <code>.invoke()</code> consumes the left-hand side's output. Same shape, regardless of how many stages.</p>
+      <pre><code class="language-python">from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_anthropic import ChatAnthropic
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a banking risk analyst."),
+    ("user", "Assess: {transaction}"),
+])
+llm = ChatAnthropic(model="claude-haiku-4-5", temperature=0)
+parser = StrOutputParser()
+
+chain = prompt | llm | parser
+risk_summary = chain.invoke({"transaction": tx_json})</code></pre>
+      <h4 style="margin-top:0.5em;">What you also get for free</h4>
+      <ul class="checklist">
+        <li><code>.stream({"transaction": ...})</code> — token-by-token</li>
+        <li><code>.batch([{"transaction": t1}, {"transaction": t2}])</code> — parallel</li>
+        <li><code>chain.with_config({"tags": ["risk"]})</code> — for tracing</li>
+      </ul>
+    </div>
+    <div>
+      <h4>What the pipe is doing under the hood</h4>
+      <pre><code style="font-size:0.7em;"># Conceptually:
+def chain_invoke(input_dict):
+    prompt_value = prompt.invoke(input_dict)
+    ai_message   = llm.invoke(prompt_value)
+    text         = parser.invoke(ai_message)
+    return text
+
+# LCEL just wraps that, but also gives you
+# stream / batch / async / tracing / fallbacks
+# without having to rewrite the function.</code></pre>
+      <div class="info-card violet">
+        <strong>Lab 3.1 §4</strong> walks through the same chain with three different output parsers (Str, Json, Pydantic) and shows streaming.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 1/4</div>
+</section>
+
+<section>
+  <h2><code>RunnableParallel</code> — fan-out, fan-in</h2>
+  <div class="grid-2">
+    <div>
+      <p>Run multiple Runnables on the <em>same</em> input concurrently. The result is a dict keyed by your branch names.</p>
+      <pre><code class="language-python">from langchain_core.runnables import RunnableParallel
+
+# Three perspectives on the same email
+analysis = RunnableParallel({
+    "summary":      summary_chain,
+    "sentiment":    sentiment_chain,
+    "action_items": action_chain,
+})
+
+result = analysis.invoke({"email": email_text})
+# result == {
+#   "summary":      "...",
+#   "sentiment":    "...",
+#   "action_items": [...],
+# }</code></pre>
+      <p style="margin-top:0.4em;">Each branch runs <em>concurrently</em> via the LangChain executor (threaded for sync, asyncio for async). For 3 branches → ~1× latency instead of 3×.</p>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arP" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+          </marker>
+        </defs>
+        <rect x="140" y="20" width="120" height="32" rx="6" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="200" y="40" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">input dict</text>
+        <line x1="200" y1="52" x2="80"  y2="92" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arP)"/>
+        <line x1="200" y1="52" x2="200" y2="92" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arP)"/>
+        <line x1="200" y1="52" x2="320" y2="92" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arP)"/>
+        <rect x="20" y="95" width="120" height="50" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="80" y="115" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">summary_chain</text>
+        <text x="80" y="132" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">~1.2s</text>
+        <rect x="140" y="95" width="120" height="50" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="200" y="115" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">sentiment_chain</text>
+        <text x="200" y="132" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">~1.0s</text>
+        <rect x="260" y="95" width="120" height="50" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="320" y="115" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">action_chain</text>
+        <text x="320" y="132" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">~1.4s</text>
+        <line x1="80"  y1="148" x2="200" y2="188" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arP)"/>
+        <line x1="200" y1="148" x2="200" y2="188" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arP)"/>
+        <line x1="320" y1="148" x2="200" y2="188" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arP)"/>
+        <rect x="120" y="190" width="160" height="42" rx="6" fill="#161c3a" stroke="#fbbf24"/>
+        <text x="200" y="210" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">{summary, sentiment, action_items}</text>
+        <text x="200" y="226" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">total ≈ max(1.2, 1.0, 1.4) = 1.4s</text>
+      </svg>
+    </div>
+  </div>
+  <div class="info-card emerald">
+    <strong>Lab 3.1 §8</strong> uses <code>RunnableParallel</code> for a 3-branch document analysis. Module 7 generalises this pattern with the LangGraph <code>Send</code> API.
+  </div>
+  <div class="footer-tag">Part 2 · 2/4</div>
+</section>
+
+<section>
+  <h2><code>RunnableLambda</code> + <code>RunnablePassthrough.assign</code></h2>
+  <div class="grid-2">
+    <div>
+      <h3><code>RunnableLambda</code></h3>
+      <p>Wrap any Python callable into the Runnable interface — so it composes via <code>|</code>.</p>
+      <pre><code class="language-python">from langchain_core.runnables import RunnableLambda
+
+def normalize(text: str) -> str:
+    return text.strip().lower()
+
+clean = RunnableLambda(normalize)
+chain = clean | prompt | llm | parser</code></pre>
+      <h4 style="margin-top:0.5em;">When use it</h4>
+      <ul class="checklist">
+        <li>Pre / post-processing in the middle of a chain</li>
+        <li>Calling a non-LangChain library (regex, datetime, API wrapper)</li>
+        <li>Custom transforms that don't justify a full Runnable subclass</li>
+      </ul>
+    </div>
+    <div>
+      <h3><code>RunnablePassthrough.assign</code></h3>
+      <p>Add fields to a dict-shaped pipeline state without dropping the existing ones. Used everywhere in RAG.</p>
+      <pre><code class="language-python">from langchain_core.runnables import RunnablePassthrough
+
+# Input:  {"question": "..."}
+# Add a "context" field, keep "question"
+chain = (
+    RunnablePassthrough.assign(
+        context=lambda x: retriever.invoke(x["question"])
+    )
+    | prompt   # uses both {question} and {context}
+    | llm
+    | parser
+)</code></pre>
+      <div class="info-card amber">
+        <strong>Lab 3.1 §7</strong> + Module 4 RAG labs lean on this pattern. It's the LCEL-idiomatic way to build pipeline state.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 3/4</div>
+</section>
+
+<section>
+  <h2>Branching — <code>RunnableBranch</code>, fallbacks, retries</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h3><code>RunnableBranch</code></h3>
+      <p>If/elif/else routing on the input. Use when the routing rule is <strong>deterministic</strong> (regex, type check, length).</p>
+      <pre><code style="font-size:0.62em;">RunnableBranch(
+  (lambda x: x["type"]=="urgent",
+   urgent_chain),
+  (lambda x: x["type"]=="vip",
+   vip_chain),
+  default_chain,
+)</code></pre>
+      <p style="color:var(--text-muted); font-size:0.7em;">For LLM-based routing, use a small classifier chain (Module 7).</p>
+    </div>
+    <div class="card violet">
+      <h3><code>.with_fallbacks(...)</code></h3>
+      <p>If the primary Runnable raises, try the next one. Best for <strong>provider failover</strong>.</p>
+      <pre><code style="font-size:0.62em;">primary = ChatAnthropic(...)
+backup  = ChatOpenAI(...)
+
+resilient = primary.with_fallbacks(
+    [backup]
+)</code></pre>
+      <p style="color:var(--text-muted); font-size:0.7em;">Fires on any exception. Doesn't retry the same provider.</p>
+    </div>
+    <div class="card emerald">
+      <h3><code>.with_retry(...)</code></h3>
+      <p>Retry the <em>same</em> Runnable on failure. Best for <strong>transient errors</strong> (rate limits, timeouts).</p>
+      <pre><code style="font-size:0.62em;">llm.with_retry(
+  retry_if_exception_type=(
+    RateLimitError,
+  ),
+  stop_after_attempt=3,
+  wait_exponential_jitter=True,
+)</code></pre>
+      <p style="color:var(--text-muted); font-size:0.7em;">Combine with fallbacks: retry first, then fail over.</p>
+    </div>
+  </div>
+  <div class="info-card amber">
+    <strong>Layered defence:</strong> <code>llm.with_retry(...).with_fallbacks([backup])</code> — exponential-backoff against the primary, then switch providers if it still fails. <em>This is the production pattern.</em>
+  </div>
+  <div class="footer-tag">Part 2 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 3 — MODERN MEMORY ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 3</span>
+  <h1>Modern memory<br><code>RunnableWithMessageHistory</code></h1>
+  <p class="subtitle">The deprecated <code>ConversationBufferMemory</code> family is gone in 1.0. The new pattern composes cleanly with LCEL and scales to multi-tenant deployments.</p>
+</section>
+
+<section>
+  <h2>Why <code>ConversationBufferMemory</code> was deprecated</h2>
+  <div class="bad-good">
+    <div class="bad">
+      <h4>Legacy memory · pre-LCEL</h4>
+      <pre><code style="font-size:0.7em;">from langchain.memory import (
+    ConversationBufferMemory,
+)
+memory = ConversationBufferMemory(
+    memory_key="history",
+    return_messages=True,
+)
+chain = LLMChain(
+    llm=llm, prompt=prompt, memory=memory,
+)
+out = chain({"input": "hi"})  # memory side-effected</code></pre>
+      <p style="margin-top:0.4em;">Stateful object embedded in a Chain · single-process · bound to the chain instance · doesn't compose with LCEL pipes · per-user requires N memory objects.</p>
+    </div>
+    <div class="good">
+      <h4>Modern memory · LCEL-native</h4>
+      <pre><code style="font-size:0.7em;">from langchain_core.runnables.history \
+    import RunnableWithMessageHistory
+from langchain_core.chat_history \
+    import InMemoryChatMessageHistory
+
+store = {}
+def get_history(session_id: str):
+    if session_id not in store:
+        store[session_id] = InMemoryChatMessageHistory()
+    return store[session_id]
+
+chain_with_mem = RunnableWithMessageHistory(
+    chain, get_history,
+    input_messages_key="input",
+    history_messages_key="history",
+)</code></pre>
+      <p style="margin-top:0.4em;">Pure wrapper · composes with any Runnable · per-session via <code>session_id</code> · history backend is pluggable (in-mem, SQLite, Postgres, Redis).</p>
+    </div>
+  </div>
+  <div class="info-card violet">
+    <strong>The mental shift.</strong> Memory is no longer a property of the chain — it's a <em>wrapper</em> that injects history before the call and saves the new turn after. The chain stays stateless and reusable.
+  </div>
+  <div class="footer-tag">Part 3 · 1/3</div>
+</section>
+
+<section>
+  <h2>How <code>RunnableWithMessageHistory</code> actually works</h2>
+  <div class="grid-2">
+    <div>
+      <svg class="diagram" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arH" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#34d399"/>
+          </marker>
+        </defs>
+        <rect x="120" y="15" width="160" height="32" rx="6" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="200" y="35" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">.invoke({"input": "..."})</text>
+        <text x="200" y="58" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">config={"configurable": {"session_id": "u-123"}}</text>
+
+        <line x1="200" y1="68" x2="200" y2="84" stroke="#34d399" stroke-width="2" marker-end="url(#arH)"/>
+        <rect x="60" y="88" width="280" height="32" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="200" y="108" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">① get_history("u-123") → [...prior msgs]</text>
+
+        <line x1="200" y1="120" x2="200" y2="138" stroke="#34d399" stroke-width="2" marker-end="url(#arH)"/>
+        <rect x="60" y="142" width="280" height="32" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="200" y="162" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">② merge into prompt vars: history + input</text>
+
+        <line x1="200" y1="174" x2="200" y2="192" stroke="#34d399" stroke-width="2" marker-end="url(#arH)"/>
+        <rect x="60" y="196" width="280" height="32" rx="6" fill="#161c3a" stroke="#fbbf24"/>
+        <text x="200" y="216" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">③ inner chain runs (prompt | llm | ...)</text>
+
+        <line x1="200" y1="228" x2="200" y2="246" stroke="#34d399" stroke-width="2" marker-end="url(#arH)"/>
+        <rect x="60" y="250" width="280" height="22" rx="6" fill="#161c3a" stroke="#fb7185"/>
+        <text x="200" y="265" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">④ append new HumanMessage + AIMessage to store</text>
+      </svg>
+    </div>
+    <div>
+      <h4>The <code>session_id</code></h4>
+      <p>Passed via the <code>configurable</code> key in the run config. Every call you make includes it; the wrapper uses it to look up the right history.</p>
+      <pre><code style="font-size:0.7em;">chain_with_mem.invoke(
+    {"input": "hi, I'm Priya"},
+    config={"configurable": {"session_id": "u-123"}},
+)
+chain_with_mem.invoke(
+    {"input": "what's my name?"},
+    config={"configurable": {"session_id": "u-123"}},
+)
+# → "Your name is Priya."</code></pre>
+      <h4 style="margin-top:0.5em;">Why this scales</h4>
+      <ul class="checklist">
+        <li><strong>Stateless chain</strong> — one instance, N concurrent users</li>
+        <li><strong>History store</strong> can be Redis / Postgres → multi-process</li>
+        <li><strong>session_id</strong> = your <code>user_id</code>, <code>conversation_id</code>, or both</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 2/3</div>
+</section>
+
+<section>
+  <h2>Persistence tiers — pick by deployment shape</h2>
+  <table>
+    <tr><th>Backend</th><th>Class</th><th>Lifespan</th><th>Use when…</th></tr>
+    <tr><td><strong>In-memory</strong></td><td><code>InMemoryChatMessageHistory</code></td><td>process restart wipes</td><td>Notebooks · single-process demos · CI tests</td></tr>
+    <tr><td><strong>SQLite</strong></td><td><code>SQLChatMessageHistory(...sqlite...)</code></td><td>file restart-safe</td><td>Single-server apps · prototyping · trainee labs</td></tr>
+    <tr><td><strong>Postgres / MySQL</strong></td><td><code>SQLChatMessageHistory(...pg...)</code></td><td>cluster-safe</td><td>Multi-instance FastAPI · production</td></tr>
+    <tr><td><strong>Redis</strong></td><td><code>RedisChatMessageHistory</code></td><td>cluster + TTL</td><td>High-throughput chat · session-expiry needs</td></tr>
+    <tr><td><strong>DynamoDB / Mongo</strong></td><td>community classes</td><td>cluster, schemaless</td><td>Already using it · cross-region replication</td></tr>
+  </table>
+  <div class="info-card emerald">
+    <strong>Migration is a one-line swap</strong> in <code>get_history</code>. The chain doesn't care — that's the whole point of the wrapper pattern.
+  </div>
+  <div class="quote-box">
+    <strong>Lab 3.1 §5</strong> walks through in-memory; the trainee stretch exercise points at SQLite. Module 7 (LangGraph checkpoints) is where Postgres becomes interesting.
+  </div>
+  <div class="footer-tag">Part 3 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 4 — STREAMING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 4</span>
+  <h1>Streaming<br><code>.stream</code> · <code>.astream_events</code></h1>
+  <p class="subtitle">For UIs you want token streaming. For tracing, observability, and SSE endpoints you want event streaming. They're different APIs for different jobs.</p>
+</section>
+
+<section>
+  <h2>Three ways to consume a chain's output</h2>
+  <table>
+    <tr><th>Method</th><th>What you get</th><th>Latency</th><th>When use</th></tr>
+    <tr><td><code>.invoke(x)</code></td><td>Final result, all at once</td><td>Wait for full output</td><td>Batch jobs · post-processing</td></tr>
+    <tr><td><code>.stream(x)</code></td><td>Iterator of <em>output chunks</em> (text deltas, dict diffs)</td><td>First token in &lt; 1s</td><td>Chat UIs · token streaming</td></tr>
+    <tr><td><code>.astream_events(x, version="v2")</code></td><td>Iterator of fine-grained events: <em>chain start, llm token, tool call, end</em></td><td>First event immediately</td><td>SSE endpoints · LangSmith-like tracing · debug</td></tr>
+  </table>
+  <div class="grid-2" style="margin-top:0.4em;">
+    <div>
+      <h4><code>.stream</code> — for users</h4>
+      <pre><code style="font-size:0.7em;">for chunk in chain.stream({"q": q}):
+    print(chunk, end="", flush=True)
+# "The" "loan" " application" " indicates" ...</code></pre>
+    </div>
+    <div>
+      <h4><code>.astream_events</code> — for the platform</h4>
+      <pre><code style="font-size:0.7em;">async for ev in chain.astream_events(
+    {"q": q}, version="v2"):
+    if ev["event"] == "on_llm_stream":
+        ...   # send to SSE
+    elif ev["event"] == "on_tool_end":
+        ...   # log audit trail</code></pre>
+    </div>
+  </div>
+  <div class="info-card violet">
+    <strong>Lab 3.1 §6</strong> walks through both. Module 10 wires <code>astream_events</code> into a FastAPI <code>StreamingResponse</code> for the deployed agent — that's why it matters.
+  </div>
+  <div class="footer-tag">Part 4 · 1/1</div>
+</section>
+
+<!-- ═══════════════════════ PART 5 — TOOLS & AGENTS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 5</span>
+  <h1>Tools &amp; agents<br>the v1 path</h1>
+  <p class="subtitle">A chain runs a fixed sequence. An agent picks its own next step. <code>create_agent</code> (LangChain v1) replaces the legacy <code>AgentExecutor</code> — leaner, async-native, message-shaped.</p>
+</section>
+
+<section>
+  <h2>The agent loop — what's actually happening</h2>
+  <div class="grid-2">
+    <div>
+      <p>An agent is just <strong>a chain in a while-loop</strong>. The model returns either a final answer or a tool call. If it's a tool call, you run the tool, append the result, and ask the model again.</p>
+      <ol>
+        <li>Model receives messages + tool schemas</li>
+        <li>Model returns either:<br>
+          • final answer (we stop), or<br>
+          • <code>tool_calls</code> array (we run them)
+        </li>
+        <li>Append <code>ToolMessage</code> with each result</li>
+        <li>Loop back to step 1</li>
+      </ol>
+      <h4 style="margin-top:0.5em;">Stopping conditions</h4>
+      <ul class="checklist">
+        <li>Model returns final text (no tool calls)</li>
+        <li>Hit max iteration cap (default 25 in <code>create_agent</code>)</li>
+        <li>Hit timeout / cancellation</li>
+      </ul>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arA" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+          </marker>
+        </defs>
+        <rect x="130" y="15" width="140" height="32" rx="8" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="200" y="36" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">user message</text>
+        <line x1="200" y1="47" x2="200" y2="65" stroke="#a78bfa" stroke-width="2" marker-end="url(#arA)"/>
+
+        <rect x="100" y="68" width="200" height="38" rx="8" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="200" y="88" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">LLM with bound tools</text>
+        <text x="200" y="102" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">(prompt + tool schemas)</text>
+
+        <!-- Branch: tool call vs final -->
+        <line x1="200" y1="106" x2="100" y2="140" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arA)"/>
+        <line x1="200" y1="106" x2="300" y2="140" stroke="#34d399" stroke-width="1.6" marker-end="url(#arA)"/>
+        <text x="115" y="135" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">tool_call</text>
+        <text x="265" y="135" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="10">final</text>
+
+        <rect x="20" y="145" width="180" height="38" rx="8" fill="#161c3a" stroke="#fbbf24"/>
+        <text x="110" y="165" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">execute tool(s)</text>
+        <text x="110" y="178" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">parallel where possible</text>
+
+        <rect x="220" y="145" width="160" height="38" rx="8" fill="#161c3a" stroke="#34d399"/>
+        <text x="300" y="170" fill="#34d399" font-family="Inter,sans-serif" font-size="13" font-weight="600" text-anchor="middle">return answer</text>
+
+        <line x1="110" y1="183" x2="110" y2="210" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arA)"/>
+        <rect x="20" y="213" width="180" height="38" rx="8" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="110" y="233" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">append ToolMessage(s)</text>
+        <text x="110" y="246" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">(tool name + result)</text>
+
+        <line x1="110" y1="251" x2="110" y2="280" stroke="#a78bfa" stroke-width="1.6"/>
+        <line x1="110" y1="280" x2="200" y2="280" stroke="#a78bfa" stroke-width="1.6"/>
+        <line x1="200" y1="280" x2="200" y2="106" stroke="#a78bfa" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#arA)"/>
+        <text x="155" y="300" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">loop back</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 1/4</div>
+</section>
+
+<section>
+  <h2>Defining tools — <code>@tool</code> vs <code>StructuredTool</code></h2>
+  <div class="grid-2">
+    <div>
+      <h3><code>@tool</code> — the quick form</h3>
+      <p>Decorate a typed function. The docstring becomes the LLM-visible description; type hints become the schema.</p>
+      <pre><code class="language-python">from langchain_core.tools import tool
+
+@tool
+def get_balance(account_id: str) -> float:
+    """Return the current INR balance for the
+    given bank account_id. Use only for
+    customer-owned accounts."""
+    return banking_db.balance(account_id)</code></pre>
+      <h4 style="margin-top:0.4em;">When use it</h4>
+      <ul class="checklist">
+        <li>Schema is simple (1–3 primitive args)</li>
+        <li>Docstring describes the contract well</li>
+        <li>You don't need custom validation</li>
+      </ul>
+    </div>
+    <div>
+      <h3><code>StructuredTool</code> + Pydantic — strict form</h3>
+      <p>Define an explicit Pydantic input schema. Get validation, descriptions per field, enums, ranges.</p>
+      <pre><code class="language-python">from pydantic import BaseModel, Field
+from langchain_core.tools import StructuredTool
+
+class TransferInput(BaseModel):
+    from_account: str = Field(description="...")
+    to_account:   str = Field(description="...")
+    amount_inr:   float = Field(gt=0, le=200_000)
+    note:         str | None = None
+
+def _transfer(from_account, to_account, amount_inr, note):
+    ...
+
+transfer = StructuredTool.from_function(
+    func=_transfer,
+    name="transfer_funds",
+    description="Move INR between two own accounts.",
+    args_schema=TransferInput,
+)</code></pre>
+      <div class="info-card amber">
+        Pick this for anything <strong>non-trivial</strong> or <strong>dangerous</strong> (transfers, deletes, external API writes).
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 2/4</div>
+</section>
+
+<section>
+  <h2>Manual loop with <code>bind_tools</code> — and what's missing</h2>
+  <div class="grid-2">
+    <div>
+      <p><strong>Useful to see once</strong>, then never write again. <code>bind_tools</code> tells the LLM about tools but you do all the loop bookkeeping by hand.</p>
+      <pre><code class="language-python">llm_with_tools = llm.bind_tools([get_balance, transfer])
+
+messages = [HumanMessage(content="check balance for A1")]
+while True:
+    ai = llm_with_tools.invoke(messages)
+    messages.append(ai)
+    if not ai.tool_calls:
+        break  # final answer
+    for call in ai.tool_calls:
+        result = TOOLS[call["name"]].invoke(call["args"])
+        messages.append(ToolMessage(
+            content=str(result), tool_call_id=call["id"]
+        ))</code></pre>
+    </div>
+    <div>
+      <h4>What this loop is missing</h4>
+      <ul class="checklist">
+        <li><strong>Iteration cap</strong> — runaway loops</li>
+        <li><strong>Per-tool error handling</strong> — one bad call kills it</li>
+        <li><strong>Parallel tool execution</strong> — N calls run sequentially</li>
+        <li><strong>Streaming</strong> — no partial visibility</li>
+        <li><strong>Tracing hooks</strong> — no LangSmith / Langfuse out of the box</li>
+        <li><strong>Cancellation / timeout</strong> — no clean shutdown</li>
+      </ul>
+      <div class="info-card rose">
+        Every one of these is a real bug Lab 3.2 §8 walks through. Then §9 introduces the solution: <code>create_agent</code>.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 3/4</div>
+</section>
+
+<section>
+  <h2><code>create_agent</code> — the LangChain v1 modern path</h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">from langchain.agents import create_agent
+from langchain_anthropic import ChatAnthropic
+
+llm = ChatAnthropic(
+    model="claude-sonnet-4-5",
+    temperature=0,
+)
+
+agent = create_agent(
+    model=llm,
+    tools=[get_balance, transfer, get_rate],
+    prompt="You are a banking assistant. "
+           "Use the tools to answer accurately.",
+)
+
+result = agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": "What's my A1 balance, and "
+                   "transfer ₹5K to A2?",
+    }]
+})
+final = result["messages"][-1].content</code></pre>
+    </div>
+    <div>
+      <h4>What you get vs the manual loop</h4>
+      <ul class="checklist">
+        <li>Iteration cap built-in (default ~25)</li>
+        <li>Parallel tool execution where possible</li>
+        <li>Streaming via <code>.astream(...)</code></li>
+        <li>Native LangSmith / callback integration</li>
+        <li>Per-tool error injection back to the LLM</li>
+        <li>Async-first — drop into FastAPI directly</li>
+      </ul>
+      <h4 style="margin-top:0.5em;">vs legacy <code>AgentExecutor</code></h4>
+      <ul class="checklist">
+        <li>Message-shaped state (matches LangGraph)</li>
+        <li>Composes with <code>RunnableWithMessageHistory</code> for chat</li>
+        <li>One import, no <code>create_*_agent</code> + <code>AgentExecutor</code> two-step</li>
+      </ul>
+      <div class="info-card emerald">
+        <strong>Lab 3.2 §9</strong> rewrites the manual loop using <code>create_agent</code>. Side-by-side it's ~⅓ the code and you stop hand-rolling bookkeeping.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 6 — PRODUCTION CONCERNS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 6</span>
+  <h1>Production<br>concerns</h1>
+  <p class="subtitle">Once you ship an agent to real users, the failure modes that don't show up in notebooks are the ones that page you at 2am.</p>
+</section>
+
+<section>
+  <h2>Errors inside the tool loop</h2>
+  <div class="grid-2">
+    <div>
+      <p>The agent calls <code>get_weather("Mumbai")</code>. The API is down. <strong>What now?</strong> Three options, only one is right.</p>
+      <table style="font-size:0.78em;">
+        <tr><th>Strategy</th><th>UX</th><th>Verdict</th></tr>
+        <tr><td>Crash the whole agent</td><td>500 error</td><td>❌ silly</td></tr>
+        <tr><td>Silently skip the tool</td><td>"I don't know"</td><td>❌ deceptive</td></tr>
+        <tr><td>Inject error back into messages</td><td>Agent retries / picks alternate</td><td>✅ correct</td></tr>
+      </table>
+      <p style="margin-top:0.4em;"><code>create_agent</code> does the third by default — exception → <code>ToolMessage(content="error: ...", status="error")</code>. The next LLM step sees it and adapts.</p>
+    </div>
+    <div>
+      <pre><code class="language-python"># Custom error handler at the tool level
+@tool
+def get_weather(city: str) -> str:
+    """Get current weather for an Indian city."""
+    try:
+        return weather_api.fetch(city)
+    except WeatherAPIDown:
+        return ("ERROR: weather API is down. "
+                "Tell the user to retry in a minute.")
+    except CityNotFound:
+        return f"ERROR: '{city}' not found. Suggest "
+               "nearest major city."
+
+# Now the LLM sees readable errors and routes around them.</code></pre>
+      <div class="info-card amber">
+        <strong>The trick:</strong> errors that <em>read like instructions</em> (because they go to the LLM) almost always result in the agent recovering gracefully. Errors that read like stack traces don't.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 6 · 1/3</div>
+</section>
+
+<section>
+  <h2>Debugging — when the agent picks the wrong tool</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4>① Read the trace</h4>
+      <p>Print every <code>tool_call</code> and the messages in scope. The wrong choice almost always becomes obvious — an irrelevant tool description, a missing arg.</p>
+    </div>
+    <div class="card violet">
+      <h4>② Sharpen tool descriptions</h4>
+      <p>Treat the docstring as a <strong>prompt for the LLM</strong>. State <em>when to use</em> AND <em>when not to use</em>. Concrete examples beat abstract verbs.</p>
+    </div>
+    <div class="card emerald">
+      <h4>③ Reduce tool count</h4>
+      <p>10 tools → 30% wrong-tool rate. 4 tools → ~5%. Group related tools, remove unused ones, or split by sub-agent (Module 8).</p>
+    </div>
+    <div class="card amber">
+      <h4>④ Add few-shot examples to the prompt</h4>
+      <p>"For balance questions, use <code>get_balance</code>; for rate questions, use <code>get_rate</code>" — explicit routing examples in the system prompt.</p>
+    </div>
+    <div class="card rose">
+      <h4>⑤ Tighten arg schemas</h4>
+      <p>Wrong-arg ≠ wrong-tool, but feels the same. Pydantic <code>Literal</code>, <code>conint(ge=...)</code>, descriptive field text — all reduce the model's guesswork.</p>
+    </div>
+    <div class="card">
+      <h4>⑥ Lower temperature</h4>
+      <p>Default to <code>temperature=0</code> for the agent's planner. Creativity is for the response, not the routing.</p>
+    </div>
+  </div>
+  <div class="info-card violet">
+    <strong>Lab 3.2 §11</strong> intentionally provokes a wrong-tool selection, then walks through fixes 1–6 above. It's the most-cited interview-prep section of the day.
+  </div>
+  <div class="footer-tag">Part 6 · 2/3</div>
+</section>
+
+<section>
+  <h2>Forward references — where this leads</h2>
+  <div class="grid-3">
+    <div class="card violet">
+      <h3>Module 7 · LangGraph</h3>
+      <p>The <code>create_agent</code> loop is great for "model + tools." When you need <strong>explicit state, branches, parallel branches, HITL, and checkpoints</strong>, you graduate to LangGraph.</p>
+      <p style="color:var(--text-muted); font-size:0.74em;">Same agent, but now you can pause for human approval, persist state across crashes, and branch based on results.</p>
+    </div>
+    <div class="card emerald">
+      <h3>Module 9 · Observability</h3>
+      <p>Custom <code>BaseCallbackHandler</code> hooks expose every <code>on_llm_start</code> / <code>on_tool_end</code> event for audit logging. LangSmith automates most of this.</p>
+      <p style="color:var(--text-muted); font-size:0.74em;">Today's <code>astream_events</code> is the read-only variant. The callback API is the write side.</p>
+    </div>
+    <div class="card amber">
+      <h3>Module 10 · Deployment</h3>
+      <p><code>agent.astream_events()</code> → FastAPI <code>StreamingResponse</code> → SSE stream → browser. The pattern that turns a notebook agent into a public-URL service.</p>
+      <p style="color:var(--text-muted); font-size:0.74em;">Today is the streaming foundation; M10 is the deployment story.</p>
+    </div>
+  </div>
+  <div class="quote-box">
+    Day 3 is the spine of the program. Everything from Module 4 (RAG) onward composes on top of <code>RunnableWithMessageHistory</code>, <code>create_agent</code>, and the streaming events. Get strong here.
+  </div>
+  <div class="footer-tag">Part 6 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 7 — MAP TO THE LABS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 7</span>
+  <h1>Map to the labs</h1>
+  <p class="subtitle">Where each concept above lands in Labs 3.1 → 3.2.</p>
+</section>
+
+<section>
+  <h2>Lab 3.1 — LangChain Fundamentals: Chains, Modern Memory, LCEL</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Build LCEL chains with <code>StrOutputParser</code>, <code>JsonOutputParser</code>; wrap one in <code>RunnableWithMessageHistory</code> for per-session memory; stream via <code>.stream</code> and <code>.astream_events</code>; compose with <code>RunnableLambda</code> + <code>RunnableParallel</code>.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>The Runnable interface (Part 1)</li>
+        <li>LCEL composition primitives (Part 2)</li>
+        <li>Modern memory pattern (Part 3)</li>
+        <li>Streaming methods (Part 4)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card">
+        <h4>👀 Watch for</h4>
+        <ul class="checklist">
+          <li>How the same chain handles <code>.invoke</code>, <code>.stream</code>, <code>.batch</code> with no rewrites</li>
+          <li>Why the memory wrapper needs a <code>session_id</code> and what happens if you forget it</li>
+          <li>The <code>.astream_events</code> output — that's the data Module 9 traces depend on</li>
+          <li>Section 8's parallel branches — wall-clock latency &lt; sum of branch latencies</li>
+        </ul>
+      </div>
+      <div class="info-card emerald" style="margin-top:0.5em;">
+        Lab ends with an <strong>Interview Preparation</strong> section — 8 questions on memory, LCEL internals, and streaming.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 7 · 1/3</div>
+</section>
+
+<section>
+  <h2>Lab 3.2 — Tool Calling Agents (LangChain v1)</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Use Tavily as a built-in tool; define custom tools with <code>@tool</code> and <code>StructuredTool</code>; hand-roll the loop with <code>bind_tools</code> to feel the pain; rewrite with <code>create_agent</code>; add error handling; debug a wrong-tool case.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>Tool definition styles (Part 5)</li>
+        <li>The agent loop mechanics (Part 5)</li>
+        <li><code>create_agent</code> vs manual / legacy <code>AgentExecutor</code> (Part 5)</li>
+        <li>Production debugging mindset (Part 6)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card violet">
+        <h4>👀 Watch for</h4>
+        <ul class="checklist">
+          <li>Side-by-side: 25-line manual loop vs 5-line <code>create_agent</code></li>
+          <li>How a tool that returns an <em>error string</em> lets the agent recover, while a thrown exception kills it</li>
+          <li>Section 11 — intentionally provoke a wrong-tool selection, then fix it via 6 different debug steps</li>
+          <li>Forward reference cell to LangGraph at the end</li>
+        </ul>
+      </div>
+      <div class="info-card amber" style="margin-top:0.5em;">
+        Lab ends with an <strong>Interview Preparation</strong> section — 8 questions on tool design, agent loop semantics, and debugging.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 7 · 2/3</div>
+</section>
+
+<section>
+  <h2>Three checkpoints for Day 3</h2>
+  <div class="grid-3" style="margin-top:0.5em;">
+    <div class="card">
+      <h3>① Pipe fluency</h3>
+      <p>For any LLM feature, can you sketch the chain in <code>prompt | llm | parser</code> form, with <code>RunnableParallel</code> / <code>RunnablePassthrough.assign</code> where needed?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> stop hand-wiring <code>.invoke</code> calls.</p>
+    </div>
+    <div class="card violet">
+      <h3>② Memory pattern</h3>
+      <p>Default mode: stateless chain + <code>RunnableWithMessageHistory</code> wrapper + <code>session_id</code> in run config. No <code>ConversationBufferMemory</code>.</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> reach for the wrapper by reflex; pick the persistence backend by deployment shape.</p>
+    </div>
+    <div class="card emerald">
+      <h3>③ Agent vs chain</h3>
+      <p>Can you say in one sentence when you need <code>create_agent</code> vs a plain LCEL chain — and what each gives you that the other doesn't?</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> "agent when the model needs to <em>decide what to do next</em>; chain when the steps are fixed."</p>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.6em;">
+    Day 4 (RAG Foundations) builds on every concept here — chains compose retrievers + LLMs, memory wraps the conversational layer, streaming feeds the front-end. Bring strong LCEL muscle memory.
+  </div>
+  <div class="footer-tag">Part 7 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ END ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">End of Module 3</div>
+  <h1>Questions?</h1>
+  <div class="subtitle">Next: open Lab 3.1 — LangChain Fundamentals.<br>
+    Have your <code>.env</code> populated with <code>OPENAI_API_KEY</code> and <code>ANTHROPIC_API_KEY</code>; <code>langchain&gt;=1.0</code>, <code>langchain-anthropic</code>, and <code>tavily-python</code> installed.</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">Module 3 · Day 3 · LangChain Deep Dive</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    pdfSeparateFragments: false,
+    plugins: [RevealHighlight, RevealZoom, RevealSearch],
+  });
+</script>
+</body>
+</html>
