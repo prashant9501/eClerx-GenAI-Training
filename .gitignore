@@ -58,7 +58,10 @@ datasets/
 chroma/
 chroma_db/
 faiss_index/
+banking_faiss_index/
 *.index
+chat_data.json
+data.csv
 local_storage/
 artifacts/
 runs/
