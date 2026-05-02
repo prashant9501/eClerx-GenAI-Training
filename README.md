@@ -27,10 +27,16 @@ eClerx-GenAI-Training/
 │   ├── Lab_2.4_Output_Parsers_DeepDive.ipynb
 │   ├── Lab_2.5_Prompt_Caching.ipynb
 │   └── Module_2_Prompt_and_Context_Engineering.html
-├── Module 3 - LangChain Deep Dive/                       ← Day 3 (2 labs) ✅
+├── Module 3 - LangChain Deep Dive/                       ← Day 3 (2 labs · 1 deck) ✅
 │   ├── Lab_3.1_LangChain_Fundamentals.ipynb
-│   └── Lab_3.2_Tool_Calling_Agents.ipynb
-├── Module 4 - RAG Foundations/                           (coming soon — Day 4, 4 labs)
+│   ├── Lab_3.2_Tool_Calling_Agents.ipynb
+│   └── Module_3_LangChain_Deep_Dive.html
+├── Module 4 - RAG Foundations/                           ← Day 4 (4 labs · 1 deck) ✅
+│   ├── Lab_4.1_Document_Loaders_Chunking.ipynb
+│   ├── Lab_4.2_Embeddings_Vector_Stores.ipynb
+│   ├── Lab_4.3_RAG_LCEL_Pipeline.ipynb
+│   ├── Lab_4.4_Bedrock_Knowledge_Bases.ipynb
+│   └── Module_4_RAG_Foundations.html
 ├── …
 └── Module 10 - Production Deployment & Capstone/         (coming soon — Day 10, 3 labs)
 ```
@@ -40,7 +46,7 @@ eClerx-GenAI-Training/
 | 1 | Python for GenAI & LLM Foundations | 1 | 4 | ✅ Available |
 | 2 | Prompt Engineering with LangChain | 2 | 5 | ✅ Available |
 | 3 | LangChain Deep Dive | 3 | 2 | ✅ Available |
-| 4 | RAG Foundations | 4 | 4 | Coming soon |
+| 4 | RAG Foundations | 4 | 4 | ✅ Available |
 | 5 | Advanced RAG & Evaluation | 5 | 4 | Coming soon |
 | 6 | Claude API & AWS Bedrock | 6 | 4 | Coming soon |
 | 7 | Agentic AI with LangGraph | 7 | 4 | Coming soon |
@@ -85,6 +91,19 @@ eClerx-GenAI-Training/
 | 3.2 | Tool-calling agents with **LangChain v1 `create_agent`** — built-in tools (Tavily), custom `@tool` and `StructuredTool` patterns, real-world weather API, error handling | Dense (with interview prep) |
 
 Lab 3.1 replaces the deprecated `ConversationBufferMemory` family with the LangChain v1 `RunnableWithMessageHistory` + `InMemoryChatMessageHistory` pattern, and introduces `.astream_events()` for streaming UIs (used later in Module 10's FastAPI deployment). Lab 3.2 replaces the legacy `AgentExecutor` orchestration with the v1 `create_agent` Runnable, and previews the LangGraph `StateGraph` re-implementation that comes in Module 7.
+
+---
+
+## Module 4 — RAG Foundations
+
+| Lab | Topic | Type |
+|---|---|---|
+| 4.1 | Document loaders & chunking — PDF (PyPDF, PyMuPDF, Unstructured), CSV, JSON, Markdown, recursive vs semantic vs section-aware splitting, tiktoken-based chunking | Dense (with interview prep) |
+| 4.2 | Embeddings & vector stores — OpenAI `text-embedding-3-small` vs Bedrock Titan v2, FAISS in-memory vs ChromaDB persistent, metadata filtering, indexing strategies | Dense (with interview prep) |
+| 4.3 | End-to-end LCEL RAG pipeline with FAISS / ChromaDB + source citations (page numbers, document IDs); forward-reference to Lab 3.1's `RunnableWithMessageHistory` for conversational RAG | Applied |
+| 4.4 | Amazon Bedrock Knowledge Bases — managed-RAG pipeline, `retrieve` vs `retrieve_and_generate`, when to choose managed vs self-hosted | Dense (with interview prep) |
+
+**Deck:** `Module_4_RAG_Foundations.html` covers why RAG, document loaders & chunking trade-offs, embeddings & vector geometry, vector-store selection (FAISS/Chroma/OpenSearch), the end-to-end LCEL RAG flow, and the managed-vs-self-hosted Bedrock KB decision.
 
 ---
 
