@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 7 — Agentic AI with LangGraph · Prashant Sahu</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #0a0e27;
+    --bg-mid:  #111733;
+    --bg-card: #161c3a;
+    --bg-card-hover: #1d2447;
+    --accent-sky:     #38bdf8;
+    --accent-violet:  #a78bfa;
+    --accent-emerald: #34d399;
+    --accent-amber:   #fbbf24;
+    --accent-rose:    #fb7185;
+    --text-primary: #e2e8f0;
+    --text-muted:   #94a3b8;
+    --text-dim:     #64748b;
+    --border-soft:  rgba(148, 163, 184, 0.15);
+    --code-bg: #1e293b;
+  }
+
+  .reveal {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+    font-size: 24px;
+  }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section { padding: 12px 0; }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ffffff;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    margin: 0 0 0.4em 0;
+  }
+  .reveal h1 { font-size: 2.0em;  line-height: 1.1; font-weight: 700; }
+  .reveal h2 { font-size: 1.25em; line-height: 1.2; }
+  .reveal h3 { font-size: 1.0em;  line-height: 1.3; color: var(--accent-sky); font-weight: 600; }
+  .reveal h4 { font-size: 0.85em; line-height: 1.3; color: var(--accent-violet); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reveal p, .reveal li { line-height: 1.5; color: var(--text-primary); font-size: 0.85em; }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .reveal li { margin-bottom: 0.32em; }
+  .reveal strong { color: #ffffff; font-weight: 600; }
+  .reveal em { color: var(--accent-amber); font-style: italic; }
+  .reveal a { color: var(--accent-sky); text-decoration: none; border-bottom: 1px dotted var(--accent-sky); }
+
+  .reveal code {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    padding: 0.08em 0.32em;
+    border-radius: 4px;
+    font-size: 0.82em;
+  }
+  .reveal pre {
+    width: 100%;
+    box-shadow: none;
+    margin: 0.4em 0;
+  }
+  .reveal pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6em;
+    line-height: 1.5;
+    padding: 0.85em 1em;
+    background: var(--code-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-sky);
+    max-height: 380px;
+    overflow: auto;
+  }
+
+  .reveal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4em 0;
+    font-size: 0.78em;
+  }
+  .reveal table th {
+    background: linear-gradient(180deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.08) 100%);
+    color: #ffffff;
+    text-align: left;
+    padding: 0.5em 0.8em;
+    border-bottom: 2px solid var(--accent-sky);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .reveal table td {
+    padding: 0.45em 0.8em;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 180ms ease;
+  }
+  .reveal table tr:hover td { background: rgba(56, 189, 248, 0.06); }
+  .reveal table tr:nth-child(even) td { background: rgba(255, 255, 255, 0.018); }
+  .reveal table tr:nth-child(even):hover td { background: rgba(56, 189, 248, 0.08); }
+
+  /* Title slide */
+  .reveal section.title-slide {
+    text-align: center;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(167, 139, 250, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.title-slide .eyebrow {
+    color: var(--accent-sky);
+    font-size: 0.55em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.8em;
+  }
+  .reveal section.title-slide h1 {
+    font-size: 2.4em;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #38bdf8 0%, #a78bfa 50%, #fb7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5em;
+    animation: titleFade 1.2s ease-out;
+  }
+  @keyframes titleFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal section.title-slide .subtitle {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 0.4em;
+  }
+  .reveal section.title-slide .tag {
+    display: inline-block;
+    margin-top: 0.4em;
+    padding: 0.3em 1em;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 999px;
+    font-size: 0.6em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .reveal section.title-slide .presenter-block {
+    margin-top: 1.6em;
+    padding: 0.6em 1.4em;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+  .reveal section.title-slide .presenter-label {
+    color: var(--accent-violet);
+    font-size: 0.5em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.15em;
+  }
+  .reveal section.title-slide .presenter-name {
+    color: #ffffff;
+    font-size: 1.0em;
+    font-weight: 600;
+  }
+  .reveal section.title-slide .meta {
+    margin-top: 1.4em;
+    color: var(--text-dim);
+    font-size: 0.55em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Section divider */
+  .reveal section.divider {
+    text-align: left;
+    background:
+      radial-gradient(circle at 20% 60%, rgba(56, 189, 248, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 90% 30%, rgba(167, 139, 250, 0.13) 0%, transparent 55%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.divider .part-label {
+    display: block;
+    color: var(--accent-sky);
+    font-size: 0.6em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.4em;
+  }
+  .reveal section.divider h1 {
+    font-size: 2.2em;
+    line-height: 1.05;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+  }
+  .reveal section.divider .subtitle {
+    color: var(--text-muted);
+    font-size: 0.7em;
+    max-width: 800px;
+    line-height: 1.5;
+  }
+  .reveal section.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--accent-sky), var(--accent-violet));
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.75em 1.05em;
+    border-left: 3px solid var(--accent-sky);
+    margin: 0.35em 0;
+    transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+  }
+  .card.violet  { border-left-color: var(--accent-violet); }
+  .card.violet:hover  { box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15); }
+  .card.emerald { border-left-color: var(--accent-emerald); }
+  .card.emerald:hover { box-shadow: 0 8px 24px rgba(52, 211, 153, 0.12); }
+  .card.amber   { border-left-color: var(--accent-amber); }
+  .card.amber:hover   { box-shadow: 0 8px 24px rgba(251, 191, 36, 0.12); }
+  .card.rose    { border-left-color: var(--accent-rose); }
+  .card.rose:hover    { box-shadow: 0 8px 24px rgba(251, 113, 133, 0.12); }
+  .card h3, .card h4 { margin-top: 0; }
+  .card p { margin: 0.3em 0; font-size: 0.78em; }
+
+  .info-card {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    padding: 0.65em 0.95em;
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .info-card.violet  { background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.2); }
+  .info-card.emerald { background: rgba(52, 211, 153, 0.08);  border-color: rgba(52, 211, 153, 0.2); }
+  .info-card.amber   { background: rgba(251, 191, 36, 0.08);  border-color: rgba(251, 191, 36, 0.25); }
+  .info-card.rose    { background: rgba(251, 113, 133, 0.08); border-color: rgba(251, 113, 133, 0.25); }
+
+  .pill {
+    display: inline-block;
+    padding: 0.12em 0.55em;
+    background: rgba(56, 189, 248, 0.16);
+    color: var(--accent-sky);
+    border-radius: 999px;
+    font-size: 0.65em;
+    font-weight: 500;
+    margin: 0.05em 0.15em;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+  .pill.violet  { background: rgba(167, 139, 250, 0.16); color: var(--accent-violet); border-color: rgba(167, 139, 250, 0.3); }
+  .pill.emerald { background: rgba(52, 211, 153, 0.16);  color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.3); }
+  .pill.amber   { background: rgba(251, 191, 36, 0.16);  color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); }
+  .pill.rose    { background: rgba(251, 113, 133, 0.16); color: var(--accent-rose); border-color: rgba(251, 113, 133, 0.3); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85em; align-items: stretch; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.65em; align-items: stretch; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.55em; align-items: stretch; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5em; align-items: stretch; }
+
+  svg.diagram {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 8px;
+    width: 100%;
+    height: auto;
+    margin: 0.3em 0;
+    border: 1px solid var(--border-soft);
+  }
+
+  .kpi {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.55em 0.85em;
+    text-align: center;
+    border-top: 3px solid var(--accent-sky);
+    transition: transform 200ms ease;
+  }
+  .kpi:hover { transform: translateY(-3px); }
+  .kpi.violet  { border-top-color: var(--accent-violet); }
+  .kpi.emerald { border-top-color: var(--accent-emerald); }
+  .kpi.amber   { border-top-color: var(--accent-amber); }
+  .kpi.rose    { border-top-color: var(--accent-rose); }
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-label {
+    color: var(--text-muted);
+    font-size: 0.66em;
+    margin-top: 0.3em;
+    letter-spacing: 0.06em;
+  }
+
+  .quote-box {
+    border-left: 3px solid var(--accent-amber);
+    padding: 0.45em 0.95em;
+    background: rgba(251, 191, 36, 0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .quote-box::before { content: '"'; color: var(--accent-amber); font-size: 1.5em; line-height: 0.5; vertical-align: middle; margin-right: 0.2em; }
+
+  .reveal ul.checklist { list-style: none; padding-left: 0.4em; }
+  .reveal ul.checklist li::before {
+    content: '▸';
+    color: var(--accent-sky);
+    margin-right: 0.5em;
+    font-weight: 700;
+  }
+
+  .reveal .progress { color: var(--accent-sky); height: 4px; }
+  .reveal .slide-number {
+    background: rgba(10, 14, 39, 0.65);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .footer-tag {
+    position: absolute;
+    bottom: 0.3em;
+    right: 0.5em;
+    color: var(--text-dim);
+    font-size: 0.45em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Bad-vs-good comparison boxes */
+  .bad-good {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7em;
+    margin: 0.4em 0;
+  }
+  .bad-good .bad, .bad-good .good {
+    border-radius: 10px;
+    padding: 0.7em 1em;
+    font-size: 0.78em;
+    transition: all 220ms ease;
+  }
+  .bad-good .bad {
+    background: rgba(251, 113, 133, 0.08);
+    border: 1px solid rgba(251, 113, 133, 0.3);
+  }
+  .bad-good .bad:hover { background: rgba(251, 113, 133, 0.13); }
+  .bad-good .good {
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+  .bad-good .good:hover { background: rgba(52, 211, 153, 0.13); }
+  .bad-good h4 { margin-bottom: 0.3em; }
+  .bad-good .bad h4  { color: var(--accent-rose); }
+  .bad-good .good h4 { color: var(--accent-emerald); }
+
+  /* Lever / dimension card */
+  .lever {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.7em 0.9em;
+    border-bottom: 3px solid var(--accent-sky);
+    transition: transform 220ms ease;
+  }
+  .lever:hover { transform: translateY(-3px); }
+  .lever .lever-num {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-sky);
+    font-size: 0.7em;
+  }
+  .lever h4 { margin: 0.2em 0 0.3em 0; color: #ffffff; text-transform: none; letter-spacing: 0; font-size: 0.95em; }
+  .lever p { font-size: 0.72em; color: var(--text-muted); margin: 0; }
+  .lever.violet  { border-bottom-color: var(--accent-violet); }
+  .lever.emerald { border-bottom-color: var(--accent-emerald); }
+  .lever.amber   { border-bottom-color: var(--accent-amber); }
+  .lever.rose    { border-bottom-color: var(--accent-rose); }
+
+  @media print {
+    .reveal pre code { font-size: 0.5em; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════ TITLE ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">eClerx · CDAC · Module 7 · Day 7</div>
+  <h1>Agentic AI<br>with LangGraph</h1>
+  <div class="subtitle">From a single agent loop to a stateful, routable, parallelisable, human-gated graph.</div>
+  <div class="tag">Setup deck for Labs 7.1 → 7.4</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">2026 · Cohort 1</div>
+</section>
+
+<!-- ═══════════════════════ ROADMAP ═══════════════════════ -->
+<section>
+  <h2>What we'll cover today</h2>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card"><h4>Part 1</h4><p>From <code>create_agent</code> to LangGraph — when state matters</p></div>
+    <div class="card violet"><h4>Part 2</h4><p>StateGraph mechanics — TypedDict, nodes, edges, reducers</p></div>
+    <div class="card emerald"><h4>Part 3</h4><p>Routing patterns (Lab 7.1)</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card amber"><h4>Part 4</h4><p>Parallelisation — Send API + cost analysis (Lab 7.2)</p></div>
+    <div class="card rose"><h4>Part 5</h4><p>HITL &amp; checkpointing — interrupt, resume, time-travel (Lab 7.3)</p></div>
+    <div class="card"><h4>Part 6</h4><p>Composing it all — Financial Analyst Agent (Lab 7.4)</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card violet"><h4>Part 7</h4><p>Map to the labs — slide-to-lab cross-reference</p></div>
+    <div class="card emerald"><h4>+</h4><p>Forward references — Multi-agent (M8), Observability (M9)</p></div>
+    <div class="card amber"><h4>Goal</h4><p>By 6pm: ship a 4-tool stateful agent with HITL gates &amp; replay</p></div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    <strong>One sentence summary.</strong> A LangGraph is <em>a state machine where every super-step can branch, fan out, pause for a human, and be replayed from any past checkpoint</em>. Internalise that and the API surface follows.
+  </div>
+  <div class="footer-tag">Roadmap</div>
+</section>
+
+<!-- ═══════════════════════ PART 1 — FROM AGENT TO LANGGRAPH ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 1</span>
+  <h1>From <code>create_agent</code><br>to LangGraph</h1>
+  <p class="subtitle">Day 3 you built a single tool-calling agent. Today you build the graph it lives inside — typed state, conditional edges, parallel branches, durable pauses.</p>
+</section>
+
+<section>
+  <h2>What <code>create_agent</code> already gives you</h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">from langchain.agents import create_agent
+from langchain_anthropic import ChatAnthropic
+
+llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0)
+
+agent = create_agent(llm, tools=[search_tool, calc_tool])
+result = agent.invoke({"messages": [
+    {"role": "user", "content": "What's 2025 GDP of India?"},
+]})</code></pre>
+      <p style="margin-top:0.4em;">A single ReAct-style loop: think → pick tool → call tool → observe → think → answer. The framework handles the loop, retries, error capture.</p>
+      <h4 style="margin-top:0.5em;">Strengths</h4>
+      <ul class="checklist">
+        <li>Few lines of code</li>
+        <li>Provider-portable tool calling</li>
+        <li>Streaming + callbacks for free</li>
+      </ul>
+    </div>
+    <div>
+      <h4>What it doesn't give you</h4>
+      <div class="bad-good" style="grid-template-columns: 1fr;">
+        <div class="bad">
+          <h4>Limits of a single agent loop</h4>
+          <ul style="font-size:0.8em;">
+            <li>No <strong>typed state</strong> beyond the message list</li>
+            <li>No <strong>conditional routing</strong> to specialist sub-flows</li>
+            <li>No <strong>parallel branches</strong> with deterministic merge</li>
+            <li>No <strong>pause / resume</strong> for human approval mid-flow</li>
+            <li>No <strong>time-travel replay</strong> of a past decision</li>
+          </ul>
+        </div>
+      </div>
+      <div class="info-card violet" style="margin-top:0.4em;">
+        Module 7 = the moment you outgrow the single loop. LangGraph is the next layer up.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 1 · 1/3</div>
+</section>
+
+<section>
+  <h2>When state matters — three signals</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4>① Multiple steps share data</h4>
+      <p>Not just <code>messages</code> — you have a <code>customer_id</code>, a <code>credit_score</code>, an intermediate <code>routing_decision</code>. Every node reads/writes typed fields.</p>
+    </div>
+    <div class="card violet">
+      <h4>② Routing depends on intermediate output</h4>
+      <p>"If credit_score &gt; 750 and amount &lt; ₹5L, auto-approve; otherwise call HITL." A single agent can't express that without a state machine.</p>
+    </div>
+    <div class="card emerald">
+      <h4>③ The flow can pause for a human</h4>
+      <p>Loan approval, compliance review, escalation gates. <code>interrupt()</code> needs a checkpointer, which needs a state object — which needs a graph.</p>
+    </div>
+  </div>
+  <div class="info-card emerald" style="margin-top:0.5em;">
+    <strong>Heuristic.</strong> If you find yourself stashing state inside <code>messages</code> as JSON strings — stop. That's a LangGraph signal.
+  </div>
+  <div class="footer-tag">Part 1 · 2/3</div>
+</section>
+
+<section>
+  <h2>The Day-3 → Day-7 mental shift</h2>
+  <div class="bad-good">
+    <div class="bad">
+      <h4>Day 3 · agent as a black box</h4>
+      <pre><code style="font-size:0.7em;">agent = create_agent(llm, tools=[t1, t2])
+
+# I get a final answer.
+# I see the messages list.
+# I can stream events.
+
+# But I cannot:
+#   - branch on state
+#   - run two tools in parallel & merge
+#   - pause for human approval
+#   - replay from a past decision</code></pre>
+    </div>
+    <div class="good">
+      <h4>Day 7 · graph as a state machine</h4>
+      <pre><code style="font-size:0.7em;">graph = (StateGraph(MyState)
+    .add_node("classify", classifier)
+    .add_node("approve", approver)
+    .add_node("reject",  rejector)
+    .add_conditional_edges("classify", route_fn,
+        {"approve": "approve", "reject": "reject"})
+    .add_edge("approve", END)
+    .add_edge("reject",  END)
+    .compile(checkpointer=SqliteSaver(...)))
+
+# I get: typed state · conditional edges
+#        parallel branches · pauses · time-travel</code></pre>
+    </div>
+  </div>
+  <div class="info-card violet">
+    The whole module is moving you from the left to the right of this slide. <code>create_agent</code> doesn't go away — it lives <em>inside</em> some of these nodes.
+  </div>
+  <div class="footer-tag">Part 1 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 2 — STATEGRAPH MECHANICS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 2</span>
+  <h1>StateGraph<br>mechanics</h1>
+  <p class="subtitle">Five primitives — TypedDict state, nodes, edges, conditional edges, reducers. Everything else is sugar.</p>
+</section>
+
+<section>
+  <h2>The state — a typed dict with reducers</h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">from typing import Annotated, TypedDict
+from langgraph.graph.message import add_messages
+import operator
+
+class SupportState(TypedDict):
+    # Plain field — last write wins
+    customer_id: str
+    routing: str
+
+    # Reducer field — append, dedupe by ID
+    messages: Annotated[list, add_messages]
+
+    # Reducer field — concat lists from parallel branches
+    tool_outputs: Annotated[list[dict], operator.add]</code></pre>
+      <h4 style="margin-top:0.5em;">Why TypedDict, not Pydantic</h4>
+      <ul class="checklist">
+        <li>Native support for <strong>partial updates</strong> from nodes</li>
+        <li>Reducers compose with the merge step</li>
+        <li>Pydantic works too — pick when you need strict validation</li>
+      </ul>
+    </div>
+    <div>
+      <h4>The reducer is the key idea</h4>
+      <table style="font-size:0.78em;">
+        <tr><th>Reducer</th><th>Behaviour</th><th>When</th></tr>
+        <tr><td><em>none</em></td><td>last write wins</td><td>scalar fields, IDs</td></tr>
+        <tr><td><code>add_messages</code></td><td>append + dedupe</td><td>chat history</td></tr>
+        <tr><td><code>operator.add</code></td><td>concat lists</td><td>parallel writes</td></tr>
+        <tr><td>custom <code>fn(a,b)</code></td><td>your merge</td><td>sets / dicts / scores</td></tr>
+      </table>
+      <div class="info-card amber">
+        <strong>Why this matters.</strong> Without reducers, two parallel branches writing the same field would silently overwrite each other. Reducers are the <em>contract</em> between concurrent writers.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 1/4</div>
+</section>
+
+<section>
+  <h2>Nodes &amp; edges — the topology</h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">from langgraph.graph import StateGraph, START, END
+
+builder = StateGraph(SupportState)
+
+# 1. Nodes — plain Python callables.
+builder.add_node("classify",   classify_node)
+builder.add_node("billing",    billing_handler)
+builder.add_node("technical",  technical_handler)
+
+# 2. Edges — the static topology.
+builder.add_edge(START, "classify")
+builder.add_edge("billing",   END)
+builder.add_edge("technical", END)
+
+# 3. Conditional edge — routes by state.
+builder.add_conditional_edges(
+    "classify",
+    lambda s: s["routing"],          # router fn
+    {"billing": "billing", "technical": "technical"},
+)
+
+graph = builder.compile()</code></pre>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arSG" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <!-- START -->
+        <ellipse cx="200" cy="30" rx="40" ry="18" fill="#161c3a" stroke="#94a3b8" stroke-dasharray="3,3"/>
+        <text x="200" y="35" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">START</text>
+        <line x1="200" y1="48" x2="200" y2="68" stroke="#38bdf8" stroke-width="2" marker-end="url(#arSG)"/>
+        <!-- classify -->
+        <rect x="135" y="72" width="130" height="40" rx="8" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="200" y="92" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">classify</text>
+        <text x="200" y="106" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">writes: routing</text>
+        <!-- conditional split -->
+        <line x1="170" y1="112" x2="80"  y2="158" stroke="#fbbf24" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#arSG)"/>
+        <line x1="230" y1="112" x2="320" y2="158" stroke="#fbbf24" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#arSG)"/>
+        <text x="125" y="138" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">routing=="billing"</text>
+        <text x="280" y="138" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">routing=="technical"</text>
+        <!-- billing / technical -->
+        <rect x="20" y="162" width="120" height="40" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+        <text x="80" y="187" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">billing</text>
+        <rect x="260" y="162" width="120" height="40" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="1.5"/>
+        <text x="320" y="187" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">technical</text>
+        <!-- to END -->
+        <line x1="80"  y1="202" x2="180" y2="240" stroke="#38bdf8" stroke-width="2" marker-end="url(#arSG)"/>
+        <line x1="320" y1="202" x2="220" y2="240" stroke="#38bdf8" stroke-width="2" marker-end="url(#arSG)"/>
+        <ellipse cx="200" cy="252" rx="40" ry="18" fill="#161c3a" stroke="#94a3b8" stroke-dasharray="3,3"/>
+        <text x="200" y="257" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">END</text>
+      </svg>
+      <div class="info-card emerald">
+        <strong>Lab 7.1</strong> builds exactly this shape with 5 specialist branches and a Pydantic-typed router.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 2/4</div>
+</section>
+
+<section>
+  <h2>What a node returns — partial state</h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">def classify_node(state: SupportState) -> dict:
+    # Read what you need
+    last_msg = state["messages"][-1].content
+
+    # Call the LLM (with structured output)
+    decision = router_llm.with_structured_output(
+        RoutingDecision,
+    ).invoke(last_msg)
+
+    # Return ONLY the fields you change.
+    # The framework merges them into state via reducers.
+    return {
+        "routing": decision.category,
+        "messages": [AIMessage(
+            content=f"Routed to {decision.category}",
+        )],
+    }</code></pre>
+    </div>
+    <div>
+      <h4>Three invariants you must respect</h4>
+      <ul class="checklist">
+        <li><strong>Return a dict</strong> of just the fields you changed. Don't return the whole state.</li>
+        <li><strong>For reducer fields</strong>, return the <em>delta</em> (e.g. <code>[new_msg]</code>), not the full list. The reducer composes it.</li>
+        <li><strong>For scalar fields</strong>, return the new value. The default reducer (overwrite) applies.</li>
+      </ul>
+      <div class="info-card violet" style="margin-top:0.4em;">
+        Returning <code>{}</code> is legal — the node ran, but the state didn't change. Useful for pure side-effect nodes (logging, observability).
+      </div>
+      <div class="quote-box">
+        Nodes are pure-ish functions of state → state-delta. That's what makes them composable, testable, and time-travelable.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 3/4</div>
+</section>
+
+<section>
+  <h2>Super-steps — how the runtime executes the graph</h2>
+  <div class="grid-2">
+    <div>
+      <p>LangGraph runs the graph in <strong>super-steps</strong>. In each super-step:</p>
+      <ol style="font-size:0.85em;">
+        <li>Find every node whose incoming edges have all fired since the last super-step.</li>
+        <li>Run them <strong>concurrently</strong> (threaded for sync, asyncio for async).</li>
+        <li>Collect each node's partial-state dict.</li>
+        <li>Merge them through the reducers.</li>
+        <li>Persist the merged state to the checkpointer.</li>
+        <li>Schedule the next super-step.</li>
+      </ol>
+      <div class="info-card amber" style="margin-top:0.4em;">
+        <strong>Implication.</strong> Two nodes scheduled in the same super-step run in parallel by default. That's how fan-out works — no extra API. (Lab 7.2.)
+      </div>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arSS" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#34d399"/>
+          </marker>
+        </defs>
+        <text x="20" y="20" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="11">super-step 1</text>
+        <rect x="120" y="25" width="160" height="32" rx="6" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="200" y="45" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">classify</text>
+        <line x1="200" y1="58" x2="80"  y2="92" stroke="#34d399" stroke-width="2" marker-end="url(#arSS)"/>
+        <line x1="200" y1="58" x2="200" y2="92" stroke="#34d399" stroke-width="2" marker-end="url(#arSS)"/>
+        <line x1="200" y1="58" x2="320" y2="92" stroke="#34d399" stroke-width="2" marker-end="url(#arSS)"/>
+        <text x="20" y="100" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="11">super-step 2</text>
+        <rect x="20" y="98" width="120" height="32" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="80" y="118" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">aml_check</text>
+        <rect x="140" y="98" width="120" height="32" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="200" y="118" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">kyc_check</text>
+        <rect x="260" y="98" width="120" height="32" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="320" y="118" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">sanctions_check</text>
+        <text x="20" y="148" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="11">→ merged via operator.add reducer</text>
+        <text x="20" y="178" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="11">super-step 3</text>
+        <line x1="80"  y1="130" x2="200" y2="190" stroke="#34d399" stroke-width="2" marker-end="url(#arSS)"/>
+        <line x1="200" y1="130" x2="200" y2="190" stroke="#34d399" stroke-width="2" marker-end="url(#arSS)"/>
+        <line x1="320" y1="130" x2="200" y2="190" stroke="#34d399" stroke-width="2" marker-end="url(#arSS)"/>
+        <rect x="120" y="195" width="160" height="32" rx="6" fill="#161c3a" stroke="#fbbf24"/>
+        <text x="200" y="215" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">aggregate</text>
+        <text x="200" y="248" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">checkpointed after each super-step</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 4/4</div>
+</section>
+
+<!-- ═══════════════════════ PART 3 — ROUTING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 3</span>
+  <h1>Routing patterns</h1>
+  <p class="subtitle">A classifier node, a routing function, conditional edges. The supervisor pattern in miniature — Lab 7.1 builds the foundation that Module 8 grows into a full multi-agent system.</p>
+</section>
+
+<section>
+  <h2>The router pattern — three pieces</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4>① The schema</h4>
+      <p>Pydantic enum locks the router's output to a finite set of categories. No regex parsing.</p>
+      <pre><code style="font-size:0.62em;">class RoutingDecision(BaseModel):
+    category: Literal[
+      "order_status",
+      "returns",
+      "billing",
+      "shipping",
+      "general",
+    ]
+    confidence: float = Field(ge=0, le=1)</code></pre>
+    </div>
+    <div class="card violet">
+      <h4>② The classifier node</h4>
+      <p>One LLM call with <code>with_structured_output</code> — typed result lands in state.</p>
+      <pre><code style="font-size:0.62em;">def router_node(state) -> dict:
+    decision = (router_llm
+        .with_structured_output(RoutingDecision)
+        .invoke(state["query"]))
+    return {
+        "routing": decision.category,
+        "confidence": decision.confidence,
+    }</code></pre>
+    </div>
+    <div class="card emerald">
+      <h4>③ The conditional edge</h4>
+      <p>A pure Python function reads state and returns the next node's name.</p>
+      <pre><code style="font-size:0.62em;">def route_by_category(state) -> str:
+    return state["routing"]
+
+builder.add_conditional_edges(
+    "router",
+    route_by_category,
+    {"order_status": "order_status_handler",
+     "returns":      "returns_handler",
+     ...},
+)</code></pre>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    <strong>Lab 7.1</strong> builds this exact pattern for ShopSmart customer support. The same shape becomes the supervisor pattern in Lab 8.1.
+  </div>
+  <div class="footer-tag">Part 3 · 1/2</div>
+</section>
+
+<section>
+  <h2>Routing variants — three you'll meet in production</h2>
+  <table>
+    <tr><th>Pattern</th><th>Router signal</th><th>When</th></tr>
+    <tr><td><strong>Single-axis</strong></td><td><code>category</code> only</td><td>Topic-based dispatch — simple support routers</td></tr>
+    <tr><td><strong>Multi-axis</strong></td><td><code>category</code> + <code>priority</code></td><td>Two queues per category; VIP fast-path</td></tr>
+    <tr><td><strong>Confidence-gated</strong></td><td><code>category</code> + <code>confidence</code></td><td>Below threshold → human handoff. The first HITL pattern.</td></tr>
+    <tr><td><strong>Cycle-permitted</strong></td><td>specialist may route back to router</td><td>Multi-turn diagnosis — ShopSmart "ask clarifying question" → re-classify</td></tr>
+    <tr><td><strong>Hierarchical</strong></td><td>top router → sub-router</td><td>Large taxonomies (50+ leaf categories) — supervisor pattern (Module 8)</td></tr>
+  </table>
+  <div class="bad-good" style="margin-top:0.4em;">
+    <div class="bad">
+      <h4>Anti-pattern · LLM in the routing function</h4>
+      <pre><code style="font-size:0.7em;">def route_fn(state):
+    # ❌ DON'T call an LLM here
+    return llm.invoke(...)</code></pre>
+      <p>The routing function should be cheap &amp; deterministic. LLM calls go in the <em>node</em>, then the function reads its output.</p>
+    </div>
+    <div class="good">
+      <h4>Pattern · LLM in the node, dispatch in the function</h4>
+      <pre><code style="font-size:0.7em;">def router_node(state):
+    # ✅ LLM call here, write to state
+    return {"routing": llm_decision(...)}
+
+def route_fn(state):
+    # ✅ pure dispatch — fast, deterministic
+    return state["routing"]</code></pre>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 4 — PARALLELISATION ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 4</span>
+  <h1>Parallelisation</h1>
+  <p class="subtitle">Static fan-out for fixed branches. Send API for runtime-many workers. Reducers for deterministic merge. And an empirical cost comparison — because intuition lies.</p>
+</section>
+
+<section>
+  <h2>Static fan-out — known-N branches</h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">builder = StateGraph(ComplianceState)
+
+# 4 fixed compliance checks — known at compile time
+for check in ["aml", "kyc", "sanctions", "pep"]:
+    builder.add_node(check, make_check_node(check))
+    builder.add_edge(START, check)
+    builder.add_edge(check, "aggregate")
+
+builder.add_node("aggregate", aggregate_node)
+builder.add_edge("aggregate", END)
+
+graph = builder.compile()
+# All 4 checks run in parallel in super-step 1.
+# Aggregate runs in super-step 2 once all 4 finish.</code></pre>
+      <div class="info-card emerald" style="margin-top:0.4em;">
+        Reducer: <code>tool_outputs: Annotated[list[dict], operator.add]</code> — each check returns a one-element list, the framework concatenates.
+      </div>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arSF" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+          </marker>
+        </defs>
+        <ellipse cx="200" cy="25" rx="40" ry="16" fill="#161c3a" stroke="#94a3b8" stroke-dasharray="3,3"/>
+        <text x="200" y="30" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">START</text>
+        <line x1="170" y1="38" x2="55"  y2="78" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <line x1="190" y1="40" x2="155" y2="78" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <line x1="210" y1="40" x2="245" y2="78" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <line x1="230" y1="38" x2="345" y2="78" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <rect x="20"  y="80" width="70" height="36" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="55"  y="103" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">aml</text>
+        <rect x="120" y="80" width="70" height="36" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="155" y="103" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">kyc</text>
+        <rect x="210" y="80" width="80" height="36" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="250" y="103" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">sanctions</text>
+        <rect x="310" y="80" width="70" height="36" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="345" y="103" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">pep</text>
+        <line x1="55"  y1="116" x2="180" y2="170" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <line x1="155" y1="116" x2="195" y2="170" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <line x1="250" y1="116" x2="210" y2="170" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <line x1="345" y1="116" x2="220" y2="170" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <rect x="140" y="174" width="120" height="40" rx="8" fill="#161c3a" stroke="#fbbf24"/>
+        <text x="200" y="194" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">aggregate</text>
+        <text x="200" y="208" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">reducer: operator.add</text>
+        <line x1="200" y1="214" x2="200" y2="234" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSF)"/>
+        <ellipse cx="200" cy="246" rx="40" ry="14" fill="#161c3a" stroke="#94a3b8" stroke-dasharray="3,3"/>
+        <text x="200" y="250" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">END</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 4 · 1/3</div>
+</section>
+
+<section>
+  <h2>Dynamic fan-out — the <code>Send</code> API</h2>
+  <div class="grid-2">
+    <div>
+      <p>What if N depends on the input? An orchestrator-worker shape: a planner node decides how many workers to spawn, with what payload each. Static edges can't express that.</p>
+      <pre><code class="language-python">from langgraph.types import Send
+
+def plan_sections(state: ReportState) -> dict:
+    # LLM picks 3-7 sections based on the topic
+    sections = planner_llm.invoke(state["topic"])
+    return {"sections": sections}
+
+def assign_workers(state: ReportState) -> list[Send]:
+    # Runtime fan-out — one worker per section
+    return [
+        Send("write_section", {"section": s})
+        for s in state["sections"]
+    ]
+
+builder.add_conditional_edges(
+    "plan_sections", assign_workers, ["write_section"],
+)</code></pre>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arDF" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#fb7185"/>
+          </marker>
+        </defs>
+        <rect x="135" y="20" width="130" height="40" rx="8" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="200" y="40" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">plan_sections</text>
+        <text x="200" y="54" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">runtime: N = 5</text>
+        <line x1="160" y1="60" x2="40"  y2="100" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <line x1="180" y1="60" x2="120" y2="100" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <line x1="200" y1="60" x2="200" y2="100" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <line x1="220" y1="60" x2="280" y2="100" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <line x1="240" y1="60" x2="360" y2="100" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <text x="265" y="78" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="9">Send(...)</text>
+        <rect x="10"  y="102" width="60" height="34" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="40"  y="123" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">w(intro)</text>
+        <rect x="80"  y="102" width="80" height="34" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="120" y="123" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">w(market)</text>
+        <rect x="170" y="102" width="60" height="34" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="200" y="123" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">w(risk)</text>
+        <rect x="240" y="102" width="80" height="34" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="280" y="123" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">w(returns)</text>
+        <rect x="330" y="102" width="60" height="34" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="360" y="123" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="10" text-anchor="middle">w(end)</text>
+        <line x1="40"  y1="136" x2="180" y2="180" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <line x1="120" y1="136" x2="190" y2="180" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <line x1="200" y1="136" x2="200" y2="180" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <line x1="280" y1="136" x2="210" y2="180" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <line x1="360" y1="136" x2="220" y2="180" stroke="#fb7185" stroke-width="1.6" marker-end="url(#arDF)"/>
+        <rect x="135" y="184" width="130" height="40" rx="8" fill="#161c3a" stroke="#fbbf24"/>
+        <text x="200" y="204" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">synthesize</text>
+        <text x="200" y="218" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">reducer merges N writes</text>
+      </svg>
+      <div class="info-card violet">
+        <strong>Lab 7.2</strong> builds this exact orchestrator-worker. The Send API is what makes Module 8's compliance-report generator work.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 4 · 2/3</div>
+</section>
+
+<section>
+  <h2>Cost &amp; latency — what parallelisation actually buys you</h2>
+  <div class="grid-3">
+    <div class="kpi"><div class="kpi-value">~3.0×</div><div class="kpi-label">typical speedup, 4 parallel calls</div></div>
+    <div class="kpi violet"><div class="kpi-value">1.0×</div><div class="kpi-label">token cost — identical</div></div>
+    <div class="kpi emerald"><div class="kpi-value">max(t_i)</div><div class="kpi-label">wall-clock floor (vs sum(t_i))</div></div>
+  </div>
+  <div class="grid-2" style="margin-top:0.4em;">
+    <div>
+      <h4>The win</h4>
+      <ul class="checklist">
+        <li><strong>Wall-clock latency</strong> drops from sum-of-calls to max-of-calls</li>
+        <li>User-facing chat &amp; real-time decisions feel sharper</li>
+        <li>Same input/output tokens — same dollar cost</li>
+      </ul>
+    </div>
+    <div>
+      <h4>When it's NOT a win</h4>
+      <ul class="checklist">
+        <li>Provider rate limits cap your concurrency</li>
+        <li>Calls &lt; 200 ms — scheduling overhead dominates</li>
+        <li>"Independent" branches that secretly read each other's state</li>
+        <li>1000+ branches — exhaust the executor pool</li>
+      </ul>
+    </div>
+  </div>
+  <div class="quote-box">
+    <strong>Lab 7.2 Part 6</strong> measures this empirically — 4 parallel LLM calls vs 4 sequential, with token counts and wall-clock side-by-side.
+  </div>
+  <div class="footer-tag">Part 4 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 5 — HITL & CHECKPOINTING ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 5</span>
+  <h1>Human-in-the-loop<br>&amp; checkpointing</h1>
+  <p class="subtitle">Pause for a human, persist state to disk, replay from any past snapshot. The pattern that turns a demo into a production system.</p>
+</section>
+
+<section>
+  <h2>The HITL primitives — <code>interrupt</code> + <code>Command</code></h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">from langgraph.types import interrupt, Command
+
+def hitl_gate(state: LoanState) -> dict:
+    if (state["amount"] &gt; 25_00_000
+        or state["credit_score"] &lt; 750
+        or state["ai_confidence"] &lt; 0.85):
+        # Pause. State is checkpointed. Process can exit.
+        decision = interrupt({
+            "for_review": state["draft_decision"],
+            "amount":     state["amount"],
+            "applicant":  state["customer_id"],
+        })
+        # When the human resumes, decision is their value.
+        return {"final_decision": decision}
+    return {"final_decision": state["draft_decision"]}</code></pre>
+      <p style="margin-top:0.4em;">Resume from any client (CLI, FastAPI, Slack bot):</p>
+      <pre><code style="font-size:0.7em;">graph.invoke(
+    Command(resume={"approved": True, "officer": "ksingh"}),
+    config={"configurable": {"thread_id": "loan-042"}},
+)</code></pre>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arHL" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#fb7185"/>
+          </marker>
+        </defs>
+        <rect x="120" y="15" width="160" height="32" rx="6" fill="#161c3a" stroke="#38bdf8"/>
+        <text x="200" y="35" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">credit_check</text>
+        <line x1="200" y1="48" x2="200" y2="68" stroke="#fb7185" stroke-width="2" marker-end="url(#arHL)"/>
+        <rect x="120" y="72" width="160" height="32" rx="6" fill="#161c3a" stroke="#a78bfa"/>
+        <text x="200" y="92" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">decision_draft</text>
+        <line x1="200" y1="104" x2="200" y2="124" stroke="#fb7185" stroke-width="2" marker-end="url(#arHL)"/>
+        <rect x="120" y="128" width="160" height="46" rx="6" fill="#161c3a" stroke="#fbbf24" stroke-width="2"/>
+        <text x="200" y="148" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">hitl_gate</text>
+        <text x="200" y="164" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">interrupt({...})  ← state saved</text>
+        <text x="20" y="184" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="10">⟵ pause — process can exit ⟶</text>
+        <line x1="200" y1="195" x2="200" y2="215" stroke="#fb7185" stroke-width="2" marker-end="url(#arHL)" stroke-dasharray="4,4"/>
+        <rect x="120" y="218" width="160" height="32" rx="6" fill="#161c3a" stroke="#34d399"/>
+        <text x="200" y="238" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">final_response</text>
+        <text x="20" y="208" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="9">resume: Command(resume=…)</text>
+        <line x1="200" y1="250" x2="200" y2="270" stroke="#fb7185" stroke-width="2" marker-end="url(#arHL)"/>
+        <ellipse cx="200" cy="276" rx="40" ry="6" fill="#161c3a" stroke="#94a3b8"/>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 1/3</div>
+</section>
+
+<section>
+  <h2>Persistence tiers — pick by deployment shape</h2>
+  <table>
+    <tr><th>Checkpointer</th><th>Storage</th><th>Restart-safe?</th><th>Use when…</th></tr>
+    <tr><td><code>InMemorySaver</code></td><td>process RAM</td><td>❌</td><td>Notebooks · demos · CI</td></tr>
+    <tr><td><code>SqliteSaver</code></td><td>local <code>.sqlite</code> file</td><td>✅ (file)</td><td>Single-server apps · prototype · trainee labs</td></tr>
+    <tr><td><code>PostgresSaver</code></td><td>Postgres DB</td><td>✅ (cluster)</td><td>Multi-instance prod · regulated workloads · audit trail</td></tr>
+    <tr><td>Custom (DynamoDB, MongoDB, …)</td><td>any KV / doc store</td><td>backend-dependent</td><td>Already standardised on something else</td></tr>
+  </table>
+  <div class="bad-good" style="margin-top:0.4em;">
+    <div class="good">
+      <h4>Same API across all three</h4>
+      <pre><code style="font-size:0.7em;">graph.get_state(config)
+graph.get_state_history(config)
+graph.update_state(config, values)
+graph.invoke(Command(resume=…), config)</code></pre>
+      <p>Migration is a one-line swap of the constructor — graph code is unchanged.</p>
+    </div>
+    <div class="bad">
+      <h4>Common pitfall</h4>
+      <p style="font-size:0.85em;"><strong>Forgetting the checkpointer entirely.</strong> Without one, <code>interrupt()</code> has nowhere to save state — the pause becomes a crash. Always compile with <code>checkpointer=…</code> when you have HITL or long-running flows.</p>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 2/3</div>
+</section>
+
+<section>
+  <h2>Time-travel replay — rewind, edit, resume</h2>
+  <div class="grid-2">
+    <div>
+      <p>Every super-step writes a checkpoint. <code>get_state_history</code> walks the list. <code>update_state</code> writes a new checkpoint with edited values. <code>invoke(None, ...)</code> resumes from there.</p>
+      <pre><code class="language-python"># 1. Walk history
+history = list(graph.get_state_history(
+    {"configurable": {"thread_id": "loan-003"}}
+))
+
+# 2. Pick a fork point
+fork = next(s for s in history
+            if "decision_draft" in s.metadata["writes"])
+
+# 3. Write a new checkpoint with edited state
+new_config = graph.update_state(
+    fork.config, {"ai_confidence": 0.95},
+)
+
+# 4. Resume from the edit
+graph.invoke(None, config=new_config)</code></pre>
+    </div>
+    <div>
+      <h4>Why this is production magic</h4>
+      <ul class="checklist">
+        <li><strong>Reproduce a customer dispute exactly</strong> — replay the bad decision step-by-step</li>
+        <li><strong>What-if analysis</strong> — change one input, re-run the rest. No re-charging the unchanged LLM calls.</li>
+        <li><strong>Audit trail</strong> — every checkpoint is immutable. Regulators love append-only state machines.</li>
+        <li><strong>A/B prompt experiments</strong> — fork from the same checkpoint with two prompt variants</li>
+      </ul>
+      <div class="info-card amber" style="margin-top:0.4em;">
+        <strong>Watch out.</strong> If your nodes have non-idempotent side effects (charge a card, send an email), replay will repeat them. Use idempotency keys.
+      </div>
+      <div class="quote-box">
+        <strong>Lab 7.3</strong> walks through this on the loan-approval graph end-to-end.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 3/3</div>
+</section>
+
+<!-- ═══════════════════════ PART 6 — COMPOSING IT ALL ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 6</span>
+  <h1>Composing it all<br>Financial Analyst Agent</h1>
+  <p class="subtitle">Lab 7.4 — a ReAct agent with 4 heterogeneous tools (SQL, vector RAG, live web search, calculator). When the agent loop is the right abstraction, and when to graduate to a graph.</p>
+</section>
+
+<section>
+  <h2>4 tools, one agent, one decision loop</h2>
+  <div class="grid-4">
+    <div class="lever"><div class="lever-num">tool 1</div><h4>SQL</h4><p>Portfolio + transactions DB. Natural-language to SELECT.</p></div>
+    <div class="lever violet"><div class="lever-num">tool 2</div><h4>Vector RAG</h4><p>Investment policy PDFs over FAISS. Cite the clause.</p></div>
+    <div class="lever emerald"><div class="lever-num">tool 3</div><h4>Live web search</h4><p>Tavily — sector news, current rates.</p></div>
+    <div class="lever amber"><div class="lever-num">tool 4</div><h4>Calculator</h4><p>CAGR, allocation %, rebalance trades.</p></div>
+  </div>
+  <pre style="margin-top:0.4em;"><code class="language-python">from langchain.agents import create_agent
+
+agent = create_agent(
+    llm,
+    tools=[sql_tool, rag_tool, web_search_tool, calc_tool],
+    prompt="You are a financial analyst at Meridian Wealth Partners...",
+)
+result = agent.invoke({"messages": [{"role": "user", "content": question}]})</code></pre>
+  <div class="info-card emerald" style="margin-top:0.3em;">
+    <strong>This is where Days 3 and 7 meet.</strong> The agent loop is the <em>simplest</em> agentic abstraction. Lab 7.4 uses it because no node needs typed state, conditional routing, or HITL — the model just picks tools.
+  </div>
+  <div class="footer-tag">Part 6 · 1/2</div>
+</section>
+
+<section>
+  <h2>When agent vs when graph</h2>
+  <div class="bad-good">
+    <div class="good">
+      <h4><code>create_agent</code> — when?</h4>
+      <ul class="checklist">
+        <li>The model picks tools <strong>freely</strong>, no enforced order</li>
+        <li>State is just <code>messages</code></li>
+        <li>No mid-flow human approval needed</li>
+        <li>You'd rather not think about graph topology</li>
+      </ul>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.4em;"><strong>~80% of "agentic" use cases.</strong> Q&amp;A bots, research assistants, ad-hoc analysis.</p>
+    </div>
+    <div class="bad" style="background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.3);">
+      <h4 style="color: var(--accent-violet);"><code>StateGraph</code> — when?</h4>
+      <ul class="checklist">
+        <li>Multiple steps need <strong>typed shared state</strong></li>
+        <li>Routing depends on <strong>intermediate state</strong> (not just last message)</li>
+        <li>Mid-flow <strong>HITL</strong> approval is required</li>
+        <li><strong>Parallel branches</strong> with deterministic merge</li>
+        <li><strong>Time-travel replay</strong> for audit / debugging</li>
+        <li><strong>Multi-agent</strong> supervisor / swarm patterns (Module 8)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.4em;">
+    <strong>You can compose them.</strong> A node inside a StateGraph can itself be a <code>create_agent</code> — small loops inside the bigger machine. (Pattern used heavily in Module 8.)
+  </div>
+  <div class="footer-tag">Part 6 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 7 — MAP TO THE LABS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 7</span>
+  <h1>Map to the labs</h1>
+  <p class="subtitle">Each lab maps back to specific slides — so you know where to revisit when something is unclear during the build.</p>
+</section>
+
+<section>
+  <h2>Slide → lab cross-reference</h2>
+  <table>
+    <tr><th>Lab</th><th>Slides that inform it</th><th>What you'll build</th></tr>
+    <tr>
+      <td><strong>Lab 7.1</strong><br>LangGraph Routing</td>
+      <td>Part 2 (StateGraph mechanics) · Part 3 (routing patterns)</td>
+      <td>5-way customer-support router for ShopSmart with Pydantic-typed router output and Mermaid visualization</td>
+    </tr>
+    <tr>
+      <td><strong>Lab 7.2</strong><br>Parallelisation + Send API</td>
+      <td>Part 2 (super-steps) · Part 4 (static + dynamic fan-out + cost analysis)</td>
+      <td>Linear → static fan-out → uneven parallel → financial compliance pipeline → dynamic Send → empirical 4-call cost benchmark</td>
+    </tr>
+    <tr>
+      <td><strong>Lab 7.3</strong><br>HITL + Checkpointing</td>
+      <td>Part 5 (interrupt/Command, persistence tiers, time-travel)</td>
+      <td>QuickLoan approval graph with multi-tier HITL gate, MemorySaver + SqliteSaver demo, time-travel replay of a rejected application</td>
+    </tr>
+    <tr>
+      <td><strong>Lab 7.4</strong><br>Financial Analyst Agent</td>
+      <td>Part 6 (agent vs graph) — and forward links to Day 8</td>
+      <td>4-tool ReAct agent (SQL + RAG + web + calc) for Meridian Wealth Partners — when the agent loop is enough</td>
+    </tr>
+  </table>
+  <div class="footer-tag">Part 7 · 1/2</div>
+</section>
+
+<section>
+  <h2>Three things to internalise before tomorrow</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h3>① State + reducers</h3>
+      <p>If two nodes ever write the same field, you need a reducer. <code>operator.add</code> for lists, <code>add_messages</code> for chat, custom for the rest.</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> stop seeing "last write wins" bugs.</p>
+    </div>
+    <div class="card violet">
+      <h3>② Checkpoint or it didn't happen</h3>
+      <p>Anything with HITL, long flows, or audit needs a checkpointer. SQLite is fine for prototypes; Postgres for prod.</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> reach for <code>checkpointer=…</code> by reflex.</p>
+    </div>
+    <div class="card emerald">
+      <h3>③ Agent vs graph</h3>
+      <p>Single loop with free tool choice → <code>create_agent</code>. Typed state, conditional routing, HITL, parallel branches, replay → <code>StateGraph</code>.</p>
+      <p style="color:var(--text-muted); font-size:0.78em; margin-top:0.3em;"><strong>Goal:</strong> match the abstraction to the problem.</p>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.6em;">
+    Day 8 (Multi-Agent Systems) builds <em>directly</em> on this — supervisor/swarm/hierarchical patterns are all StateGraphs whose nodes are themselves agents. Bring strong LangGraph muscle memory.
+  </div>
+  <div class="footer-tag">Part 7 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ END ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">End of Module 7</div>
+  <h1>Questions?</h1>
+  <div class="subtitle">Next: open Lab 7.1 — LangGraph Routing.<br>
+    Have your <code>.env</code> populated with <code>OPENAI_API_KEY</code> (and <code>TAVILY_API_KEY</code> for Lab 7.4); <code>langchain&gt;=1.0</code>, <code>langgraph&gt;=1.0</code>, and <code>langgraph-checkpoint-sqlite</code> installed.</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">Module 7 · Day 7 · Agentic AI with LangGraph</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    pdfSeparateFragments: false,
+    plugins: [RevealHighlight, RevealZoom, RevealSearch],
+  });
+</script>
+</body>
+</html>
