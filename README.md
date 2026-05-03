@@ -37,6 +37,13 @@ eClerx-GenAI-Training/
 │   ├── Lab_4.3_RAG_LCEL_Pipeline.ipynb
 │   ├── Lab_4.4_Bedrock_Knowledge_Bases.ipynb
 │   └── Module_4_RAG_Foundations.html
+├── Module 7 - Agentic AI with LangGraph/                 ← Day 7 (4 labs · 1 deck) ✅
+│   ├── Lab_7.1_LangGraph_Routing.ipynb
+│   ├── Lab_7.2_Parallelization_SendAPI.ipynb
+│   ├── Lab_7.3_HITL_Checkpointing_Loan_Approval.ipynb
+│   ├── Lab_7.4_Financial_Analyst_Agent.ipynb
+│   ├── Module_7_LangGraph_Agentic_AI.html
+│   └── policy_documents.zip                              ← Lab 7.4 runtime data (5 PDFs + meridian_wealth.db)
 ├── …
 └── Module 10 - Production Deployment & Capstone/         (coming soon — Day 10, 3 labs)
 ```
@@ -49,7 +56,7 @@ eClerx-GenAI-Training/
 | 4 | RAG Foundations | 4 | 4 | ✅ Available |
 | 5 | Advanced RAG & Evaluation | 5 | 4 | Coming soon |
 | 6 | Claude API & AWS Bedrock | 6 | 4 | Coming soon |
-| 7 | Agentic AI with LangGraph | 7 | 4 | Coming soon |
+| 7 | Agentic AI with LangGraph | 7 | 4 | ✅ Available |
 | 8 | Multi-Agent Systems | 8 | 5 | Coming soon |
 | 9 | Observability, Evaluation & Responsible AI | 9 | 4 | Coming soon |
 | 10 | Production Deployment & Capstone | 10 | 3 | Coming soon |
@@ -104,6 +111,21 @@ Lab 3.1 replaces the deprecated `ConversationBufferMemory` family with the LangC
 | 4.4 | Amazon Bedrock Knowledge Bases — managed-RAG pipeline, `retrieve` vs `retrieve_and_generate`, when to choose managed vs self-hosted | Dense (with interview prep) |
 
 **Deck:** `Module_4_RAG_Foundations.html` covers why RAG, document loaders & chunking trade-offs, embeddings & vector geometry, vector-store selection (FAISS/Chroma/OpenSearch), the end-to-end LCEL RAG flow, and the managed-vs-self-hosted Bedrock KB decision.
+
+---
+
+## Module 7 — Agentic AI with LangGraph
+
+| Lab | Topic | Type |
+|---|---|---|
+| 7.1 | LangGraph routing — StateGraph mechanics, TypedDict state, conditional edges, reducers (`add_messages`); customer-support router on the ShopSmart scenario | Dense (with interview prep) |
+| 7.2 | Parallelisation with the **Send API** — fan-out / fan-in over dynamic worker counts, latency analysis vs sequential, SecureBank multi-account analysis | Dense (with interview prep) |
+| 7.3 | Human-in-the-loop & checkpointing — `interrupt_before`/`interrupt_after`, `MemorySaver` vs `SqliteSaver` vs `PostgresSaver`, time-travel replay; loan approval workflow | Dense (with interview prep) |
+| 7.4 | Composing it all — Financial Analyst Agent integrating ReAct + RAG (5 wealth-management policy PDFs in `policy_documents.zip`) + SQL on `meridian_wealth.db` + web search | Applied |
+
+**Deck:** `Module_7_LangGraph_Agentic_AI.html` covers when to graduate from `create_agent` to a `StateGraph`, the StateGraph topology (nodes / conditional edges / reducers), routing patterns, the Send API for dynamic parallelism, HITL with checkpointers across persistence tiers, and time-travel debugging.
+
+**Runtime data — `policy_documents.zip`:** Lab 7.4's first cell unpacks this archive into the working directory. It contains 5 wealth-management policy PDFs (Asset Allocation, Client Suitability, Quarterly Reporting, Rebalancing Protocol, Risk Management) and a small `meridian_wealth.db` SQLite database the SQL agent queries. All synthetic — Meridian Wealth is fictional.
 
 ---
 
