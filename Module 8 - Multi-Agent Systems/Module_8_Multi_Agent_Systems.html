@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 8 — Multi-Agent Systems · Prashant Sahu</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #0a0e27;
+    --bg-mid:  #111733;
+    --bg-card: #161c3a;
+    --bg-card-hover: #1d2447;
+    --accent-sky:     #38bdf8;
+    --accent-violet:  #a78bfa;
+    --accent-emerald: #34d399;
+    --accent-amber:   #fbbf24;
+    --accent-rose:    #fb7185;
+    --text-primary: #e2e8f0;
+    --text-muted:   #94a3b8;
+    --text-dim:     #64748b;
+    --border-soft:  rgba(148, 163, 184, 0.15);
+    --code-bg: #1e293b;
+  }
+
+  .reveal {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+    font-size: 24px;
+  }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section { padding: 12px 0; }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ffffff;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    margin: 0 0 0.4em 0;
+  }
+  .reveal h1 { font-size: 2.0em;  line-height: 1.1; font-weight: 700; }
+  .reveal h2 { font-size: 1.25em; line-height: 1.2; }
+  .reveal h3 { font-size: 1.0em;  line-height: 1.3; color: var(--accent-sky); font-weight: 600; }
+  .reveal h4 { font-size: 0.85em; line-height: 1.3; color: var(--accent-violet); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reveal p, .reveal li { line-height: 1.5; color: var(--text-primary); font-size: 0.85em; }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .reveal li { margin-bottom: 0.32em; }
+  .reveal strong { color: #ffffff; font-weight: 600; }
+  .reveal em { color: var(--accent-amber); font-style: italic; }
+  .reveal a { color: var(--accent-sky); text-decoration: none; border-bottom: 1px dotted var(--accent-sky); }
+
+  .reveal code {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    padding: 0.08em 0.32em;
+    border-radius: 4px;
+    font-size: 0.82em;
+  }
+  .reveal pre {
+    width: 100%;
+    box-shadow: none;
+    margin: 0.4em 0;
+  }
+  .reveal pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6em;
+    line-height: 1.5;
+    padding: 0.85em 1em;
+    background: var(--code-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-sky);
+    max-height: 380px;
+    overflow: auto;
+  }
+
+  .reveal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4em 0;
+    font-size: 0.78em;
+  }
+  .reveal table th {
+    background: linear-gradient(180deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.08) 100%);
+    color: #ffffff;
+    text-align: left;
+    padding: 0.5em 0.8em;
+    border-bottom: 2px solid var(--accent-sky);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .reveal table td {
+    padding: 0.45em 0.8em;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 180ms ease;
+  }
+  .reveal table tr:hover td { background: rgba(56, 189, 248, 0.06); }
+  .reveal table tr:nth-child(even) td { background: rgba(255, 255, 255, 0.018); }
+  .reveal table tr:nth-child(even):hover td { background: rgba(56, 189, 248, 0.08); }
+
+  /* Title slide */
+  .reveal section.title-slide {
+    text-align: center;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(167, 139, 250, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.title-slide .eyebrow {
+    color: var(--accent-sky);
+    font-size: 0.55em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.8em;
+  }
+  .reveal section.title-slide h1 {
+    font-size: 2.4em;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #38bdf8 0%, #a78bfa 50%, #fb7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5em;
+    animation: titleFade 1.2s ease-out;
+  }
+  @keyframes titleFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal section.title-slide .subtitle {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 0.4em;
+  }
+  .reveal section.title-slide .tag {
+    display: inline-block;
+    margin-top: 0.4em;
+    padding: 0.3em 1em;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 999px;
+    font-size: 0.6em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .reveal section.title-slide .presenter-block {
+    margin-top: 1.6em;
+    padding: 0.6em 1.4em;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+  .reveal section.title-slide .presenter-label {
+    color: var(--accent-violet);
+    font-size: 0.5em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.15em;
+  }
+  .reveal section.title-slide .presenter-name {
+    color: #ffffff;
+    font-size: 1.0em;
+    font-weight: 600;
+  }
+  .reveal section.title-slide .meta {
+    margin-top: 1.4em;
+    color: var(--text-dim);
+    font-size: 0.55em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Section divider */
+  .reveal section.divider {
+    text-align: left;
+    background:
+      radial-gradient(circle at 20% 60%, rgba(56, 189, 248, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 90% 30%, rgba(167, 139, 250, 0.13) 0%, transparent 55%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.divider .part-label {
+    display: block;
+    color: var(--accent-sky);
+    font-size: 0.6em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.4em;
+  }
+  .reveal section.divider h1 {
+    font-size: 2.2em;
+    line-height: 1.05;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+  }
+  .reveal section.divider .subtitle {
+    color: var(--text-muted);
+    font-size: 0.7em;
+    max-width: 800px;
+    line-height: 1.5;
+  }
+  .reveal section.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--accent-sky), var(--accent-violet));
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.75em 1.05em;
+    border-left: 3px solid var(--accent-sky);
+    margin: 0.35em 0;
+    transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+  }
+  .card.violet  { border-left-color: var(--accent-violet); }
+  .card.violet:hover  { box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15); }
+  .card.emerald { border-left-color: var(--accent-emerald); }
+  .card.emerald:hover { box-shadow: 0 8px 24px rgba(52, 211, 153, 0.12); }
+  .card.amber   { border-left-color: var(--accent-amber); }
+  .card.amber:hover   { box-shadow: 0 8px 24px rgba(251, 191, 36, 0.12); }
+  .card.rose    { border-left-color: var(--accent-rose); }
+  .card.rose:hover    { box-shadow: 0 8px 24px rgba(251, 113, 133, 0.12); }
+  .card h3, .card h4 { margin-top: 0; }
+  .card p { margin: 0.3em 0; font-size: 0.78em; }
+
+  .info-card {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    padding: 0.65em 0.95em;
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .info-card.violet  { background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.2); }
+  .info-card.emerald { background: rgba(52, 211, 153, 0.08);  border-color: rgba(52, 211, 153, 0.2); }
+  .info-card.amber   { background: rgba(251, 191, 36, 0.08);  border-color: rgba(251, 191, 36, 0.25); }
+  .info-card.rose    { background: rgba(251, 113, 133, 0.08); border-color: rgba(251, 113, 133, 0.25); }
+
+  .pill {
+    display: inline-block;
+    padding: 0.12em 0.55em;
+    background: rgba(56, 189, 248, 0.16);
+    color: var(--accent-sky);
+    border-radius: 999px;
+    font-size: 0.65em;
+    font-weight: 500;
+    margin: 0.05em 0.15em;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+  .pill.violet  { background: rgba(167, 139, 250, 0.16); color: var(--accent-violet); border-color: rgba(167, 139, 250, 0.3); }
+  .pill.emerald { background: rgba(52, 211, 153, 0.16);  color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.3); }
+  .pill.amber   { background: rgba(251, 191, 36, 0.16);  color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); }
+  .pill.rose    { background: rgba(251, 113, 133, 0.16); color: var(--accent-rose); border-color: rgba(251, 113, 133, 0.3); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85em; align-items: stretch; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.65em; align-items: stretch; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.55em; align-items: stretch; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5em; align-items: stretch; }
+
+  svg.diagram {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 8px;
+    width: 100%;
+    height: auto;
+    margin: 0.3em 0;
+    border: 1px solid var(--border-soft);
+  }
+
+  .kpi {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.55em 0.85em;
+    text-align: center;
+    border-top: 3px solid var(--accent-sky);
+    transition: transform 200ms ease;
+  }
+  .kpi:hover { transform: translateY(-3px); }
+  .kpi.violet  { border-top-color: var(--accent-violet); }
+  .kpi.emerald { border-top-color: var(--accent-emerald); }
+  .kpi.amber   { border-top-color: var(--accent-amber); }
+  .kpi.rose    { border-top-color: var(--accent-rose); }
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-label {
+    color: var(--text-muted);
+    font-size: 0.66em;
+    margin-top: 0.3em;
+    letter-spacing: 0.06em;
+  }
+
+  .quote-box {
+    border-left: 3px solid var(--accent-amber);
+    padding: 0.45em 0.95em;
+    background: rgba(251, 191, 36, 0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .quote-box::before { content: '"'; color: var(--accent-amber); font-size: 1.5em; line-height: 0.5; vertical-align: middle; margin-right: 0.2em; }
+
+  .reveal ul.checklist { list-style: none; padding-left: 0.4em; }
+  .reveal ul.checklist li::before {
+    content: '▸';
+    color: var(--accent-sky);
+    margin-right: 0.5em;
+    font-weight: 700;
+  }
+
+  .reveal .progress { color: var(--accent-sky); height: 4px; }
+  .reveal .slide-number {
+    background: rgba(10, 14, 39, 0.65);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .footer-tag {
+    position: absolute;
+    bottom: 0.3em;
+    right: 0.5em;
+    color: var(--text-dim);
+    font-size: 0.45em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Bad-vs-good comparison boxes */
+  .bad-good {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7em;
+    margin: 0.4em 0;
+  }
+  .bad-good .bad, .bad-good .good {
+    border-radius: 10px;
+    padding: 0.7em 1em;
+    font-size: 0.78em;
+    transition: all 220ms ease;
+  }
+  .bad-good .bad {
+    background: rgba(251, 113, 133, 0.08);
+    border: 1px solid rgba(251, 113, 133, 0.3);
+  }
+  .bad-good .bad:hover { background: rgba(251, 113, 133, 0.13); }
+  .bad-good .good {
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+  .bad-good .good:hover { background: rgba(52, 211, 153, 0.13); }
+  .bad-good h4 { margin-bottom: 0.3em; }
+  .bad-good .bad h4  { color: var(--accent-rose); }
+  .bad-good .good h4 { color: var(--accent-emerald); }
+
+  /* Lever / dimension card */
+  .lever {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.7em 0.9em;
+    border-bottom: 3px solid var(--accent-sky);
+    transition: transform 220ms ease;
+  }
+  .lever:hover { transform: translateY(-3px); }
+  .lever .lever-num {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-sky);
+    font-size: 0.7em;
+  }
+  .lever h4 { margin: 0.2em 0 0.3em 0; color: #ffffff; text-transform: none; letter-spacing: 0; font-size: 0.95em; }
+  .lever p { font-size: 0.72em; color: var(--text-muted); margin: 0; }
+  .lever.violet  { border-bottom-color: var(--accent-violet); }
+  .lever.emerald { border-bottom-color: var(--accent-emerald); }
+  .lever.amber   { border-bottom-color: var(--accent-amber); }
+  .lever.rose    { border-bottom-color: var(--accent-rose); }
+
+  @media print {
+    .reveal pre code { font-size: 0.5em; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════ TITLE ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">eClerx · CDAC · Module 8 · Day 8</div>
+  <h1>Multi-Agent<br>Systems</h1>
+  <div class="subtitle">From a single tool-calling agent to coordinated teams — supervisor, orchestrator-worker, evaluator-optimizer, and four production frameworks side-by-side.</div>
+  <div class="tag">Setup deck for Labs 8.1 → 8.5</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">2026 · Cohort 1</div>
+</section>
+<!-- ═══════════════════════ ROADMAP ═══════════════════════ -->
+<section>
+  <h2>What we'll cover today</h2>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card"><h4>Part 1</h4><p>Why multi-agent — when single agent + tools is not enough</p></div>
+    <div class="card violet"><h4>Part 2</h4><p>Supervisor pattern — LangGraph, <code>Command(goto=)</code> · Lab 8.1</p></div>
+    <div class="card emerald"><h4>Part 3</h4><p>Orchestrator-Worker + Evaluator-Optimizer · Lab 8.2</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card amber"><h4>Part 4</h4><p>Microsoft Agent Framework (autogen-agentchat 0.4 → MAF) · Lab 8.3</p></div>
+    <div class="card rose"><h4>Part 5</h4><p>CrewAI — role / goal / backstory · Lab 8.4</p></div>
+    <div class="card"><h4>Part 6</h4><p>OpenAI Agents SDK — handoffs + guardrails · Lab 8.5</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card violet"><h4>Part 7</h4><p>Framework-selection decision matrix</p></div>
+    <div class="card emerald"><h4>Map</h4><p>Slide-to-lab cross-reference</p></div>
+    <div class="card amber"><h4>Goal</h4><p>By 6pm: pick the right framework for any client multi-agent brief</p></div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    <strong>One sentence summary.</strong> Multi-agent isn't one pattern — it's at least three (supervisor, orchestrator-worker, evaluator-optimizer) crossed with at least four production frameworks (LangGraph, MAF, CrewAI, OpenAI Agents SDK). Today's deck gives you the matrix.
+  </div>
+  <div class="footer-tag">Roadmap</div>
+</section>
+<!-- ═══════════════════════ PART 1 — WHY MULTI-AGENT ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 1</span>
+  <h1>Why multi-agent —<br>when single agent + tools<br>is not enough</h1>
+  <p class="subtitle">Module 7 ended with a tool-calling agent that could research, draft, and review on its own. So why split that into a team? The answer is the seam between <em>specialisation</em>, <em>scale</em>, and <em>auditability</em>.</p>
+</section>
+<section>
+  <h2>Three forces that push you to multi-agent</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4>1. Context-window bloat</h4>
+      <p>A single agent that knows all 27 banking tools, all 14 retrieval policies, and all 8 compliance rules ends up with a 12k-token system prompt. It's slow, expensive, and confused. Split into specialists with 3-tool prompts each.</p>
+    </div>
+    <div class="card violet">
+      <h4>2. Role-specific tone &amp; backstory</h4>
+      <p>The Researcher should be neutral and citation-heavy. The Writer should be marketing-tonal. The Compliance Reviewer should be paranoid. One system prompt can't be all three.</p>
+    </div>
+    <div class="card emerald">
+      <h4>3. Audit + HITL boundaries</h4>
+      <p>Regulators want to see: "who decided this?". An explicit specialist node is auditable. A monolithic agent's chain-of-thought isn't. HITL interrupts also need clear boundaries.</p>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    Heuristic: if your single-agent prompt is &gt; 2 000 tokens, your tool list &gt; 8, or you find yourself adding "if context says X then behave like Y" rules — you're past the single-agent threshold.
+  </div>
+  <div class="footer-tag">Part 1 · 1/2</div>
+</section>
+<section>
+  <h2>Three coordination patterns we'll see today</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h3>Supervisor</h3>
+      <p>One LLM router decides which specialist runs next. Specialists return to the supervisor; supervisor decides &quot;done&quot; or &quot;next&quot;. Best for triage / customer-service.</p>
+      <p style="color:var(--text-muted); font-size:0.7em;">Lab 8.1 · LangGraph</p>
+    </div>
+    <div class="card violet">
+      <h3>Orchestrator-Worker</h3>
+      <p>One LLM plans an unknown number of subtasks; workers run in <em>parallel</em> via the Send API; an evaluator decides accept-or-revise. Best for variable-shape work (reports, batches).</p>
+      <p style="color:var(--text-muted); font-size:0.7em;">Lab 8.2 · LangGraph</p>
+    </div>
+    <div class="card emerald">
+      <h3>Evaluator-Optimizer</h3>
+      <p>An LLM judge scores the worker's output and decides revise-or-ship. Bounded loop with a max-iteration safeguard. Often layered <em>on top of</em> orchestrator-worker.</p>
+      <p style="color:var(--text-muted); font-size:0.7em;">Lab 8.2 · LangGraph</p>
+    </div>
+  </div>
+  <div class="info-card violet" style="margin-top:0.5em;">
+    These three are <em>patterns</em>, not frameworks. You can implement all three in LangGraph; CrewAI ships sequential / hierarchical equivalents; MAF ships <code>RoundRobinGroupChat</code> / <code>SelectorGroupChat</code>; OpenAI SDK ships handoffs.
+  </div>
+  <div class="footer-tag">Part 1 · 2/2</div>
+</section>
+<!-- ═══════════════════════ PART 2 — SUPERVISOR ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 2</span>
+  <h1>Supervisor pattern<br><code>Command(goto=...)</code></h1>
+  <p class="subtitle">One router LLM, many specialists, a shared <code>TypedDict</code> state. The bread-and-butter pattern of customer-service multi-agent — and the basis of Lab 8.1's ShopSmart support build.</p>
+</section>
+<section>
+  <h2>The supervisor in one diagram</h2>
+  <div class="grid-2">
+    <div>
+      <svg class="diagram" viewBox="0 0 460 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arSup" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+    </marker>
+  </defs>
+  <text x="230" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Supervisor pattern — single router, many specialists</text>
+  <rect x="170" y="40" width="120" height="50" rx="8" fill="#161c3a" stroke="#a78bfa" stroke-width="1.6"/>
+  <text x="230" y="60" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Supervisor</text>
+  <text x="230" y="78" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">LLM router</text>
+  <line x1="230" y1="92" x2="80"  y2="138" stroke="#38bdf8" stroke-width="1.6" marker-end="url(#arSup)"/>
+  <line x1="230" y1="92" x2="230" y2="138" stroke="#38bdf8" stroke-width="1.6" marker-end="url(#arSup)"/>
+  <line x1="230" y1="92" x2="380" y2="138" stroke="#38bdf8" stroke-width="1.6" marker-end="url(#arSup)"/>
+  <rect x="20"  y="142" width="120" height="48" rx="6" fill="#161c3a" stroke="#34d399"/>
+  <text x="80"  y="160" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Account Agent</text>
+  <text x="80"  y="178" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">tools + state</text>
+  <rect x="170" y="142" width="120" height="48" rx="6" fill="#161c3a" stroke="#34d399"/>
+  <text x="230" y="160" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Loan Agent</text>
+  <text x="230" y="178" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">tools + state</text>
+  <rect x="320" y="142" width="120" height="48" rx="6" fill="#161c3a" stroke="#34d399"/>
+  <text x="380" y="160" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Investment</text>
+  <text x="380" y="178" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">tools + state</text>
+  <line x1="80"  y1="190" x2="230" y2="240" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSup)"/>
+  <line x1="230" y1="190" x2="230" y2="240" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSup)"/>
+  <line x1="380" y1="190" x2="230" y2="240" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arSup)"/>
+  <rect x="170" y="240" width="120" height="32" rx="6" fill="#161c3a" stroke="#fbbf24"/>
+  <text x="230" y="260" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">final answer</text>
+  <text x="50" y="225" fill="#a78bfa" font-family="JetBrains Mono,monospace" font-size="9">Command(goto=...)</text>
+</svg>
+    </div>
+    <div>
+      <h4>Three things to notice</h4>
+      <ul class="checklist">
+        <li>The <strong>supervisor</strong> is itself an LLM call — it picks the next node by name.</li>
+        <li>Routing happens via <code>Command(goto=&quot;loan_agent&quot;)</code> — explicit, traceable.</li>
+        <li>Specialists return to the supervisor; <strong>only the supervisor</strong> decides &quot;done&quot;.</li>
+      </ul>
+      <h4 style="margin-top:0.5em;">Why this beats a chain of <code>if/elif</code></h4>
+      <p>A regex/keyword router fails on ambiguous queries (&quot;I want to check my home-loan EMI and also transfer some money&quot;). An LLM router handles ambiguity, multi-intent, and vague phrasing — at the cost of one extra LLM call per turn.</p>
+      <div class="info-card emerald" style="margin-top:0.5em;">
+        <strong>Lab 8.1 §6</strong> walks through the supervisor's prompt — note how it lists each specialist's <em>capabilities</em>, not just its name.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 1/2</div>
+</section>
+<section>
+  <h2><code>Command(goto=...)</code> — the handoff primitive</h2>
+  <div class="grid-2">
+    <div>
+      <pre><code class="language-python">from langgraph.types import Command
+
+def supervisor(state: State) -> Command:
+    decision = llm.invoke(
+        f"Route the query to one of: "
+        f"account, loan, investment, end. "
+        f"Query: {state['messages'][-1].content}"
+    )
+    next_node = parse(decision.content)
+    if next_node == "end":
+        return Command(goto=END)
+    return Command(
+        goto=next_node,
+        update={"hops": state["hops"] + 1},
+    )</code></pre>
+      <p style="margin-top:0.4em;">Two things in one return: <em>where to go next</em> and <em>what to update in shared state</em>.</p>
+    </div>
+    <div>
+      <h4>Three guardrails Lab 8.1 adds</h4>
+      <ul class="checklist">
+        <li><strong>Hop counter</strong> in state — supervisor stops after <code>state[&quot;hops&quot;] &gt;= 6</code> to prevent loops.</li>
+        <li><strong>Explicit END node</strong> — supervisor must <em>decide</em> the conversation is done; no implicit fall-through.</li>
+        <li><strong>Telemetry</strong> — log every routing decision with reasoning to a callback handler (Module 9 picks this up).</li>
+      </ul>
+      <div class="info-card amber" style="margin-top:0.5em;">
+        Without a hop counter, two specialists can ping-pong forever (&quot;defer to loan&quot; → &quot;no, defer to account&quot; → ...). It's the most common multi-agent bug.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 2 · 2/2</div>
+</section>
+<!-- ═══════════════════════ PART 3 — ORCH-WORKER + EVAL ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 3</span>
+  <h1>Orchestrator-Worker<br>+ Evaluator-Optimizer</h1>
+  <p class="subtitle">When the work isn't a triage but a <em>plan-fan-out-evaluate</em> loop — Lab 8.2's compliance-report generator with HITL approval mid-graph.</p>
+</section>
+<section>
+  <h2>Orchestrator-Worker — fan-out via <code>Send</code></h2>
+  <div class="grid-2">
+    <div>
+      <svg class="diagram" viewBox="0 0 460 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arOW" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+  <text x="230" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Orchestrator–Worker — fan-out via Send, evaluator loop</text>
+  <rect x="170" y="40" width="120" height="42" rx="8" fill="#161c3a" stroke="#38bdf8" stroke-width="1.6"/>
+  <text x="230" y="58" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Orchestrator</text>
+  <text x="230" y="74" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">plans N sections</text>
+  <line x1="230" y1="84" x2="60"  y2="120" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arOW)"/>
+  <line x1="230" y1="84" x2="170" y2="120" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arOW)"/>
+  <line x1="230" y1="84" x2="290" y2="120" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arOW)"/>
+  <line x1="230" y1="84" x2="400" y2="120" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arOW)"/>
+  <rect x="10"  y="124" width="100" height="42" rx="6" fill="#161c3a" stroke="#34d399"/>
+  <text x="60"  y="148" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Worker §1</text>
+  <rect x="120" y="124" width="100" height="42" rx="6" fill="#161c3a" stroke="#34d399"/>
+  <text x="170" y="148" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Worker §2</text>
+  <rect x="240" y="124" width="100" height="42" rx="6" fill="#161c3a" stroke="#34d399"/>
+  <text x="290" y="148" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Worker §3</text>
+  <rect x="350" y="124" width="100" height="42" rx="6" fill="#161c3a" stroke="#34d399"/>
+  <text x="400" y="148" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Worker §N</text>
+  <line x1="60"  y1="166" x2="230" y2="200" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arOW)"/>
+  <line x1="170" y1="166" x2="230" y2="200" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arOW)"/>
+  <line x1="290" y1="166" x2="230" y2="200" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arOW)"/>
+  <line x1="400" y1="166" x2="230" y2="200" stroke="#a78bfa" stroke-width="1.6" marker-end="url(#arOW)"/>
+  <rect x="170" y="200" width="120" height="34" rx="6" fill="#161c3a" stroke="#fbbf24"/>
+  <text x="230" y="220" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Evaluator (LLM)</text>
+  <line x1="170" y1="217" x2="60" y2="250" stroke="#fb7185" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#arOW)"/>
+  <text x="100" y="266" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="9">revise → loop</text>
+  <line x1="290" y1="217" x2="400" y2="250" stroke="#34d399" stroke-width="1.4" marker-end="url(#arOW)"/>
+  <text x="360" y="266" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="9">approved → final</text>
+</svg>
+    </div>
+    <div>
+      <h4>Why <code>Send</code>, not a fixed branch</h4>
+      <p>The orchestrator <em>doesn't know</em> how many sections the report will have until it sees the brief. A 2-section brief should not pay for 5 worker nodes. <code>Send</code> spawns one worker per planned subtask <em>at runtime</em>.</p>
+      <pre><code class="language-python">from langgraph.types import Send
+
+def fan_out(state):
+    return [
+        Send("worker", {"section": s})
+        for s in state["plan"].sections
+    ]</code></pre>
+      <h4 style="margin-top:0.4em;">Workers run in parallel</h4>
+      <p>For 5 sections @ ~8s each: serial = 40s, parallel via <code>Send</code> = ~9s. Same wall-clock pattern as <code>RunnableParallel</code> from Module 3.</p>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 1/2</div>
+</section>
+<section>
+  <h2>Evaluator-Optimizer + HITL</h2>
+  <div class="grid-2">
+    <div>
+      <h4>Evaluator-as-LLM</h4>
+      <p>The evaluator is a small dedicated LLM agent whose only job is to return a structured Pydantic verdict — <code>{verdict: APPROVE | REVISE, reasons: [...]}</code>. Bounded loop with <code>max_iters = 3</code>.</p>
+      <pre><code class="language-python">def evaluator(state):
+    v = judge_llm.invoke(state["draft"])
+    if v.verdict == "APPROVE" or state["iters"] &gt;= 3:
+        return Command(goto="hitl")
+    return Command(
+        goto="reviser",
+        update={"iters": state["iters"]+1,
+                "feedback": v.reasons},
+    )</code></pre>
+    </div>
+    <div>
+      <h4>HITL via <code>interrupt()</code></h4>
+      <p>Mid-graph the workflow pauses; a human compliance officer reviews and either approves or annotates. <code>Command(resume=approval)</code> continues.</p>
+      <pre><code class="language-python">from langgraph.types import interrupt
+
+def hitl(state):
+    approval = interrupt({
+        "draft": state["draft"],
+        "evaluator": state["feedback"],
+    })
+    return {"approval": approval}</code></pre>
+      <div class="info-card emerald" style="margin-top:0.4em;">
+        <strong>Lab 8.2 §10</strong> shows the full pause/resume — including how to thread the <code>thread_id</code> through the FastAPI layer in Module 10.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 2/2</div>
+</section>
+<!-- ═══════════════════════ PART 4 — MICROSOFT AGENT FRAMEWORK ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 4</span>
+  <h1>Microsoft Agent Framework<br><span style="color:var(--accent-sky); font-size:0.55em;">autogen-agentchat 0.4 lineage</span></h1>
+  <p class="subtitle">Lab 8.3 — the unified evolution of AutoGen 0.2 and Semantic Kernel, with Azure AI Foundry on top. The open-source core is <code>autogen-agentchat ≥ 0.4</code>.</p>
+</section>
+<section>
+  <h2>The lineage — and why the package name matters</h2>
+  <div class="grid-2">
+    <div>
+      <svg class="diagram" viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arML" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#fbbf24"/>
+    </marker>
+  </defs>
+  <text x="240" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">From legacy AutoGen to Microsoft Agent Framework</text>
+  <line x1="40" y1="120" x2="450" y2="120" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2,4"/>
+  <circle cx="80"  cy="120" r="9" fill="#fb7185"/>
+  <text x="80"  y="148" fill="#fb7185" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">2023</text>
+  <text x="80"  y="170" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">pyautogen</text>
+  <text x="80"  y="186" fill="#94a3b8" font-family="Inter,sans-serif" font-size="9" text-anchor="middle">AutoGen 0.2 (legacy)</text>
+  <text x="80"  y="100" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">deprecated</text>
+  <line x1="100" y1="120" x2="220" y2="120" stroke="#fbbf24" stroke-width="2" marker-end="url(#arML)"/>
+  <circle cx="240" cy="120" r="11" fill="#a78bfa"/>
+  <text x="240" y="148" fill="#a78bfa" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">2024</text>
+  <text x="240" y="170" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">autogen-agentchat ≥ 0.4</text>
+  <text x="240" y="186" fill="#94a3b8" font-family="Inter,sans-serif" font-size="9" text-anchor="middle">async core, group chat</text>
+  <text x="240" y="100" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">re-architected</text>
+  <line x1="260" y1="120" x2="380" y2="120" stroke="#fbbf24" stroke-width="2" marker-end="url(#arML)"/>
+  <circle cx="400" cy="120" r="13" fill="#34d399"/>
+  <text x="400" y="148" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">2025</text>
+  <text x="400" y="170" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Microsoft Agent Framework</text>
+  <text x="400" y="186" fill="#94a3b8" font-family="Inter,sans-serif" font-size="9" text-anchor="middle">+ Azure AI Foundry</text>
+  <text x="400" y="100" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">enterprise wrap</text>
+  <text x="240" y="218" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">autogen-agentchat IS the open-source core of MAF</text>
+</svg>
+    </div>
+    <div>
+      <h4>The three checkpoints</h4>
+      <ul class="checklist">
+        <li><strong>2023 — <code>pyautogen</code></strong> (AutoGen 0.2). Synchronous, single-threaded, hard to scale. Now legacy.</li>
+        <li><strong>2024 — <code>autogen-agentchat ≥ 0.4</code> + <code>autogen-ext</code></strong>. Async core, group chat patterns, model-provider extensions. <em>This is what you pip-install.</em></li>
+        <li><strong>2025 — Microsoft Agent Framework (MAF)</strong>. Same open-source core, plus Azure AI Foundry integration (managed runtime, identity, monitoring).</li>
+      </ul>
+      <div class="info-card rose" style="margin-top:0.4em;">
+        <strong>Do not</strong> install <code>pyautogen</code>. Lab 8.3 explicitly pins <code>autogen-agentchat &gt;= 0.4</code>. Mixing the two corrupts your env.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 4 · 1/2</div>
+</section>
+<section>
+  <h2>The four MAF building blocks Lab 8.3 uses</h2>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <h4><code>AssistantAgent</code></h4>
+        <p>The base agent. Wraps an LLM + system message + (optional) tools. Async-first.</p>
+      </div>
+      <div class="card violet">
+        <h4><code>RoundRobinGroupChat</code></h4>
+        <p>Cycles through a list of agents in fixed order. Equivalent to CrewAI's sequential.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card emerald">
+        <h4><code>SelectorGroupChat</code></h4>
+        <p>An LLM picks who speaks next from the group. Equivalent to LangGraph's supervisor pattern.</p>
+      </div>
+      <div class="card amber">
+        <h4><code>Handoff</code></h4>
+        <p>Explicit agent-to-agent transfer. Like OpenAI SDK's handoffs but inside MAF's group-chat abstraction.</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-card violet" style="margin-top:0.5em;">
+    <strong>When does MAF beat LangGraph for a financial-services client?</strong> When the client is already on the Azure stack — Foundry adds managed identity, regional data residency, and built-in monitoring that you'd otherwise wire up by hand. For multi-cloud or AWS-native clients, LangGraph stays ahead.
+  </div>
+  <div class="footer-tag">Part 4 · 2/2</div>
+</section>
+<!-- ═══════════════════════ PART 5 — CREWAI ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 5</span>
+  <h1>CrewAI<br><span style="color:var(--accent-sky); font-size:0.55em;">role · goal · backstory</span></h1>
+  <p class="subtitle">Lab 8.4 — when the workflow already maps onto an org chart, this is the framework that gets you to a demo fastest.</p>
+</section>
+<section>
+  <h2>The CrewAI mental model</h2>
+  <div class="grid-2">
+    <div>
+      <h4>An agent is a team member</h4>
+      <pre><code class="language-python">researcher = Agent(
+    role="Fintech Market Research Analyst",
+    goal="Find the latest market trends "
+         "and data points for content briefs",
+    backstory=(
+        "8 years tracking Indian fintech. "
+        "Follows NPCI, SEBI, RBI daily. "
+        "Knows UPI, MFs, digital lending."
+    ),
+    tools=[search_market_trends],
+    llm="openai/gpt-4o-mini",
+)</code></pre>
+      <p style="margin-top:0.4em;">The <strong>backstory</strong> acts as a permanent, role-scoped system prompt that biases tone, vocabulary, and risk appetite <em>before</em> any task arrives.</p>
+    </div>
+    <div>
+      <h4>A task is what they do</h4>
+      <pre><code class="language-python">writing_task = Task(
+    description=(
+        f"Write a {brief['platform']} post "
+        f"about {brief['topic']}."
+    ),
+    agent=writer,
+    expected_output=(
+        f"A complete {brief['platform']} post "
+        f"ready for editorial review."
+    ),
+)</code></pre>
+      <div class="info-card emerald" style="margin-top:0.4em;">
+        <strong>expected_output</strong> is more important than it looks — it's the contract the next task in the chain assumes.
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Part 5 · 1/2</div>
+</section>
+<section>
+  <h2>Two processes — sequential vs hierarchical</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3><code>Process.sequential</code></h3>
+      <p>Tasks run in declared order. Each task's output becomes the next's context. Predictable, traceable, perfect for content pipelines whose order is stable.</p>
+      <pre><code style="font-size:0.65em;">crew = Crew(
+  agents=[researcher, writer,
+          editor, compliance],
+  tasks=[research_task, writing_task,
+         editing_task, compliance_task],
+  process=Process.sequential,
+)
+result = crew.kickoff()</code></pre>
+      <p style="color:var(--text-muted); font-size:0.72em;"><strong>Lab 8.4 Part 1.</strong></p>
+    </div>
+    <div class="card violet">
+      <h3><code>Process.hierarchical</code></h3>
+      <p>A <strong>manager LLM</strong> reads the goal and dynamically delegates. Use when the optimal order varies per brief (compliance-first for regulated topics, research-first for trending news).</p>
+      <pre><code style="font-size:0.65em;">crew = Crew(
+  agents=[researcher, writer,
+          editor, compliance],
+  tasks=[...],
+  process=Process.hierarchical,
+  manager_llm="openai/gpt-4o-mini",
+)</code></pre>
+      <p style="color:var(--text-muted); font-size:0.72em;"><strong>Lab 8.4 Part 2.</strong></p>
+    </div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    <strong>The CrewAI vs LangGraph rule of thumb:</strong> <em>org chart → CrewAI · state machine → LangGraph.</em> Lab 8.4's closing cell expands this into a full decision matrix.
+  </div>
+  <div class="footer-tag">Part 5 · 2/2</div>
+</section>
+<!-- ═══════════════════════ PART 6 — OPENAI AGENTS SDK ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 6</span>
+  <h1>OpenAI Agents SDK<br><span style="color:var(--accent-sky); font-size:0.55em;">handoffs · guardrails · tracing</span></h1>
+  <p class="subtitle">Lab 8.5 — the only framework on this list that ships prompt-injection guardrails, PII filtering, voice (<code>RealtimeAgent</code>), and dashboard tracing as first-class primitives.</p>
+</section>
+<section>
+  <h2>Three things the SDK gives you for free</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4>① Handoffs as functions</h4>
+      <p>The SDK exposes each handoff target as a <em>tool</em> the LLM can call. You write <code>Agent(..., handoffs=[a1, a2, a3])</code> — no graph, no edges.</p>
+      <pre><code style="font-size:0.62em;">triage = Agent(
+  name="Concierge",
+  instructions="Route to specialists.",
+  handoffs=[account_agent,
+            loan_agent,
+            investment_agent],
+)</code></pre>
+    </div>
+    <div class="card violet">
+      <h4>② Built-in guardrails</h4>
+      <p><code>@InputGuardrail</code> runs <em>before</em> the agent; <code>@OutputGuardrail</code> runs <em>after</em>. Each can trip the run with a Pydantic verdict from a dedicated guard agent.</p>
+      <pre><code style="font-size:0.62em;">@InputGuardrail
+async def detect_injection(ctx, a, x):
+    r = await Runner.run(
+        injection_detector, x)
+    return GuardrailFunctionOutput(
+      tripwire_triggered=r.is_injection,
+    )</code></pre>
+    </div>
+    <div class="card emerald">
+      <h4>③ Auto-tracing</h4>
+      <p>Every <code>Runner.run_sync()</code> shows up at <strong>platform.openai.com → Traces</strong> — handoffs, tool calls, guardrails, latency. No instrumentation code.</p>
+      <p style="color:var(--text-muted); font-size:0.72em;">For multi-provider stacks, you'll still want LangSmith / Langfuse — covered in Module 9.</p>
+    </div>
+  </div>
+  <div class="footer-tag">Part 6 · 1/2</div>
+</section>
+<section>
+  <h2>Why &quot;guard agents&quot; beat regex</h2>
+  <div class="bad-good">
+    <div class="bad">
+      <h4>Regex / keyword filter</h4>
+      <pre><code style="font-size:0.7em;">BAD = ["ignore previous",
+       "system prompt",
+       "you are now"]
+def is_injection(x):
+    return any(b in x.lower()
+               for b in BAD)</code></pre>
+      <p style="margin-top:0.3em;">Brittle. New jailbreak phrasing = miss. Multilingual = miss. Encoding tricks = miss.</p>
+    </div>
+    <div class="good">
+      <h4>Dedicated classifier agent</h4>
+      <pre><code style="font-size:0.7em;">injection_detector = Agent(
+  name="Injection Detector",
+  instructions="Classify input...",
+  output_type=InjectionCheck,
+)
+# returns Pydantic
+# {is_injection: bool,
+#  reasoning: str}</code></pre>
+      <p style="margin-top:0.3em;">Generalises to novel attacks. Cost: +1 LLM call per turn — fair price for banking.</p>
+    </div>
+  </div>
+  <div class="info-card emerald" style="margin-top:0.4em;">
+    <strong>Lab 8.5 §10 + §11</strong> apply this pattern twice — once for prompt-injection input filtering, once for PII output filtering.
+  </div>
+  <div class="footer-tag">Part 6 · 2/2</div>
+</section>
+<!-- ═══════════════════════ PART 7 — DECISION MATRIX ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 7</span>
+  <h1>Framework selection<br>decision matrix</h1>
+  <p class="subtitle">The interview-ready answer to &quot;which framework would you pick for our use case, and why?&quot;</p>
+</section>
+<section>
+  <h2>The 2-axis quadrant</h2>
+  <div class="grid-2">
+    <div>
+      <svg class="diagram" viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg">
+  <text x="240" y="22" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Framework selection — control vs OOTB-features</text>
+  <line x1="60"  y1="280" x2="440" y2="280" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="60"  y1="60"  x2="60"  y2="290" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="240" y="305" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">→  Out-of-the-box features (guardrails, voice, tracing)</text>
+  <text x="22"  y="170" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" transform="rotate(-90 22 170)">→  Explicit control (state, branches, HITL)</text>
+  <circle cx="130" cy="100" r="22" fill="#161c3a" stroke="#38bdf8" stroke-width="2"/>
+  <text x="130" y="103" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">LangGraph</text>
+  <text x="130" y="138" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">graph + state · max control</text>
+  <circle cx="370" cy="105" r="22" fill="#161c3a" stroke="#a78bfa" stroke-width="2"/>
+  <text x="370" y="108" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">MAF</text>
+  <text x="370" y="138" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">async + Azure Foundry</text>
+  <circle cx="220" cy="220" r="22" fill="#161c3a" stroke="#fbbf24" stroke-width="2"/>
+  <text x="220" y="223" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">CrewAI</text>
+  <text x="220" y="256" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">role / goal / backstory</text>
+  <circle cx="380" cy="230" r="22" fill="#161c3a" stroke="#34d399" stroke-width="2"/>
+  <text x="380" y="233" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">OpenAI</text>
+  <text x="380" y="245" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="9" text-anchor="middle">Agents SDK</text>
+  <text x="380" y="266" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">guardrails + voice + traces</text>
+</svg>
+    </div>
+    <div>
+      <h4>Reading the quadrant</h4>
+      <ul class="checklist">
+        <li><strong>LangGraph</strong> — top-left: maximum control, minimal OOTB. You wire everything yourself, but you control everything.</li>
+        <li><strong>MAF</strong> — top-right: high control + Azure-managed runtime / identity / monitoring.</li>
+        <li><strong>CrewAI</strong> — middle: process types (sequential / hierarchical) trade some control for fast prototyping.</li>
+        <li><strong>OpenAI SDK</strong> — bottom-right: handoffs let the LLM decide; guardrails, voice, and tracing are free.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-tag">Part 7 · 1/2</div>
+</section>
+<section>
+  <h2>One-line decision rules</h2>
+  <table>
+    <tr><th>If the brief says…</th><th>Pick</th><th>Because</th></tr>
+    <tr><td>&quot;State machine with explicit branches, retries, HITL&quot;</td><td><strong>LangGraph</strong></td><td>Maximum control + first-class <code>interrupt()</code></td></tr>
+    <tr><td>&quot;Org chart of specialists doing creative / research work&quot;</td><td><strong>CrewAI</strong></td><td>Role / goal / backstory maps cleanly to job titles</td></tr>
+    <tr><td>&quot;OpenAI-native + needs voice or PII guardrails out of the box&quot;</td><td><strong>OpenAI Agents SDK</strong></td><td>Only one with built-in guardrails, voice, tracing</td></tr>
+    <tr><td>&quot;Azure stack, regulated, needs Foundry monitoring&quot;</td><td><strong>Microsoft Agent Framework</strong></td><td>autogen-agentchat core + Azure-managed runtime</td></tr>
+    <tr><td>&quot;Compliance-grade audit trail, multi-provider failover&quot;</td><td><strong>LangGraph</strong></td><td>Provider-agnostic + checkpointers + LangSmith</td></tr>
+    <tr><td>&quot;Quick prototype to win the deal next week&quot;</td><td><strong>CrewAI</strong> or <strong>OpenAI SDK</strong></td><td>Lowest setup overhead</td></tr>
+  </table>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    The frameworks are not zero-sum. Real production stacks often combine: LangGraph as the orchestration backbone, OpenAI SDK guardrails on customer-facing surfaces, MAF for the Azure-hosted parts, CrewAI for marketing-content pipelines.
+  </div>
+  <div class="footer-tag">Part 7 · 2/2</div>
+</section>
+<!-- ═══════════════════════ MAP TO THE LABS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Map</span>
+  <h1>Map to the labs</h1>
+  <p class="subtitle">Each lab's primary slides — bring this back open while you're working through the notebooks.</p>
+</section>
+<section>
+  <h2>Labs 8.1 + 8.2 — LangGraph foundations</h2>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <h4>Lab 8.1 — LangGraph Supervisor (ShopSmart support)</h4>
+        <ul class="checklist">
+          <li>Bring: Part 1 (when multi-agent beats single-agent)</li>
+          <li>Bring: Part 2 (supervisor pattern, <code>Command(goto)</code>, hop counter)</li>
+          <li>Watch for: section 6's supervisor prompt — note the per-specialist <em>capability list</em></li>
+          <li>Section 9 — intentional ping-pong demo and how the hop counter saves it</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card violet">
+        <h4>Lab 8.2 — Compliance Report Generator</h4>
+        <ul class="checklist">
+          <li>Bring: Part 3 (orchestrator-worker, <code>Send</code>, evaluator-optimizer)</li>
+          <li>Watch for: section 7's <code>Send</code> fan-out — note workers run in parallel</li>
+          <li>Section 9 — evaluator's Pydantic verdict and the bounded retry loop</li>
+          <li>Section 10 — <code>interrupt()</code> + <code>Command(resume=...)</code> mid-graph HITL</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Map · 1/3</div>
+</section>
+<section>
+  <h2>Labs 8.3 + 8.4 — MAF and CrewAI</h2>
+  <div class="grid-2">
+    <div>
+      <div class="card emerald">
+        <h4>Lab 8.3 — Microsoft Agent Framework</h4>
+        <ul class="checklist">
+          <li>Bring: Part 4 (lineage AutoGen 0.2 → autogen-agentchat 0.4 → MAF)</li>
+          <li>Watch for: <code>RoundRobinGroupChat</code> vs <code>SelectorGroupChat</code> — match each to a Part 1 pattern</li>
+          <li>Migration markdown — what you'd change in legacy <code>pyautogen</code> code</li>
+          <li>Closing &quot;MAF on Azure&quot; cell — when financial clients on Azure should pick this over LangGraph</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card amber">
+        <h4>Lab 8.4 — CrewAI (BrightFin Media)</h4>
+        <ul class="checklist">
+          <li>Bring: Part 5 (role / goal / backstory; sequential vs hierarchical)</li>
+          <li>Watch for: how a good <code>backstory</code> changes tone without touching the task</li>
+          <li>Part 1 sequential — predictable order, mirrors the email pipeline</li>
+          <li>Part 2 hierarchical — manager LLM picks the order; useful for variable-shape briefs</li>
+          <li>Closing cell — <em>Why CrewAI for content but LangGraph for compliance</em> — your interview answer</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Map · 2/3</div>
+</section>
+<section>
+  <h2>Lab 8.5 — OpenAI Agents SDK</h2>
+  <div class="grid-2">
+    <div>
+      <h4>What you'll do</h4>
+      <p>Build SecureBank India's banking concierge — 1 triage agent + 3 specialists (account, loan, investment), with input + output guardrails, multi-turn session memory, and built-in tracing.</p>
+      <h4>What you should bring</h4>
+      <ul class="checklist">
+        <li>Part 6 (handoffs as functions; built-in guardrails; auto-tracing)</li>
+        <li>Part 7 (when OpenAI SDK is the right pick)</li>
+        <li>Module 7's tool-calling agent loop — handoffs are tools under the hood</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card rose">
+        <h4>👀 Watch for</h4>
+        <ul class="checklist">
+          <li>How a <em>handoff</em> shows up in the trace as a tool call</li>
+          <li>The <code>injection_detector</code> being a separate <code>Agent</code> with <code>output_type=InjectionCheck</code></li>
+          <li>The PII guardrail using a Pydantic <code>list[str]</code> for found PII types</li>
+          <li><code>SQLiteSession</code> remembering the account ID across 3 turns</li>
+          <li>Closing comparison table — when to choose SDK vs LangGraph</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-tag">Map · 3/3</div>
+</section>
+<!-- ═══════════════════════ END ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">End of Module 8</div>
+  <h1>Questions?</h1>
+  <div class="subtitle">Next: open Lab 8.1 — LangGraph Supervisor (ShopSmart support).<br>
+    Have your <code>.env</code> populated with <code>OPENAI_API_KEY</code> and <code>ANTHROPIC_API_KEY</code>.<br>
+    Pinned packages: <code>langchain&gt;=1.0</code>, <code>langgraph&gt;=1.0</code>, <code>autogen-agentchat&gt;=0.4</code>, <code>autogen-ext</code>, <code>crewai</code>, <code>openai-agents</code>.</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">Module 8 · Day 8 · Multi-Agent Systems</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    pdfSeparateFragments: false,
+    plugins: [RevealHighlight, RevealZoom, RevealSearch],
+  });
+</script>
+</body>
+</html>
