@@ -44,6 +44,18 @@ eClerx-GenAI-Training/
 │   ├── Lab_7.4_Financial_Analyst_Agent.ipynb
 │   ├── Module_7_LangGraph_Agentic_AI.html
 │   └── policy_documents.zip                              ← Lab 7.4 runtime data (5 PDFs + meridian_wealth.db)
+├── Module 8 - Multi-Agent Systems/                       ← Day 8 (5 labs · 1 deck · synthetic data) ✅
+│   ├── Lab_8.1_LangGraph_Supervisor.ipynb
+│   ├── Lab_8.2_Compliance_Report_Generator.ipynb
+│   ├── Lab_8.3_Microsoft_Agent_Framework.ipynb
+│   ├── Lab_8.4_CrewAI_Fintech.ipynb
+│   ├── Lab_8.5_OpenAI_Agents_SDK_Banking.ipynb
+│   ├── Module_8_Multi_Agent_Systems.html
+│   ├── customers.csv, customers.json, orders.json,       ← Lab 8.1 ShopSmart data
+│   │   products.json, tickets.json, policies.md
+│   └── transactions.csv, sar_filings.csv,                ← Lab 8.2 compliance data
+│       prior_findings.csv, regulatory_thresholds.json,
+│       fincen_template.md, occ_template.md, state_template.md
 ├── …
 └── Module 10 - Production Deployment & Capstone/         (coming soon — Day 10, 3 labs)
 ```
@@ -57,7 +69,7 @@ eClerx-GenAI-Training/
 | 5 | Advanced RAG & Evaluation | 5 | 4 | Coming soon |
 | 6 | Claude API & AWS Bedrock | 6 | 4 | Coming soon |
 | 7 | Agentic AI with LangGraph | 7 | 4 | ✅ Available |
-| 8 | Multi-Agent Systems | 8 | 5 | Coming soon |
+| 8 | Multi-Agent Systems | 8 | 5 | ✅ Available |
 | 9 | Observability, Evaluation & Responsible AI | 9 | 4 | Coming soon |
 | 10 | Production Deployment & Capstone | 10 | 3 | Coming soon |
 
@@ -126,6 +138,22 @@ Lab 3.1 replaces the deprecated `ConversationBufferMemory` family with the LangC
 **Deck:** `Module_7_LangGraph_Agentic_AI.html` covers when to graduate from `create_agent` to a `StateGraph`, the StateGraph topology (nodes / conditional edges / reducers), routing patterns, the Send API for dynamic parallelism, HITL with checkpointers across persistence tiers, and time-travel debugging.
 
 **Runtime data — `policy_documents.zip`:** Lab 7.4's first cell unpacks this archive into the working directory. It contains 5 wealth-management policy PDFs (Asset Allocation, Client Suitability, Quarterly Reporting, Rebalancing Protocol, Risk Management) and a small `meridian_wealth.db` SQLite database the SQL agent queries. All synthetic — Meridian Wealth is fictional.
+
+---
+
+## Module 8 — Multi-Agent Systems
+
+| Lab | Topic | Type |
+|---|---|---|
+| 8.1 | LangGraph **supervisor pattern** — `Command(goto=...)` handoffs, shared state, specialist routing; ShopSmart customer-support multi-agent | Dense (with interview prep) |
+| 8.2 | **Orchestrator-Worker + Evaluator-Optimizer** with HITL — Send API for dynamic worker spawning, evaluator-as-LLM revision loops; SecureBank compliance report generator | Dense (with interview prep) |
+| 8.3 | **Microsoft Agent Framework** (`autogen-agentchat ≥ 0.4`) — `AssistantAgent`, `RoundRobinGroupChat`, `SelectorGroupChat`, `Handoff`; AutoGen 0.2 → MAF lineage; banking use cases | Dense (with interview prep) |
+| 8.4 | **CrewAI** — role/goal/backstory model, sequential vs hierarchical processes, fintech content pipeline | Applied |
+| 8.5 | **OpenAI Agents SDK** — handoffs as functions, built-in input/output guardrails, tracing; SecureBank India banking concierge | Applied |
+
+**Deck:** `Module_8_Multi_Agent_Systems.html` covers the four multi-agent frameworks side-by-side (LangGraph supervisor, MAF, CrewAI, OpenAI Agents SDK) plus the orchestrator-worker and evaluator-optimizer patterns, ending with a framework-selection decision matrix.
+
+**Runtime data — synthetic banking + e-commerce assets (~4 MB total):** Lab 8.1 reads `customers.csv/json`, `orders.json`, `products.json`, `tickets.json`, `policies.md` for the ShopSmart support agent; Lab 8.2 reads `transactions.csv` (8K+ synthetic transactions), `sar_filings.csv`, `prior_findings.csv`, `regulatory_thresholds.json`, plus `fincen_template.md`, `occ_template.md`, `state_template.md` for the regulatory report generator. All entirely synthetic — patterned IDs (`CUST-000001`, `TXN-00000001`, `SAR-0001`), generic names, no real PII.
 
 ---
 
