@@ -106,3 +106,10 @@ Starter_Prompt.md
 Curriculum_Modules.docx
 AWS_Services_Requirements.docx
 PreAssessment_Quiz_v3.docx
+
+# Capstone / take-home assignment scaffolding (instructor-only, like .quiz/)
+.Capstone/
+
+# Personal scratch files
+prashant.csv
+prashant.txt
