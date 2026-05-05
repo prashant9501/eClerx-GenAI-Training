@@ -37,6 +37,16 @@ eClerx-GenAI-Training/
 │   ├── Lab_4.3_RAG_LCEL_Pipeline.ipynb
 │   ├── Lab_4.4_Bedrock_Knowledge_Bases.ipynb
 │   └── Module_4_RAG_Foundations.html
+├── Module 5 - Advanced RAG & Evaluation/                 ← Day 5 (3 labs · 1 deck) ✅
+│   ├── Lab_5.1_Advanced_Retrieval.ipynb                  ← merged: hybrid · HyDE · re-ranking · contextual chunks
+│   ├── Lab_5.3_LlamaIndex_Production_RAG.ipynb
+│   ├── Lab_5.4_RAG_Evaluation_RAGAS.ipynb
+│   └── Module_5_Advanced_RAG_Evaluation.html
+├── Module 6 - Claude API & AWS Bedrock/                  ← Day 6 (3 labs · 1 deck) ✅
+│   ├── Lab_6.1_Bedrock_Production_RAG.ipynb
+│   ├── Lab_6.2_Bedrock_Guardrails.ipynb
+│   ├── Lab_6.3_Document_Intelligence_Pipeline.ipynb
+│   └── Module_6_Claude_Bedrock.html
 ├── Module 7 - Agentic AI with LangGraph/                 ← Day 7 (4 labs · 1 deck) ✅
 │   ├── Lab_7.1_LangGraph_Routing.ipynb
 │   ├── Lab_7.2_Parallelization_SendAPI.ipynb
@@ -66,8 +76,8 @@ eClerx-GenAI-Training/
 | 2 | Prompt Engineering with LangChain | 2 | 5 | ✅ Available |
 | 3 | LangChain Deep Dive | 3 | 2 | ✅ Available |
 | 4 | RAG Foundations | 4 | 4 | ✅ Available |
-| 5 | Advanced RAG & Evaluation | 5 | 4 | Coming soon |
-| 6 | Claude API & AWS Bedrock | 6 | 4 | Coming soon |
+| 5 | Advanced RAG & Evaluation | 5 | 3 | ✅ Available |
+| 6 | Claude API & AWS Bedrock | 6 | 3 | ✅ Available |
 | 7 | Agentic AI with LangGraph | 7 | 4 | ✅ Available |
 | 8 | Multi-Agent Systems | 8 | 5 | ✅ Available |
 | 9 | Observability, Evaluation & Responsible AI | 9 | 4 | Coming soon |
@@ -123,6 +133,34 @@ Lab 3.1 replaces the deprecated `ConversationBufferMemory` family with the LangC
 | 4.4 | Amazon Bedrock Knowledge Bases — managed-RAG pipeline, `retrieve` vs `retrieve_and_generate`, when to choose managed vs self-hosted | Dense (with interview prep) |
 
 **Deck:** `Module_4_RAG_Foundations.html` covers why RAG, document loaders & chunking trade-offs, embeddings & vector geometry, vector-store selection (FAISS/Chroma/OpenSearch), the end-to-end LCEL RAG flow, and the managed-vs-self-hosted Bedrock KB decision.
+
+---
+
+## Module 5 — Advanced RAG & Evaluation
+
+| Lab | Topic | Type |
+|---|---|---|
+| 5.1 | **Advanced retrieval** — baseline (similarity / MMR / BM25) + **hybrid** (`EnsembleRetriever`) + **HyDE** (Hypothetical Document Embeddings) + **cross-encoder re-ranking** (`ContextualCompressionRetriever`) + **contextual chunks** (Anthropic, 2024) | Dense (with interview prep) |
+| 5.3 | **LlamaIndex** for production-grade RAG — `SimpleDirectoryReader`, `VectorStoreIndex`, **Sub-Question Query Engine**, **Router Query Engine**, response synthesizers (`tree_summarize` / `compact` / `refine`), `ReActAgent` + the LangChain-vs-LlamaIndex decision matrix | Dense (with interview prep) |
+| 5.4 | **RAG evaluation** with **RAGAS** (faithfulness · answer relevancy · context precision · context recall) plus **custom retrieval metrics** — Hit Rate@K, MRR, Precision@K, Recall@K, nDCG@K | Dense (with interview prep) |
+
+**Deck:** `Module_5_Advanced_RAG_Evaluation.html` covers why basic RAG plateaus, the four upgrade techniques (multi-query / HyDE / hybrid / cross-encoder rerank), contextual chunks, the LlamaIndex mental model, and the RAGAS metric coverage map.
+
+**Numbering note:** Module 5 ships with 3 labs (5.1, 5.3, 5.4) — what was originally a separate Lab 5.2 on contextual retrieval has been absorbed into the merged Lab 5.1 to keep the cohort's pace manageable. The deck still references "Lab 5.2 contextual chunks" topically; that material is now §11 of Lab 5.1.
+
+---
+
+## Module 6 — Claude API & AWS Bedrock
+
+| Lab | Topic | Type |
+|---|---|---|
+| 6.1 | **AWS Bedrock production patterns** — `ChatBedrock(model_id="anthropic.claude-sonnet-4-5-...")`, Titan Embed v2 via `BedrockEmbeddings`, Amazon OpenSearch as vector store, end-to-end LCEL RAG, conversational RAG via `RunnableWithMessageHistory`, cost monitoring | Applied |
+| 6.2 | **Bedrock Guardrails** for PII / PCI-DSS — `apply_guardrail` + Converse API integration, **Indian-PII regex** (PAN, Aadhaar, IFSC, mobile), denied-topics, layered defence pattern + must-block / must-allow CI suite | Dense (with interview prep) |
+| 6.3 | **Document intelligence pipeline** — Amazon Textract (OCR / forms / tables) → Amazon Comprehend (entity + PII detection + redaction) → Bedrock (Claude for summarization + structured output); the same Comprehend redactor is reused as a callback in Module 9 | Applied |
+
+**Deck:** `Module_6_Claude_Bedrock.html` covers why AWS Bedrock matters for regulated banking, direct-API vs Bedrock decision criteria, Bedrock Guardrails (placement + Indian-PII regex), and the Textract → Comprehend → Bedrock document-intelligence pipeline.
+
+**Scope note:** Module 6 ships with 3 labs. The original Lab 6.1 (Claude Vision + Extended Thinking) has been dropped — informative but tangential to the Bedrock-on-banking thrust of Day 6. The remaining labs were renumbered so the module reads cleanly as 6.1 → 6.2 → 6.3.
 
 ---
 
