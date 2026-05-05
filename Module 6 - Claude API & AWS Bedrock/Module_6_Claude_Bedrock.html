@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 6 — Claude API & AWS Bedrock · Prashant Sahu</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #0a0e27;
+    --bg-mid:  #111733;
+    --bg-card: #161c3a;
+    --bg-card-hover: #1d2447;
+    --accent-sky:     #38bdf8;
+    --accent-violet:  #a78bfa;
+    --accent-emerald: #34d399;
+    --accent-amber:   #fbbf24;
+    --accent-rose:    #fb7185;
+    --text-primary: #e2e8f0;
+    --text-muted:   #94a3b8;
+    --text-dim:     #64748b;
+    --border-soft:  rgba(148, 163, 184, 0.15);
+    --code-bg: #1e293b;
+  }
+
+  .reveal {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+    font-size: 24px;
+  }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section { padding: 12px 0; }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #ffffff;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    margin: 0 0 0.4em 0;
+  }
+  .reveal h1 { font-size: 2.0em;  line-height: 1.1; font-weight: 700; }
+  .reveal h2 { font-size: 1.25em; line-height: 1.2; }
+  .reveal h3 { font-size: 1.0em;  line-height: 1.3; color: var(--accent-sky); font-weight: 600; }
+  .reveal h4 { font-size: 0.85em; line-height: 1.3; color: var(--accent-violet); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reveal p, .reveal li { line-height: 1.5; color: var(--text-primary); font-size: 0.85em; }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .reveal li { margin-bottom: 0.32em; }
+  .reveal strong { color: #ffffff; font-weight: 600; }
+  .reveal em { color: var(--accent-amber); font-style: italic; }
+  .reveal a { color: var(--accent-sky); text-decoration: none; border-bottom: 1px dotted var(--accent-sky); }
+
+  .reveal code {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    padding: 0.08em 0.32em;
+    border-radius: 4px;
+    font-size: 0.82em;
+  }
+  .reveal pre {
+    width: 100%;
+    box-shadow: none;
+    margin: 0.4em 0;
+  }
+  .reveal pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6em;
+    line-height: 1.5;
+    padding: 0.85em 1em;
+    background: var(--code-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-sky);
+    max-height: 380px;
+    overflow: auto;
+  }
+
+  .reveal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4em 0;
+    font-size: 0.78em;
+  }
+  .reveal table th {
+    background: linear-gradient(180deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.08) 100%);
+    color: #ffffff;
+    text-align: left;
+    padding: 0.5em 0.8em;
+    border-bottom: 2px solid var(--accent-sky);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .reveal table td {
+    padding: 0.45em 0.8em;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 180ms ease;
+  }
+  .reveal table tr:hover td { background: rgba(56, 189, 248, 0.06); }
+  .reveal table tr:nth-child(even) td { background: rgba(255, 255, 255, 0.018); }
+  .reveal table tr:nth-child(even):hover td { background: rgba(56, 189, 248, 0.08); }
+
+  /* Title slide */
+  .reveal section.title-slide {
+    text-align: center;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(167, 139, 250, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.20) 0%, transparent 50%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.title-slide .eyebrow {
+    color: var(--accent-sky);
+    font-size: 0.55em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.8em;
+  }
+  .reveal section.title-slide h1 {
+    font-size: 2.4em;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #38bdf8 0%, #a78bfa 50%, #fb7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5em;
+    animation: titleFade 1.2s ease-out;
+  }
+  @keyframes titleFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal section.title-slide .subtitle {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 0.4em;
+  }
+  .reveal section.title-slide .tag {
+    display: inline-block;
+    margin-top: 0.4em;
+    padding: 0.3em 1em;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 999px;
+    font-size: 0.6em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  .reveal section.title-slide .presenter-block {
+    margin-top: 1.6em;
+    padding: 0.6em 1.4em;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+  .reveal section.title-slide .presenter-label {
+    color: var(--accent-violet);
+    font-size: 0.5em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.15em;
+  }
+  .reveal section.title-slide .presenter-name {
+    color: #ffffff;
+    font-size: 1.0em;
+    font-weight: 600;
+  }
+  .reveal section.title-slide .meta {
+    margin-top: 1.4em;
+    color: var(--text-dim);
+    font-size: 0.55em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Section divider */
+  .reveal section.divider {
+    text-align: left;
+    background:
+      radial-gradient(circle at 20% 60%, rgba(56, 189, 248, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 90% 30%, rgba(167, 139, 250, 0.13) 0%, transparent 55%),
+      linear-gradient(135deg, var(--bg-deep) 0%, #0f1430 100%);
+  }
+  .reveal section.divider .part-label {
+    display: block;
+    color: var(--accent-sky);
+    font-size: 0.6em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.4em;
+  }
+  .reveal section.divider h1 {
+    font-size: 2.2em;
+    line-height: 1.05;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+  }
+  .reveal section.divider .subtitle {
+    color: var(--text-muted);
+    font-size: 0.7em;
+    max-width: 800px;
+    line-height: 1.5;
+  }
+  .reveal section.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--accent-sky), var(--accent-violet));
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.75em 1.05em;
+    border-left: 3px solid var(--accent-sky);
+    margin: 0.35em 0;
+    transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+  }
+  .card.violet  { border-left-color: var(--accent-violet); }
+  .card.violet:hover  { box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15); }
+  .card.emerald { border-left-color: var(--accent-emerald); }
+  .card.emerald:hover { box-shadow: 0 8px 24px rgba(52, 211, 153, 0.12); }
+  .card.amber   { border-left-color: var(--accent-amber); }
+  .card.amber:hover   { box-shadow: 0 8px 24px rgba(251, 191, 36, 0.12); }
+  .card.rose    { border-left-color: var(--accent-rose); }
+  .card.rose:hover    { box-shadow: 0 8px 24px rgba(251, 113, 133, 0.12); }
+  .card h3, .card h4 { margin-top: 0; }
+  .card p { margin: 0.3em 0; font-size: 0.78em; }
+
+  .info-card {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 10px;
+    padding: 0.65em 0.95em;
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .info-card.violet  { background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.2); }
+  .info-card.emerald { background: rgba(52, 211, 153, 0.08);  border-color: rgba(52, 211, 153, 0.2); }
+  .info-card.amber   { background: rgba(251, 191, 36, 0.08);  border-color: rgba(251, 191, 36, 0.25); }
+  .info-card.rose    { background: rgba(251, 113, 133, 0.08); border-color: rgba(251, 113, 133, 0.25); }
+
+  .pill {
+    display: inline-block;
+    padding: 0.12em 0.55em;
+    background: rgba(56, 189, 248, 0.16);
+    color: var(--accent-sky);
+    border-radius: 999px;
+    font-size: 0.65em;
+    font-weight: 500;
+    margin: 0.05em 0.15em;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+  .pill.violet  { background: rgba(167, 139, 250, 0.16); color: var(--accent-violet); border-color: rgba(167, 139, 250, 0.3); }
+  .pill.emerald { background: rgba(52, 211, 153, 0.16);  color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.3); }
+  .pill.amber   { background: rgba(251, 191, 36, 0.16);  color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); }
+  .pill.rose    { background: rgba(251, 113, 133, 0.16); color: var(--accent-rose); border-color: rgba(251, 113, 133, 0.3); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85em; align-items: stretch; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.65em; align-items: stretch; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.55em; align-items: stretch; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5em; align-items: stretch; }
+
+  svg.diagram {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 8px;
+    width: 100%;
+    height: auto;
+    margin: 0.3em 0;
+    border: 1px solid var(--border-soft);
+  }
+
+  .kpi {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.55em 0.85em;
+    text-align: center;
+    border-top: 3px solid var(--accent-sky);
+    transition: transform 200ms ease;
+  }
+  .kpi:hover { transform: translateY(-3px); }
+  .kpi.violet  { border-top-color: var(--accent-violet); }
+  .kpi.emerald { border-top-color: var(--accent-emerald); }
+  .kpi.amber   { border-top-color: var(--accent-amber); }
+  .kpi.rose    { border-top-color: var(--accent-rose); }
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-label {
+    color: var(--text-muted);
+    font-size: 0.66em;
+    margin-top: 0.3em;
+    letter-spacing: 0.06em;
+  }
+
+  .quote-box {
+    border-left: 3px solid var(--accent-amber);
+    padding: 0.45em 0.95em;
+    background: rgba(251, 191, 36, 0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.82em;
+    margin: 0.4em 0;
+  }
+  .quote-box::before { content: '"'; color: var(--accent-amber); font-size: 1.5em; line-height: 0.5; vertical-align: middle; margin-right: 0.2em; }
+
+  .reveal ul.checklist { list-style: none; padding-left: 0.4em; }
+  .reveal ul.checklist li::before {
+    content: '▸';
+    color: var(--accent-sky);
+    margin-right: 0.5em;
+    font-weight: 700;
+  }
+
+  .reveal .progress { color: var(--accent-sky); height: 4px; }
+  .reveal .slide-number {
+    background: rgba(10, 14, 39, 0.65);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .footer-tag {
+    position: absolute;
+    bottom: 0.3em;
+    right: 0.5em;
+    color: var(--text-dim);
+    font-size: 0.45em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .bad-good {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7em;
+    margin: 0.4em 0;
+  }
+  .bad-good .bad, .bad-good .good {
+    border-radius: 10px;
+    padding: 0.7em 1em;
+    font-size: 0.78em;
+    transition: all 220ms ease;
+  }
+  .bad-good .bad {
+    background: rgba(251, 113, 133, 0.08);
+    border: 1px solid rgba(251, 113, 133, 0.3);
+  }
+  .bad-good .bad:hover { background: rgba(251, 113, 133, 0.13); }
+  .bad-good .good {
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+  .bad-good .good:hover { background: rgba(52, 211, 153, 0.13); }
+  .bad-good h4 { margin-bottom: 0.3em; }
+  .bad-good .bad h4  { color: var(--accent-rose); }
+  .bad-good .good h4 { color: var(--accent-emerald); }
+
+  .lever {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.7em 0.9em;
+    border-bottom: 3px solid var(--accent-sky);
+    transition: transform 220ms ease;
+  }
+  .lever:hover { transform: translateY(-3px); }
+  .lever .lever-num {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-sky);
+    font-size: 0.7em;
+  }
+  .lever h4 { margin: 0.2em 0 0.3em 0; color: #ffffff; text-transform: none; letter-spacing: 0; font-size: 0.95em; }
+  .lever p { font-size: 0.72em; color: var(--text-muted); margin: 0; }
+  .lever.violet  { border-bottom-color: var(--accent-violet); }
+  .lever.emerald { border-bottom-color: var(--accent-emerald); }
+  .lever.amber   { border-bottom-color: var(--accent-amber); }
+  .lever.rose    { border-bottom-color: var(--accent-rose); }
+
+  @media print {
+    .reveal pre code { font-size: 0.5em; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════ TITLE ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">eClerx · CDAC · Module 6 · Day 6</div>
+  <h1>Claude API<br>&amp; AWS Bedrock</h1>
+  <div class="subtitle">Production-grade Claude usage in regulated environments — Bedrock RAG, Guardrails, document intelligence</div>
+  <div class="tag">Setup deck for Labs 6.1 → 6.3</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">2026 · Cohort 1</div>
+</section>
+
+<!-- ═══════════════════════ ROADMAP ═══════════════════════ -->
+<section>
+  <h2>What we'll cover today</h2>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card"><h4>Part 1</h4><p>Why AWS Bedrock matters for regulated banking</p></div>
+    <div class="card violet"><h4>Part 2</h4><p>Direct Anthropic API vs Claude on Bedrock</p></div>
+    <div class="card emerald"><h4>Part 3</h4><p>Bedrock Guardrails for PII / PCI-DSS (Lab 6.2)</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card amber"><h4>Part 4</h4><p>Document intelligence pipeline (Lab 6.3)</p></div>
+    <div class="card rose"><h4>Part 5</h4><p>Map to the labs</p></div>
+    <div class="card"><h4>Lab 6.1</h4><p>Bedrock production RAG · OpenSearch · ChatBedrock</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0.4em;">
+    <div class="card amber"><h4>Goal</h4><p>By 6 pm: Claude on Bedrock end-to-end with safety, RAG, and audit hooks wired in</p></div>
+  </div>
+  <div class="info-card amber" style="margin-top:0.5em;">
+    <strong>One sentence summary.</strong> Today is about <em>delivery channel</em> and <em>safety controls</em>. Same Claude model — but on Bedrock you get IAM, VPC, CloudTrail, and Guardrails for free; the price is <em>slightly higher latency</em> and <em>slightly slower feature parity</em> with the direct API.
+  </div>
+  <div class="footer-tag">Roadmap</div>
+</section>
+
+<!-- ═══════════════════════ PART 1 — WHY BEDROCK ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 1</span>
+  <h1>Why AWS Bedrock<br>for regulated banking</h1>
+  <p class="subtitle">Compliance, IAM, VPC, data residency, audit trail — the things that decide whether a model goes to production at a bank.</p>
+</section>
+
+<section>
+  <h2>The five questions a bank asks before any LLM goes live</h2>
+  <div class="grid-2">
+    <div class="card violet"><h4>1. Where does the data go?</h4><p>Must stay inside the bank's VPC; cannot transit the public internet to a third-party API.</p></div>
+    <div class="card emerald"><h4>2. Who is allowed to call it?</h4><p>IAM roles, not API keys. SSO-friendly. Granular per-team permissions.</p></div>
+    <div class="card amber"><h4>3. What's the audit trail?</h4><p>Every call must land in CloudTrail / SIEM the moment it happens.</p></div>
+    <div class="card rose"><h4>4. Can we cap blast radius?</h4><p>Provisioned throughput, per-account quotas, region pinning, kill-switch.</p></div>
+    <div class="card"><h4>5. Can we enforce safety policies declaratively?</h4><p>PII masks, denied topics, profanity filters — versioned and testable.</p></div>
+    <div class="card violet"><h4>Bedrock answers all five.</h4><p>That's why it dominates regulated workloads, even though the direct Anthropic API is technically simpler.</p></div>
+  </div>
+  <div class="info-card amber">
+    <strong>Pattern.</strong> Prototype against the direct API for speed; before pilot, port the LLM call to <code>ChatBedrock</code>. The chain is unchanged — only the import line moves.
+  </div>
+  <div class="footer-tag">Part 1 · 1/2</div>
+</section>
+
+<section>
+  <h2>The Bedrock service constellation</h2>
+  <div class="grid-2">
+    <div>
+      <p>Bedrock is not a single service — it's a family of APIs sharing one set of model endpoints. Today's labs touch four of them:</p>
+      <ul class="checklist">
+        <li><code>bedrock</code> — control-plane: list models, create guardrails, manage provisioned throughput</li>
+        <li><code>bedrock-runtime</code> — data-plane: <code>invoke_model</code>, <code>converse</code>, <code>apply_guardrail</code></li>
+        <li><code>bedrock-agent</code> — managed agents (we'll skip in this module)</li>
+        <li><code>bedrock-agent-runtime</code> — KB <code>retrieve</code> / <code>retrieve_and_generate</code> (Lab 4.4)</li>
+      </ul>
+      <div class="info-card violet">
+        <strong>LangChain bridge.</strong> <code>langchain-aws</code> exposes <code>ChatBedrock</code> + <code>BedrockEmbeddings</code> — same Runnable interface as <code>ChatOpenAI</code> / <code>ChatAnthropic</code>. The pipe operator works unchanged.
+      </div>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 420 290" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <rect x="140" y="14" width="140" height="38" rx="10" fill="#1d2447" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="210" y="38" fill="#fff" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Your Application</text>
+
+        <line x1="210" y1="52" x2="210" y2="76" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar1)"/>
+
+        <rect x="40" y="80" width="340" height="38" rx="8" fill="#161c3a" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="210" y="103" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">bedrock-runtime · invoke_model · converse · apply_guardrail</text>
+
+        <line x1="120" y1="118" x2="120" y2="142" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ar1)"/>
+        <line x1="210" y1="118" x2="210" y2="142" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ar1)"/>
+        <line x1="300" y1="118" x2="300" y2="142" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ar1)"/>
+
+        <rect x="60" y="148" width="120" height="36" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="1.4"/>
+        <text x="120" y="170" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">Claude Sonnet 4.5</text>
+        <rect x="180" y="148" width="120" height="36" rx="8" fill="#161c3a" stroke="#fbbf24" stroke-width="1.4"/>
+        <text x="240" y="170" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">Titan Embed v2</text>
+        <rect x="300" y="148" width="80"  height="36" rx="8" fill="#161c3a" stroke="#fb7185" stroke-width="1.4"/>
+        <text x="340" y="170" fill="#e2e8f0" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">Guardrail</text>
+
+        <rect x="40" y="210" width="340" height="36" rx="8" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="210" y="232" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">IAM · CloudTrail · CloudWatch · VPC Endpoint (PrivateLink)</text>
+
+        <text x="210" y="270" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">One IAM role · one audit trail · one network boundary</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 1 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 2 — DIRECT vs BEDROCK ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 2</span>
+  <h1>Direct API<br>vs Claude on Bedrock</h1>
+  <p class="subtitle">Same model, two channels. The choice is operational, not capability-driven.</p>
+</section>
+
+<section>
+  <h2>Side-by-side decision table</h2>
+  <table>
+    <tr><th>Dimension</th><th>Direct Anthropic API</th><th>Claude on Bedrock</th></tr>
+    <tr><td>Auth</td><td>Static API key</td><td>IAM role + STS</td></tr>
+    <tr><td>Network</td><td>Public internet → <code>api.anthropic.com</code></td><td>Private VPC + PrivateLink</td></tr>
+    <tr><td>Data residency</td><td>Anthropic's region</td><td>Bedrock region you call</td></tr>
+    <tr><td>Latency (p50)</td><td>Lower (one hop)</td><td>Slightly higher (AWS proxy)</td></tr>
+    <tr><td>Pricing</td><td>Anthropic list price</td><td>Same per-token rate, on AWS bill</td></tr>
+    <tr><td>Audit / logs</td><td>Anthropic dashboard</td><td>CloudTrail + CloudWatch</td></tr>
+    <tr><td>Throughput SKU</td><td>Anthropic capacity</td><td>Provisioned Throughput (committed TPS)</td></tr>
+    <tr><td>Feature parity</td><td>Latest (Claude features ship here first)</td><td>Slight lag (typically days–weeks)</td></tr>
+  </table>
+  <div class="info-card emerald">
+    <strong>Rule.</strong> If the customer is a regulated bank or has VPC requirements → start on Bedrock. If you're prototyping or building a non-regulated SaaS → start on the direct API and port later.
+  </div>
+  <div class="footer-tag">Part 2 · 1/2</div>
+</section>
+
+<section>
+  <h2>Same chain, two LLMs — code-level diff</h2>
+  <div class="bad-good">
+    <div class="bad">
+      <h4>Direct Anthropic API</h4>
+<pre><code style="font-size:0.72em;">from langchain_anthropic import ChatAnthropic
+
+llm = ChatAnthropic(
+    model="claude-sonnet-4-5",
+    temperature=0.1,
+    max_tokens=2048,
+)
+
+# rest of the chain is unchanged
+chain = prompt | llm | StrOutputParser()</code></pre>
+      <p style="margin-top:0.4em;">Lower latency · simpler auth · less infra. <strong>Pre-pilot</strong> default.</p>
+    </div>
+    <div class="good">
+      <h4>Claude on Bedrock</h4>
+<pre><code style="font-size:0.72em;">from langchain_aws import ChatBedrock
+
+llm = ChatBedrock(
+    model_id="anthropic.claude-sonnet-4-5-20250929-v1:0",
+    client=bedrock_runtime,
+    region_name=aws_region,
+    model_kwargs={"max_tokens": 2048, "temperature": 0.1},
+)
+
+# rest of the chain is unchanged
+chain = prompt | llm | StrOutputParser()</code></pre>
+      <p style="margin-top:0.4em;">IAM auth · VPC endpoint · CloudTrail logs · attachable Guardrail. <strong>Production</strong> default for banks.</p>
+    </div>
+  </div>
+  <div class="info-card violet">
+    The pipe operator and downstream code never change. <strong>Picking the channel is a one-line decision</strong> — that's the whole reason for using LangChain abstractions over raw SDKs.
+  </div>
+  <div class="footer-tag">Part 2 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 3 — GUARDRAILS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 3</span>
+  <h1>Bedrock Guardrails<br>policy as code</h1>
+  <p class="subtitle">Topics, content, PII, regex, profanity — declarative, versioned, attachable to any Bedrock-hosted model.</p>
+</section>
+
+<section>
+  <h2>Where the guardrail sits in a Converse call</h2>
+  <div class="grid-2">
+    <div>
+      <p>One <code>guardrailConfig</code> on a <code>converse</code> call → both <em>input</em> (before the LLM) and <em>output</em> (before reply) are screened. Single network round-trip, single CloudTrail entry.</p>
+      <h4>Five policy types</h4>
+      <ul class="checklist">
+        <li><strong>topicPolicyConfig</strong> — denied topics with examples</li>
+        <li><strong>contentPolicyConfig</strong> — hate / insults / sexual / violence / misconduct</li>
+        <li><strong>sensitiveInformationPolicyConfig</strong> — built-in PII + custom regex</li>
+        <li><strong>wordPolicyConfig</strong> — denied words + managed profanity list</li>
+        <li><strong>contextualGroundingPolicyConfig</strong> — anti-hallucination check</li>
+      </ul>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 420 270" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#fb7185"/>
+          </marker>
+        </defs>
+        <rect x="20" y="14" width="120" height="40" rx="8" fill="#161c3a" stroke="#38bdf8" stroke-width="1.4"/>
+        <text x="80" y="38" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">User input</text>
+
+        <line x1="140" y1="34" x2="170" y2="34" stroke="#fb7185" stroke-width="2" marker-end="url(#ar3)"/>
+
+        <rect x="170" y="14" width="80" height="40" rx="8" fill="#1d2447" stroke="#fb7185" stroke-width="2"/>
+        <text x="210" y="32" fill="#fb7185" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Guardrail</text>
+        <text x="210" y="46" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">INPUT</text>
+
+        <line x1="250" y1="34" x2="280" y2="34" stroke="#fb7185" stroke-width="2" marker-end="url(#ar3)"/>
+
+        <rect x="280" y="14" width="120" height="40" rx="8" fill="#161c3a" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="340" y="38" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">Claude</text>
+
+        <line x1="340" y1="54" x2="340" y2="100" stroke="#fb7185" stroke-width="2" marker-end="url(#ar3)"/>
+
+        <rect x="280" y="100" width="120" height="40" rx="8" fill="#1d2447" stroke="#fb7185" stroke-width="2"/>
+        <text x="340" y="118" fill="#fb7185" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Guardrail</text>
+        <text x="340" y="132" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">OUTPUT</text>
+
+        <line x1="280" y1="120" x2="250" y2="120" stroke="#fb7185" stroke-width="2" marker-end="url(#ar3)"/>
+
+        <rect x="170" y="100" width="80" height="40" rx="8" fill="#161c3a" stroke="#34d399" stroke-width="1.4"/>
+        <text x="210" y="124" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Reply</text>
+
+        <line x1="170" y1="120" x2="140" y2="120" stroke="#fb7185" stroke-width="2" marker-end="url(#ar3)"/>
+
+        <rect x="20" y="100" width="120" height="40" rx="8" fill="#161c3a" stroke="#38bdf8" stroke-width="1.4"/>
+        <text x="80" y="124" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">User sees</text>
+
+        <text x="210" y="180" fill="#fb7185" font-family="Inter,sans-serif" font-size="11" text-anchor="middle">Both edges screened by ONE config</text>
+        <text x="210" y="200" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">guardrailConfig={'guardrailIdentifier': ID,</text>
+        <text x="210" y="216" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">                 'guardrailVersion': V,</text>
+        <text x="210" y="232" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">                 'trace':'enabled'}</text>
+      </svg>
+    </div>
+  </div>
+  <div class="footer-tag">Part 3 · 1/2</div>
+</section>
+
+<section>
+  <h2>Indian-financial-context PII — what to add</h2>
+  <p>Built-in entities are US-centric (<code>SSN</code>, <code>EMAIL</code>, <code>PHONE</code>, <code>NAME</code>). For Indian banking workloads, register custom regex patterns:</p>
+  <table>
+    <tr><th>Entity</th><th>Regex</th><th>Action</th></tr>
+    <tr><td><strong>PAN</strong></td><td><code>[A-Z]{5}\d{4}[A-Z]</code></td><td>ANONYMIZE</td></tr>
+    <tr><td><strong>Aadhaar</strong></td><td><code>\d{4}\s?\d{4}\s?\d{4}</code></td><td>ANONYMIZE</td></tr>
+    <tr><td><strong>Indian mobile</strong></td><td><code>(?:\+?91[\-\s]?)?[6-9]\d{9}</code></td><td>ANONYMIZE</td></tr>
+    <tr><td><strong>IFSC</strong></td><td><code>[A-Z]{4}0[A-Z0-9]{6}</code></td><td>ANONYMIZE</td></tr>
+  </table>
+  <div class="info-card emerald">
+    <strong>Layered defence (Lab 6.2 §12).</strong> Guardrails are <em>one</em> layer — pair with app-level intent rules, prompt engineering, post-processors, and human review. None of these alone is enough; together they are how regulated systems stay safe.
+  </div>
+  <div class="grid-4" style="margin-top:0.4em;">
+    <div class="kpi violet"><div class="kpi-value">~$0.75</div><div class="kpi-label">per 1k text units</div></div>
+    <div class="kpi emerald"><div class="kpi-value">in + out</div><div class="kpi-label">screened in 1 call</div></div>
+    <div class="kpi amber"><div class="kpi-value">10 + 5</div><div class="kpi-label">must-block / must-allow</div></div>
+    <div class="kpi rose"><div class="kpi-value">CI</div><div class="kpi-label">runs the suite</div></div>
+  </div>
+  <div class="footer-tag">Part 3 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 4 — DOCUMENT INTELLIGENCE ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 4</span>
+  <h1>Document Intelligence<br>Textract → Comprehend → Bedrock</h1>
+  <p class="subtitle">When the PDF is the input — chain three AWS services so the LLM is the <em>last</em> step, not the first.</p>
+</section>
+
+<section>
+  <h2>The four-stage pipeline (Polly dropped from source)</h2>
+  <svg class="diagram" viewBox="0 0 800 230" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ar4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/>
+      </marker>
+    </defs>
+    <rect x="20" y="80" width="140" height="70" rx="10" fill="#161c3a" stroke="#38bdf8" stroke-width="1.6"/>
+    <text x="90"  y="108" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Stage 1</text>
+    <text x="90"  y="126" fill="#fff"    font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle">Textract</text>
+    <text x="90"  y="142" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">OCR · tables · forms</text>
+
+    <line x1="160" y1="115" x2="200" y2="115" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar4)"/>
+
+    <rect x="200" y="80" width="140" height="70" rx="10" fill="#161c3a" stroke="#a78bfa" stroke-width="1.6"/>
+    <text x="270" y="108" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Stage 2</text>
+    <text x="270" y="126" fill="#fff"    font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle">Comprehend</text>
+    <text x="270" y="142" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">entities · sentiment · PII</text>
+
+    <line x1="340" y1="115" x2="380" y2="115" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar4)"/>
+
+    <rect x="380" y="80" width="140" height="70" rx="10" fill="#1d2447" stroke="#fb7185" stroke-width="1.6"/>
+    <text x="450" y="108" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Stage 2b</text>
+    <text x="450" y="126" fill="#fff"    font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle">Redactor</text>
+    <text x="450" y="142" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">PII → [TYPE_REDACTED]</text>
+
+    <line x1="520" y1="115" x2="560" y2="115" stroke="#38bdf8" stroke-width="2" marker-end="url(#ar4)"/>
+
+    <rect x="560" y="80" width="220" height="70" rx="10" fill="#161c3a" stroke="#34d399" stroke-width="1.6"/>
+    <text x="670" y="108" fill="#e2e8f0" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Stage 3</text>
+    <text x="670" y="126" fill="#fff"    font-family="Inter,sans-serif" font-size="14" font-weight="600" text-anchor="middle">Bedrock · Claude Sonnet 4.5</text>
+    <text x="670" y="142" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">summary + structured JSON</text>
+
+    <text x="400" y="40" fill="#fbbf24" font-family="Inter,sans-serif" font-size="13" text-anchor="middle">Claim PDF in → Executive summary + JSON record out</text>
+    <text x="400" y="200" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle">PII never reaches the LLM — Comprehend's redactor sits between</text>
+  </svg>
+  <div class="footer-tag">Part 4 · 1/2</div>
+</section>
+
+<section>
+  <h2>Why this shape, not "throw the PDF at Claude"?</h2>
+  <div class="grid-2">
+    <div class="card emerald">
+      <h4>Right tool per stage</h4>
+      <p>Textract is <em>faster</em> + <em>cheaper</em> + <em>geometry-aware</em> for layout. Comprehend's PII detector is purpose-built. Claude does what only an LLM can — narrative summary + cross-field reasoning.</p>
+    </div>
+    <div class="card violet">
+      <h4>PII redaction is a pipeline stage</h4>
+      <p>Comprehend → redact → LLM means PII never lands in your trace store, never appears in cached prompts, never trains a model. The whole stack is auditable.</p>
+    </div>
+    <div class="card amber">
+      <h4>One function, swappable parts</h4>
+      <p><code>run_claims_intelligence_pipeline(file)</code> is the contract. Stages are private. Swap Textract for Document AI, Claude for Nova, the calling code never changes.</p>
+    </div>
+    <div class="card rose">
+      <h4>Forward to Module 9</h4>
+      <p>Lab 9.4 reuses the Comprehend redactor inside an observability pipeline — every LangSmith / LangFuse trace is scrubbed first. Same primitive, very different deployment.</p>
+    </div>
+  </div>
+  <div class="footer-tag">Part 4 · 2/2</div>
+</section>
+
+<!-- ═══════════════════════ PART 5 — MAP TO LABS ═══════════════════════ -->
+<section class="divider">
+  <span class="part-label">Part 5</span>
+  <h1>Map to the labs</h1>
+  <p class="subtitle">Every slide above pays out in one of the four labs you'll run today.</p>
+</section>
+
+<section>
+  <h2>Lab-by-lab cross-reference</h2>
+  <table>
+    <tr><th>Lab</th><th>Slides that inform it</th><th>What you build</th></tr>
+    <tr>
+      <td><strong>6.1</strong> Bedrock Production RAG</td>
+      <td>Part 1 (Bedrock service constellation) · Part 2 (Direct vs Bedrock decision table + code diff)</td>
+      <td>Titan v2 + OpenSearch knn + ChatBedrock Claude · LCEL RAG · <code>RunnableWithMessageHistory</code> · cost monitor · API-vs-Bedrock comparison</td>
+    </tr>
+    <tr>
+      <td><strong>6.2</strong> Bedrock Guardrails</td>
+      <td>Part 3 (placement diagram, policy types, Indian-PII regex, layered defence)</td>
+      <td>SafeGuard Insurance guardrail · <code>apply_guardrail</code> + Converse-attached · 10 must-block / 5 must-allow CI suite</td>
+    </tr>
+    <tr>
+      <td><strong>6.3</strong> Document Intelligence</td>
+      <td>Part 4 (4-stage pipeline · why each stage exists · forward to Lab 9.4)</td>
+      <td>reportlab claim PDFs · Textract (text + tables + forms) · Comprehend (PII) · redactor · Claude on Bedrock for summary + JSON · single-function pipeline</td>
+    </tr>
+  </table>
+  <div class="info-card amber" style="margin-top:0.4em;">
+    <strong>By 6 pm</strong> you should be able to (a) point to a banking colleague and explain when to choose Bedrock over the direct API, (b) write the 8 lines that swap one for the other, (c) add a custom PAN regex to a guardrail, and (d) describe the Comprehend → redact → Claude pipeline in 60 seconds.
+  </div>
+  <div class="footer-tag">Part 5</div>
+</section>
+
+<!-- ═══════════════════════ END / Q&A ═══════════════════════ -->
+<section class="title-slide">
+  <div class="eyebrow">End of Module 6</div>
+  <h1>Questions?</h1>
+  <div class="subtitle">Next: open Lab 6.1 — Bedrock Production Patterns (ChatBedrock + OpenSearch RAG).<br>
+    Have your <code>.env</code> populated with <code>ANTHROPIC_API_KEY</code>, <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_DEFAULT_REGION</code>, and <code>OPENSEARCH_ENDPOINT</code>; <code>anthropic&gt;=0.40</code>, <code>langchain-aws&gt;=0.2</code>, <code>boto3</code>, and <code>opensearch-py</code> installed.</div>
+  <div class="presenter-block">
+    <div class="presenter-label">Instructor</div>
+    <div class="presenter-name">Prashant Sahu</div>
+  </div>
+  <div class="meta">Module 6 · Day 6 · Claude API &amp; AWS Bedrock</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    center: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    pdfSeparateFragments: false,
+    plugins: [RevealHighlight, RevealZoom, RevealSearch],
+  });
+</script>
+</body>
+</html>
